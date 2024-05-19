@@ -32,7 +32,9 @@ class OptimizationDataset(BaseModel):
 
     @staticmethod
     def list() -> list[dict]:
-        response = requests.get(f"{API_HOST}/dataset-optimization/dataset/", headers=auth_headers)
+        response = requests.get(
+            f"{API_HOST}/dataset-optimization/dataset/", headers=auth_headers
+        )
         response.raise_for_status()
         return response.json()
 
@@ -54,7 +56,11 @@ class OptimizationDataset(BaseModel):
         self.delete_by_id(self.dataset_id)
 
     def create(self) -> int:
-        if self.dataset_storage and self.dataset_storage.storage_integration and not self.storage_integration_id:
+        if (
+            self.dataset_storage
+            and self.dataset_storage.storage_integration
+            and not self.storage_integration_id
+        ):
             self.storage_integration_id = (
                 self.dataset_storage.storage_integration.create()
             )
@@ -70,8 +76,7 @@ class OptimizationDataset(BaseModel):
                 },
                 **{
                     k: model_dict[k]
-                    for k in set(list(model_dict.keys()))
-                    - set(["dataset_storage"])
+                    for k in set(list(model_dict.keys())) - set(["dataset_storage"])
                 },
             },
             headers={
@@ -108,13 +113,20 @@ class OptimizationDataset(BaseModel):
         except requests.HTTPError as error:
             try:
                 content = error.response.json()
-                logger.error("HTTP Error! Status code:", error.response.status_code, "Content:", content)
+                logger.error(
+                    "HTTP Error! Status code:",
+                    error.response.status_code,
+                    "Content:",
+                    content,
+                )
             except Exception:
                 content = error.response.text
-            raise HirundoError(f"Failed to start the run. Status code: {error.response.status_code} Content: {content}") from error
+            raise HirundoError(
+                f"Failed to start the run. Status code: {error.response.status_code} Content: {content}"
+            ) from error
         except Exception as error:
             raise HirundoError(f"Failed to start the run: {error}") from error
-        
+
     def clean_ids(self):
         self.storage_integration_id = None
         self.dataset_id = None
@@ -145,7 +157,7 @@ class OptimizationDataset(BaseModel):
                     sse.retry,
                 )
                 yield sse.data
-    
+
     def check_run(self) -> Generator[str, None, None]:
         """
         Check the status of the instance's run
@@ -180,11 +192,11 @@ class OptimizationDataset(BaseModel):
                     sse.retry,
                 )
                 yield sse.data
-    
+
     async def acheck_run(self) -> AsyncGenerator[str, None]:
         """
         Async version of check_run
-        
+
         """
         if not self.run_id:
             raise ValueError("No run has been started")

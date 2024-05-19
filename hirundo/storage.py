@@ -96,7 +96,7 @@ class StorageIntegration(BaseModel):
         )
         storage_integrations.raise_for_status()
         return storage_integrations.json()
-    
+
     @staticmethod
     def delete_by_id(storage_integration_id):
         storage_integration = requests.delete(

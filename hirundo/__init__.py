@@ -3,7 +3,8 @@ from .dataset_optimization import (
     OptimizationDataset as OptimizationDataset,
 )
 from .enum import (
-    LabellingType as LabellingType, DatasetMetadataType as DatasetMetadataType
+    LabellingType as LabellingType,
+    DatasetMetadataType as DatasetMetadataType,
 )
 from .git import GitRepo as GitRepo
 from .storage import (

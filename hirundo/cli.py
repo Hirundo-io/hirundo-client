@@ -7,6 +7,7 @@ from hirundo.env import API_HOST
 
 app = typer.Typer(name="hirundo", no_args_is_help=True)
 
+
 def replace_env(env_name: str, env_value: str):
     dotenv = "./.env"
     regex = re.compile(rf"^{env_name}=.*$")
@@ -21,13 +22,22 @@ def replace_env(env_name: str, env_value: str):
 
 
 @app.command("setup")
-def setup_api_key(api_key: Annotated[str, typer.Option(prompt="Please enter the API key value", help=f"Visit {API_HOST}/api-key to generate your API key.")]):
+def setup_api_key(
+    api_key: Annotated[
+        str,
+        typer.Option(
+            prompt="Please enter the API key value",
+            help=f"Visit {API_HOST}/api-key to generate your API key.",
+        ),
+    ],
+):
     """
     Setup the API key for the Hirundo client library.
     Values are saved to a .env file in the current directory for use by the library in requests.
     """
     replace_env("API_KEY", api_key)
     print("API key saved to .env for future use. Please do not share this file")
+
 
 @app.command("change-remote")
 def change_api_remote(
@@ -45,6 +55,7 @@ def change_api_remote(
     """
     replace_env("API_HOST", api_host)
     print("API host saved to .env for future use. Please do not share this file")
+
 
 if __name__ == "__main__":
     app()

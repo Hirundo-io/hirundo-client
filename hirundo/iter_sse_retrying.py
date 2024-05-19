@@ -35,6 +35,7 @@ def iter_sse_retrying(client, method, url) -> Generator[ServerSentEvent, None, N
 
     return _iter_sse()
 
+
 async def aiter_sse_retrying(
     client, method, url
 ) -> AsyncGenerator[ServerSentEvent, None]:

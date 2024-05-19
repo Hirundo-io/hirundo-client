@@ -45,15 +45,17 @@ def cleanup():
     datasets = OptimizationDataset.list()
     dataset_ids = [dataset["id"] for dataset in datasets]
     if len(dataset_ids) > 0:
-        logger.debug(
-            "Found %s optimization datasets, deleting them", len(dataset_ids)
-        )
+        logger.debug("Found %s optimization datasets, deleting them", len(dataset_ids))
         logger.debug("Note: If I am not the owner, I will not be able to delete them")
     for dataset_id in dataset_ids:
         try:
             OptimizationDataset.delete_by_id(dataset_id)
         except Exception as e:
-            logger.warning("Failed to delete optimization dataset with ID %s and exception %s", dataset_id, e)
+            logger.warning(
+                "Failed to delete optimization dataset with ID %s and exception %s",
+                dataset_id,
+                e,
+            )
     storage_integrations = StorageIntegration.list()
     storage_integration_ids = [
         integration["id"] for integration in storage_integrations
@@ -91,9 +93,9 @@ def test_dataset_optimization():
             logger.info("Sync: Run event %s", event)
         except StopIteration:
             break
-    assert last_event['state'] == "SUCCESS"
-    assert last_event['result'] is not None
-    logger.info("Sync: Results %s", last_event['result'])
+    assert last_event["state"] == "SUCCESS"
+    assert last_event["result"] is not None
+    logger.info("Sync: Results %s", last_event["result"])
 
 
 @pytest.mark.asyncio
