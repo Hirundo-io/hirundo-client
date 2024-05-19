@@ -100,7 +100,6 @@ def test_dataset_optimization():
 async def test_async_dataset_optimization():
     cleanup()
     logger.info("Async: Finished cleanup")
-    test_dataset.create()
     test_dataset.run_optimization()
     logger.info("Async: Startup dataset optimization run")
     events_generator = test_dataset.acheck_run()
