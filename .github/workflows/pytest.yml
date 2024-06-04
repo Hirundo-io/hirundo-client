@@ -28,3 +28,6 @@ jobs:
           pip install -r dev-requirements.txt
       - name: Run PyTest
         run: pytest
+        env:
+          API_HOST: ${{ secrets.API_HOST }}
+          API_KEY: ${{ secrets.API_KEY }}
