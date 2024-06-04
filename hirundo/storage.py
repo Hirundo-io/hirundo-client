@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Union
 from pydantic import BaseModel
 import pydantic
 from pydantic_core import Url
@@ -11,18 +12,18 @@ from hirundo.git import GitRepo
 
 
 class StorageS3(BaseModel):
-    endpoint_url: Url | None = None
+    endpoint_url: Union[Url, None] = None
     bucket_url: S3BucketUrl
     region_name: str
     # ⬆️ We could restrict this, but if we're allowing custom endpoints then the validation may be wrong
-    access_key_id: str | None = None
-    secret_access_key: str | None = None
+    access_key_id: Union[str, None] = None
+    secret_access_key: Union[str, None] = None
 
 
 class StorageGCP(BaseModel):
     bucket_name: str
     project: str
-    credentials_json: dict | None
+    credentials_json: Union[dict, None]
 
 
 class StorageAzure(BaseModel):
@@ -46,7 +47,7 @@ class StorageTypes(str, Enum):
 
 
 class StorageIntegration(BaseModel):
-    owner_id: int | None = None
+    owner_id: Union[int, None] = None
 
     name: StorageIntegrationName
     type: StorageTypes = pydantic.Field(
@@ -57,7 +58,7 @@ class StorageIntegration(BaseModel):
             StorageTypes.GIT,
         ]
     )
-    s3: StorageS3 | None = pydantic.Field(
+    s3: Union[StorageS3, None] = pydantic.Field(
         default=None,
         examples=[
             {
@@ -71,7 +72,7 @@ class StorageIntegration(BaseModel):
             None,
         ],
     )
-    gcp: StorageGCP | None = pydantic.Field(
+    gcp: Union[StorageGCP, None] = pydantic.Field(
         default=None,
         examples=[
             None,
@@ -96,7 +97,7 @@ class StorageIntegration(BaseModel):
             None,
         ],
     )
-    azure: StorageAzure | None = pydantic.Field(
+    azure: Union[StorageAzure, None] = pydantic.Field(
         default=None,
         examples=[
             None,
@@ -109,7 +110,7 @@ class StorageIntegration(BaseModel):
             None,
         ],
     )
-    git: StorageGit | None = pydantic.Field(
+    git: Union[StorageGit, None] = pydantic.Field(
         default=None,
         examples=[
             None,

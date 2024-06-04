@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import AsyncGenerator, Generator
+from typing import AsyncGenerator, Generator, Union
 from pydantic import BaseModel, Field
 import requests
 import httpx
@@ -21,7 +21,7 @@ class HirundoError(Exception):
 class OptimizationDataset(BaseModel):
     name: str
     labelling_type: LabellingType
-    dataset_storage: StorageLink | None
+    dataset_storage: Union[StorageLink, None]
 
     classes: list[str]
     dataset_metadata_path: str = "metadata.csv"
@@ -31,12 +31,12 @@ class OptimizationDataset(BaseModel):
     """
     dataset_metadata_type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
 
-    storage_integration_id: int | None = Field(default=None, init=False)
-    dataset_id: int | None = Field(default=None, init=False)
-    run_id: int | None = Field(default=None, init=False)
+    storage_integration_id: Union[int, None] = Field(default=None, init=False)
+    dataset_id: Union[int, None] = Field(default=None, init=False)
+    run_id: Union[int, None] = Field(default=None, init=False)
 
     @staticmethod
-    def list(organization_id: int | None = None) -> list[dict]:
+    def list(organization_id: Union[int, None] = None) -> list[dict]:
         """
         Lists all the `OptimizationDataset` instances created by user's default organization
         or the `organization_id` passed
