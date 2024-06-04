@@ -109,6 +109,7 @@ async def test_async_dataset_optimization():
     logger.info("Async: Started dataset optimization run")
     events_generator = test_dataset.acheck_run()
     logger.info("Async: Checking run progress")
+    last_event = {}
     async for last_event in events_generator:
         assert last_event is not None
         assert isinstance(last_event, str)
