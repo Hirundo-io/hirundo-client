@@ -1,6 +1,6 @@
 import yaml
 
-def get_requirements(file_name: str):
+def get_requirements(file_name: str) -> list[str]:
     with open(file_name, "r") as f:
         try:
             dependencies: list[dict] = yaml.safe_load(f)["dependencies"]
@@ -9,7 +9,9 @@ def get_requirements(file_name: str):
                     return [
                         pip_dep for pip_dep in dep["pip"] if not pip_dep.startswith("-e")
                     ]
-                    break
+                else:
+                    continue
+            return []
         except yaml.YAMLError as exc:
             print(exc)
             raise Exception("Failed to parse environment.yaml") from exc
