@@ -74,23 +74,26 @@ def cleanup():
                 storage_integration_id,
                 e,
             )
+    # ⬆️ Delete all datasets and storage integrations from the server for the given user's default organization
     test_dataset.clean_ids()
+    # ⬆️ Reset `dataset_id`, `storage_integration_id`, and `run_id` values on `test_dataset` to default value of `None`
+    # This prevents errors due to ID links to deleted datasets, storage integrations and runs
 
 
 def test_dataset_optimization():
     cleanup()
     logger.info("Sync: Finished cleanup")
     test_dataset.run_optimization()
-    logger.info("Sync: Startup dataset optimization run")
+    logger.info("Sync: Started dataset optimization run")
     events_generator = test_dataset.check_run()
     logger.info("Sync: Checking run progress")
-    last_event = None
+    last_event = {}
     while True:
         try:
-            event = next(events_generator)
-            assert event is not None
-            assert isinstance(event, str)
-            logger.info("Sync: Run event %s", event)
+            last_event = next(events_generator)
+            assert last_event is not None
+            assert isinstance(last_event, str)
+            logger.info("Sync: Run event %s", last_event)
         except StopIteration:
             break
     assert last_event["state"] == "SUCCESS"
@@ -103,10 +106,13 @@ async def test_async_dataset_optimization():
     cleanup()
     logger.info("Async: Finished cleanup")
     test_dataset.run_optimization()
-    logger.info("Async: Startup dataset optimization run")
+    logger.info("Async: Started dataset optimization run")
     events_generator = test_dataset.acheck_run()
     logger.info("Async: Checking run progress")
-    async for event in events_generator:
-        assert event is not None
-        assert isinstance(event, str)
-        logger.info("Async: Run event %s", event)
+    async for last_event in events_generator:
+        assert last_event is not None
+        assert isinstance(last_event, str)
+        logger.info("Async: Run event %s", last_event)
+    assert last_event["state"] == "SUCCESS"
+    assert last_event["result"] is not None
+    logger.info("Async: Results %s", last_event["result"])

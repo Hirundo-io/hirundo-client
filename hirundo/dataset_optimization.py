@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import AsyncGenerator, Generator
 from pydantic import BaseModel, Field
@@ -24,22 +25,35 @@ class OptimizationDataset(BaseModel):
 
     classes: list[str]
     dataset_metadata_path: str = "metadata.csv"
+    """
+    The path to the dataset metadata file within storage integration, e.g. S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
+    Note: This path will be prefixed with the `StorageLink`'s `path`
+    """
     dataset_metadata_type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
 
     storage_integration_id: int | None = Field(default=None, init=False)
     dataset_id: int | None = Field(default=None, init=False)
-    run_id: str | None = Field(default=None, init=False)
+    run_id: int | None = Field(default=None, init=False)
 
     @staticmethod
-    def list() -> list[dict]:
+    def list(organization_id: int | None = None) -> list[dict]:
+        """
+        Lists all the `OptimizationDataset` instances created by user's default organization
+        or the `organization_id` passed
+        Note: The return type is `list[dict]` and not `list[OptimizationDataset]`
+        """
         response = requests.get(
-            f"{API_HOST}/dataset-optimization/dataset/", headers=auth_headers
+            f"{API_HOST}/dataset-optimization/dataset/{organization_id or ''}",
+            headers=auth_headers,
         )
         response.raise_for_status()
         return response.json()
 
     @staticmethod
     def delete_by_id(dataset_id: int) -> None:
+        """
+        Deletes a `OptimizationDataset` instance from the server by its ID
+        """
         response = requests.delete(
             f"{API_HOST}/dataset-optimization/dataset/{dataset_id}",
             headers=auth_headers,
@@ -47,6 +61,16 @@ class OptimizationDataset(BaseModel):
         response.raise_for_status()
 
     def delete(self, storage_integration=True) -> None:
+        """
+        Deletes the active `OptimizationDataset` instance from the server.
+        It can only be used on a `OptimizationDataset` instance that has been created.
+
+        storage_integration: If True, the `OptimizationDataset`'s `StorageIntegration` will also be deleted
+
+        Note: If `storage_integration` is not set to `False` then the `storage_integration_id` must be set
+        This can either be set manually or by creating the `StorageIntegration` instance via the `OptimizationDataset`'s
+        `create` method
+        """
         if storage_integration:
             if not self.storage_integration_id:
                 raise ValueError("No storage integration has been created")
@@ -56,6 +80,11 @@ class OptimizationDataset(BaseModel):
         self.delete_by_id(self.dataset_id)
 
     def create(self) -> int:
+        """
+        Create a `OptimizationDataset` instance on the server
+        """
+        if not self.dataset_storage:
+            raise ValueError("No dataset storage has been provided")
         if (
             self.dataset_storage
             and self.dataset_storage.storage_integration
@@ -64,9 +93,8 @@ class OptimizationDataset(BaseModel):
             self.storage_integration_id = (
                 self.dataset_storage.storage_integration.create()
             )
-        if not self.dataset_storage:
-            raise ValueError("No dataset storage has been provided")
         model_dict = self.model_dump()
+        # ⬆️ Get dict of model fields from Pydantic model instance
         dataset_response = requests.post(
             f"{API_HOST}/dataset-optimization/dataset/",
             json={
@@ -76,7 +104,7 @@ class OptimizationDataset(BaseModel):
                 },
                 **{
                     k: model_dict[k]
-                    for k in set(list(model_dict.keys())) - set(["dataset_storage"])
+                    for k in model_dict.keys() - {"dataset_storage"}
                 },
             },
             headers={
@@ -91,7 +119,12 @@ class OptimizationDataset(BaseModel):
         return self.dataset_id
 
     @staticmethod
-    def launch_optimization_run(dataset_id: int):
+    def launch_optimization_run(dataset_id: int) -> int:
+        """
+        Run the dataset optimization process on the server using the dataset with the given ID
+        i.e. `dataset_id`
+        Returns the ID of the run (`run_id`)
+        """
         run_response = requests.post(
             f"{API_HOST}/dataset-optimization/run/{dataset_id}",
             headers=auth_headers,
@@ -99,10 +132,10 @@ class OptimizationDataset(BaseModel):
         run_response.raise_for_status()
         return run_response.json()["run_id"]
 
-    def run_optimization(self) -> str:
+    def run_optimization(self) -> int:
         """
-        Run the dataset optimization process
-        Returns an ID of the run and stores the run on the dataset instance
+        Run the dataset optimization process on the server using the active `OptimizationDataset` instance
+        Returns an ID of the run (`run_id`) and stores that `run_id` on the instance
         """
         try:
             if not self.dataset_id:
@@ -128,14 +161,17 @@ class OptimizationDataset(BaseModel):
             raise HirundoError(f"Failed to start the run: {error}") from error
 
     def clean_ids(self):
+        """
+        Reset `dataset_id`, `storage_integration_id`, and `run_id` values on the instance to default value of `None`
+        """
         self.storage_integration_id = None
         self.dataset_id = None
         self.run_id = None
 
     @staticmethod
-    def check_run_by_id(run_id: str) -> Generator[str, None, None]:
+    def check_run_by_id(run_id: int) -> Generator[dict, None, None]:
         """
-        Check the status of a run
+        Check the status of a run given its ID
 
         This generator will produce values to show progress of the run.
         Each event will be a dict, where:
@@ -156,11 +192,11 @@ class OptimizationDataset(BaseModel):
                     sse.id,
                     sse.retry,
                 )
-                yield sse.data
+                yield json.loads(sse.data)
 
-    def check_run(self) -> Generator[str, None, None]:
+    def check_run(self) -> Generator[dict, None, None]:
         """
-        Check the status of the instance's run
+        Check the status of the current active instance's run
 
         This generator will produce values to show progress of the run.
         Each event will be a dict, where:
@@ -173,9 +209,17 @@ class OptimizationDataset(BaseModel):
         return self.check_run_by_id(self.run_id)
 
     @staticmethod
-    async def acheck_run_by_id(run_id: str) -> AsyncGenerator[str, None]:
+    async def acheck_run_by_id(run_id: int) -> AsyncGenerator[dict, None]:
         """
         Async version of :func:`check_run_by_id`
+
+        Check the status of a run given its ID
+
+        This generator will produce values to show progress of the run.
+        Each event will be a dict, where:
+        - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
+        - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
+
         """
         async with httpx.AsyncClient(timeout=httpx.Timeout(5.0, read=None)) as client:
             async_iterator = await aiter_sse_retrying(
@@ -191,11 +235,18 @@ class OptimizationDataset(BaseModel):
                     sse.id,
                     sse.retry,
                 )
-                yield sse.data
+                yield json.loads(sse.data)
 
-    async def acheck_run(self) -> AsyncGenerator[str, None]:
+    async def acheck_run(self) -> AsyncGenerator[dict, None]:
         """
-        Async version of check_run
+        Async version of :func:`check_run`
+
+        Check the status of the current active instance's run
+
+        This generator will produce values to show progress of the run.
+        Each event will be a dict, where:
+        - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
+        - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
 
         """
         if not self.run_id:

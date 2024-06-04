@@ -1,5 +1,6 @@
 import re
 from typing import Annotated
+from urllib.parse import urlparse
 import typer
 
 from hirundo.env import API_HOST
@@ -8,9 +9,16 @@ from hirundo.env import API_HOST
 app = typer.Typer(name="hirundo", no_args_is_help=True)
 
 
-def replace_env(env_name: str, env_value: str):
+def upsert_env(var_name: str, var_value: str):
+    """
+    Change an environment variable in the .env file.
+    If the variable does not exist, it will be added.
+
+    var_name: The name of the environment variable to change.
+    var_value: The new value of the environment variable.
+    """
     dotenv = "./.env"
-    regex = re.compile(rf"^{env_name}=.*$")
+    regex = re.compile(rf"^{var_name}=.*$")
     with open(dotenv, "r") as f:
         lines = f.readlines()
 
@@ -18,10 +26,21 @@ def replace_env(env_name: str, env_value: str):
         f.writelines(line for line in lines if not regex.search(line) and line != "\n")
 
     with open(dotenv, "a") as f:
-        f.writelines(f"\n{env_name}={env_value}")
+        f.writelines(f"\n{var_name}={var_value}")
+
+def fix_api_host(api_host: str):
+    if not api_host.startswith("http") and not api_host.startswith("https"):
+        api_host = f"https://{api_host}"
+        print(
+            "API host must start with 'http://' or 'https://'. Automatically added 'https://'"
+        )
+    if (url := urlparse(api_host)) and url.path != "":
+        print("API host should not contain a path. Removing path.")
+        api_host = f"{url.scheme}://{url.hostname}"
+    return api_host
 
 
-@app.command("setup")
+@app.command("set-api-key")
 def setup_api_key(
     api_key: Annotated[
         str,
@@ -35,7 +54,7 @@ def setup_api_key(
     Setup the API key for the Hirundo client library.
     Values are saved to a .env file in the current directory for use by the library in requests.
     """
-    replace_env("API_KEY", api_key)
+    upsert_env("API_KEY", api_key)
     print("API key saved to .env for future use. Please do not share this file")
 
 
@@ -45,16 +64,43 @@ def change_api_remote(
         str,  # TODO: Change to HttpUrl when https://github.com/tiangolo/typer/pull/723 is merged
         typer.Option(
             prompt="Please enter the API server address",
-            help=f"Current API server address: {API_HOST}. This should only be changed for on-premises usage",
+            help=f"Current API server address: {API_HOST}. This is the same address where you access the Hirundo web interface.",
         ),
     ],
 ):
     """
     Change the API server address for the Hirundo client library.
-    This should only be used for on-premises usage.
+    This is the same address where you access the Hirundo web interface.
     """
-    replace_env("API_HOST", api_host)
+    api_host = fix_api_host(api_host)
+        
+    upsert_env("API_HOST", api_host)
     print("API host saved to .env for future use. Please do not share this file")
+
+@app.command("setup")
+def setup(
+    api_key: Annotated[
+        str,
+        typer.Option(
+            prompt="Please enter the API key value",
+            help=f"Visit {API_HOST}/api-key to generate your API key.",
+        ),
+    ],
+    api_host: Annotated[
+        str,  # TODO: Change to HttpUrl as above
+        typer.Option(
+            prompt="Please enter the API server address",
+            help=f"Current API server address: {API_HOST}. This is the same address where you access the Hirundo web interface.",
+        ),
+    ],
+):
+    """
+    Setup the Hirundo client library.
+    """
+    api_host = fix_api_host(api_host)
+    upsert_env("API_HOST", api_host)
+    upsert_env("API_KEY", api_key)
+    print("API host and API key saved to .env for future use. Please do not share this file")
 
 
 if __name__ == "__main__":
