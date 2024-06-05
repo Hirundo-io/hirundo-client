@@ -1,4 +1,6 @@
+import json
 import logging
+import os
 import pytest
 from hirundo import (
     OptimizationDataset,
@@ -26,6 +28,7 @@ test_dataset = OptimizationDataset(
             gcp=StorageGCP(
                 bucket_name="cifar10bucket",
                 project="Hirundo-global",
+                credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
             ),
         ),
         path="/pytorch-cifar/data",

@@ -41,11 +41,13 @@ test_dataset = OptimizationDataset(
     ],
 )
 
+@pytest.mark.skip(reason="Still need to implement AWS S3 Bucket auth")
 def test_dataset_optimization():
     cleanup(test_dataset)
     dataset_optimization_sync_test(test_dataset)
 
 
+@pytest.mark.skip(reason="Still need to implement AWS S3 Bucket auth")
 @pytest.mark.asyncio
 async def test_async_dataset_optimization():
     cleanup(test_dataset)
