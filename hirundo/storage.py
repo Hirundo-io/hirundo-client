@@ -23,7 +23,7 @@ class StorageS3(BaseModel):
 class StorageGCP(BaseModel):
     bucket_name: str
     project: str
-    credentials_json: Union[dict, None]
+    credentials_json: Union[dict, None] = None
 
 
 class StorageAzure(BaseModel):
@@ -129,13 +129,13 @@ class StorageIntegration(BaseModel):
     )
 
     @staticmethod
-    def list() -> list[dict]:
+    def list(organization_id: int | None = None) -> list[dict]:
         """
         Lists all the `StorageIntegration`'s created by user's default organization
         Note: The return type is `list[dict]` and not `list[StorageIntegration]`
         """
         storage_integrations = requests.get(
-            f"{API_HOST}/storage-integration/",
+            f"{API_HOST}/storage-integration/{organization_id or ''}",
             headers=auth_headers,
         )
         storage_integrations.raise_for_status()
