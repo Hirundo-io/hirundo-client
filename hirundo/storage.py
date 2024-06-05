@@ -135,7 +135,8 @@ class StorageIntegration(BaseModel):
         Note: The return type is `list[dict]` and not `list[StorageIntegration]`
         """
         storage_integrations = requests.get(
-            f"{API_HOST}/storage-integration/{organization_id or ''}",
+            f"{API_HOST}/storage-integration/",
+            params={"storage_integration_owner_id": organization_id},
             headers=auth_headers,
         )
         storage_integrations.raise_for_status()

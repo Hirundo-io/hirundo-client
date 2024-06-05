@@ -43,7 +43,8 @@ class OptimizationDataset(BaseModel):
         Note: The return type is `list[dict]` and not `list[OptimizationDataset]`
         """
         response = requests.get(
-            f"{API_HOST}/dataset-optimization/dataset/{organization_id or ''}",
+            f"{API_HOST}/dataset-optimization/dataset/",
+            params={"dataset_owner_id": organization_id},
             headers=auth_headers,
         )
         response.raise_for_status()
