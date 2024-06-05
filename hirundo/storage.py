@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Union
+import typing
 from pydantic import BaseModel
 import pydantic
 from pydantic_core import Url
@@ -129,7 +130,7 @@ class StorageIntegration(BaseModel):
     )
 
     @staticmethod
-    def list(organization_id: int | None = None) -> list[dict]:
+    def list(organization_id: typing.Union[int, None] = None) -> list[dict]:
         """
         Lists all the `StorageIntegration`'s created by user's default organization
         Note: The return type is `list[dict]` and not `list[StorageIntegration]`
