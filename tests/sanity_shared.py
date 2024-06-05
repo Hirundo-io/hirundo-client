@@ -1,47 +1,13 @@
 import logging
-import pytest
-from hirundo import (
-    OptimizationDataset,
-    LabellingType,
-    StorageLink,
-    StorageIntegration,
-    StorageTypes,
-    StorageS3,
-)
+
+from hirundo import OptimizationDataset
+from hirundo.storage import StorageIntegration
+
 
 logger = logging.getLogger(__name__)
 
-test_dataset = OptimizationDataset(
-    name="Test dataset",
-    labelling_type=LabellingType.SingleLabelClassification,
-    dataset_storage=StorageLink(
-        storage_integration=StorageIntegration(
-            name="cifar10bucket",
-            type=StorageTypes.S3,
-            s3=StorageS3(
-                bucket_url="s3://cifar10bucket",
-                region_name="us-east-2",
-            ),
-        ),
-        path="/pytorch-cifar/data",
-    ),
-    dataset_metadata_path="cifar10.csv",
-    classes=[
-        "airplane",
-        "automobile",
-        "bird",
-        "cat",
-        "deer",
-        "dog",
-        "frog",
-        "horse",
-        "ship",
-        "truck",
-    ],
-)
 
-
-def cleanup():
+def cleanup(test_dataset: OptimizationDataset):
     datasets = OptimizationDataset.list()
     dataset_ids = [dataset["id"] for dataset in datasets]
     if len(dataset_ids) > 0:
@@ -80,8 +46,7 @@ def cleanup():
     # This prevents errors due to ID links to deleted datasets, storage integrations and runs
 
 
-def test_dataset_optimization():
-    cleanup()
+def dataset_optimization_sync_test(test_dataset: OptimizationDataset):
     logger.info("Sync: Finished cleanup")
     test_dataset.run_optimization()
     logger.info("Sync: Started dataset optimization run")
@@ -100,10 +65,7 @@ def test_dataset_optimization():
     assert last_event["result"] is not None
     logger.info("Sync: Results %s", last_event["result"])
 
-
-@pytest.mark.asyncio
-async def test_async_dataset_optimization():
-    cleanup()
+async def dataset_optimization_async_test(test_dataset: OptimizationDataset):
     logger.info("Async: Finished cleanup")
     test_dataset.run_optimization()
     logger.info("Async: Started dataset optimization run")
