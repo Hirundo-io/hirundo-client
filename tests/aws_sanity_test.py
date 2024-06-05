@@ -1,4 +1,5 @@
 import logging
+import os
 import pytest
 from hirundo import (
     OptimizationDataset,
@@ -22,6 +23,8 @@ test_dataset = OptimizationDataset(
             s3=StorageS3(
                 bucket_url="s3://cifar10bucket",
                 region_name="us-east-2",
+                access_key_id=os.environ["AWS_ACCESS_KEY"],
+                secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
             ),
         ),
         path="/pytorch-cifar/data",
@@ -41,13 +44,11 @@ test_dataset = OptimizationDataset(
     ],
 )
 
-@pytest.mark.skip(reason="Still need to implement AWS S3 Bucket auth")
 def test_dataset_optimization():
     cleanup(test_dataset)
     dataset_optimization_sync_test(test_dataset)
 
 
-@pytest.mark.skip(reason="Still need to implement AWS S3 Bucket auth")
 @pytest.mark.asyncio
 async def test_async_dataset_optimization():
     cleanup(test_dataset)
