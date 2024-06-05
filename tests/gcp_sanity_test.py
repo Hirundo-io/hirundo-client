@@ -17,7 +17,7 @@ from tests.sanity_shared import (
 logger = logging.getLogger(__name__)
 
 test_dataset = OptimizationDataset(
-    name="Test dataset",
+    name="GCP test dataset",
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(

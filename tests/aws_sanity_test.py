@@ -13,7 +13,7 @@ from tests.sanity_shared import cleanup, dataset_optimization_async_test, datase
 logger = logging.getLogger(__name__)
 
 test_dataset = OptimizationDataset(
-    name="Test dataset",
+    name="AWS test dataset",
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
