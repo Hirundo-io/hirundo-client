@@ -48,7 +48,7 @@ class StorageTypes(str, Enum):
 
 
 class StorageIntegration(BaseModel):
-    owner_id: Union[int, None] = None
+    organization_id: Union[int, None] = None
 
     name: StorageIntegrationName
     type: StorageTypes = pydantic.Field(
@@ -137,7 +137,7 @@ class StorageIntegration(BaseModel):
         """
         storage_integrations = requests.get(
             f"{API_HOST}/storage-integration/",
-            params={"storage_integration_owner_id": organization_id},
+            params={"storage_integration_organization_id": organization_id},
             headers=auth_headers,
         )
         storage_integrations.raise_for_status()

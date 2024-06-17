@@ -44,7 +44,7 @@ class OptimizationDataset(BaseModel):
         """
         response = requests.get(
             f"{API_HOST}/dataset-optimization/dataset/",
-            params={"dataset_owner_id": organization_id},
+            params={"dataset_organization_id": organization_id},
             headers=auth_headers,
         )
         response.raise_for_status()

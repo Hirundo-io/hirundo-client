@@ -17,7 +17,7 @@ class GitSSHAuthBase(BaseModel):
 class GitRepo(BaseModel):
     name: str
     repository_url: Url
-    owner_id: Union[int, None] = None
+    organization_id: Union[int, None] = None
 
     plain_auth: Union[GitPlainAuthBase, None] = pydantic.Field(
         examples=[None, {"username": "ben", "password": "password"}]
