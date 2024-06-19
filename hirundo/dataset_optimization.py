@@ -84,7 +84,8 @@ class OptimizationDataset(BaseModel):
 
     def create(self) -> int:
         """
-        Create a `OptimizationDataset` instance on the server
+        Create a `OptimizationDataset` instance on the server.
+        If `storage_integration_id` is not set, it will be created.
         """
         if not self.dataset_storage:
             raise ValueError("No dataset storage has been provided")
@@ -137,6 +138,7 @@ class OptimizationDataset(BaseModel):
 
     def run_optimization(self) -> int:
         """
+        If the dataset was not created on the server yet, it is created.
         Run the dataset optimization process on the server using the active `OptimizationDataset` instance
         Returns an ID of the run (`run_id`) and stores that `run_id` on the instance
         """
