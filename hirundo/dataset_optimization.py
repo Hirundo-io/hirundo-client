@@ -180,9 +180,12 @@ class OptimizationDataset(BaseModel):
         - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
 
         """
-        with httpx.Client(timeout=httpx.Timeout(5.0, read=None)) as client:
+        with httpx.Client(timeout=httpx.Timeout(None, connect=5.0)) as client:
             for sse in iter_sse_retrying(
-                client, "GET", f"{API_HOST}/dataset-optimization/run/{run_id}"
+                client,
+                "GET",
+                f"{API_HOST}/dataset-optimization/run/{run_id}",
+                headers=auth_headers,
             ):
                 if sse.event == "ping":
                     continue
@@ -222,9 +225,12 @@ class OptimizationDataset(BaseModel):
         - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
 
         """
-        async with httpx.AsyncClient(timeout=httpx.Timeout(5.0, read=None)) as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(None, connect=5.0)) as client:
             async_iterator = await aiter_sse_retrying(
-                client, "GET", f"{API_HOST}/dataset-optimization/run/{run_id}"
+                client,
+                "GET",
+                f"{API_HOST}/dataset-optimization/run/{run_id}",
+                headers=auth_headers,
             )
             async for sse in async_iterator:
                 if sse.event == "ping":

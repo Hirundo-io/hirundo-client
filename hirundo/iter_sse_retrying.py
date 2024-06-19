@@ -7,7 +7,12 @@ from stamina import retry
 
 
 # Credit: https://github.com/florimondmanca/httpx-sse/blob/master/README.md#handling-reconnections
-def iter_sse_retrying(client, method, url) -> Generator[ServerSentEvent, None, None]:
+def iter_sse_retrying(
+    client: httpx.Client,
+    method: str,
+    url: str,
+    headers: dict[str, str] = {},
+) -> Generator[ServerSentEvent, None, None]:
     last_event_id = ""
     reconnection_delay = 0.0
 
@@ -19,12 +24,12 @@ def iter_sse_retrying(client, method, url) -> Generator[ServerSentEvent, None, N
 
         time.sleep(reconnection_delay)
 
-        headers = {"Accept": "text/event-stream"}
+        connect_headers = {**headers, "Accept": "text/event-stream", "X-Accel-Buffering": "no"}
 
         if last_event_id:
-            headers["Last-Event-ID"] = last_event_id
+            connect_headers["Last-Event-ID"] = last_event_id
 
-        with connect_sse(client, method, url, headers=headers) as event_source:
+        with connect_sse(client, method, url, headers=connect_headers) as event_source:
             for sse in event_source.iter_sse():
                 last_event_id = sse.id
 
@@ -37,7 +42,10 @@ def iter_sse_retrying(client, method, url) -> Generator[ServerSentEvent, None, N
 
 
 async def aiter_sse_retrying(
-    client, method, url
+    client: httpx.AsyncClient,
+    method: str,
+    url: str,
+    headers: dict[str, str],
 ) -> AsyncGenerator[ServerSentEvent, None]:
     last_event_id = ""
     reconnection_delay = 0.0
@@ -50,12 +58,14 @@ async def aiter_sse_retrying(
 
         await asyncio.sleep(reconnection_delay)
 
-        headers = {"Accept": "text/event-stream"}
+        connect_headers = {**headers, "Accept": "text/event-stream"}
 
         if last_event_id:
-            headers["Last-Event-ID"] = last_event_id
+            connect_headers["Last-Event-ID"] = last_event_id
 
-        async with aconnect_sse(client, method, url, headers=headers) as event_source:
+        async with aconnect_sse(
+            client, method, url, headers=connect_headers
+        ) as event_source:
             async for sse in event_source.aiter_sse():
                 last_event_id = sse.id
 
