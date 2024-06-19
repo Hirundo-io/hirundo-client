@@ -196,7 +196,8 @@ class OptimizationDataset(BaseModel):
                     sse.id,
                     sse.retry,
                 )
-                yield json.loads(sse.data)
+                last_event = json.loads(sse.data)
+                yield last_event["data"]
 
     def check_run(self) -> Generator[dict, None, None]:
         """
@@ -242,7 +243,8 @@ class OptimizationDataset(BaseModel):
                     sse.id,
                     sse.retry,
                 )
-                yield json.loads(sse.data)
+                last_event = json.loads(sse.data)
+                yield last_event["data"]
 
     async def acheck_run(self) -> AsyncGenerator[dict, None]:
         """

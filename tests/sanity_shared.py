@@ -57,7 +57,6 @@ def dataset_optimization_sync_test(test_dataset: OptimizationDataset):
         try:
             last_event = next(events_generator)
             assert last_event is not None
-            assert isinstance(last_event, str)
             logger.info("Sync: Run event %s", last_event)
         except StopIteration:
             break
@@ -74,7 +73,6 @@ async def dataset_optimization_async_test(test_dataset: OptimizationDataset):
     last_event = {}
     async for last_event in events_generator:
         assert last_event is not None
-        assert isinstance(last_event, str)
         logger.info("Async: Run event %s", last_event)
     assert last_event["state"] == "SUCCESS"
     assert last_event["result"] is not None
