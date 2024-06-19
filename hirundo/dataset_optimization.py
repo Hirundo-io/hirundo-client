@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 class HirundoError(Exception):
     pass
 
+MAX_RETRIES = 200 # Max 200 retries for HTTP SSE connection
+
 
 class OptimizationDataset(BaseModel):
     name: str
@@ -170,7 +172,7 @@ class OptimizationDataset(BaseModel):
         self.run_id = None
 
     @staticmethod
-    def check_run_by_id(run_id: int) -> Generator[dict, None, None]:
+    def check_run_by_id(run_id: int, retry = 0) -> Generator[dict, None, None]:
         """
         Check the status of a run given its ID
 
@@ -180,6 +182,9 @@ class OptimizationDataset(BaseModel):
         - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
 
         """
+        if retry > MAX_RETRIES:
+            raise HirundoError("Max retries reached")
+        last_event = None
         with httpx.Client(timeout=httpx.Timeout(None, connect=5.0)) as client:
             for sse in iter_sse_retrying(
                 client,
@@ -198,6 +203,8 @@ class OptimizationDataset(BaseModel):
                 )
                 last_event = json.loads(sse.data)
                 yield last_event["data"]
+        if not last_event or last_event["data"]["state"] == "PENDING":
+            OptimizationDataset.check_run_by_id(run_id, retry + 1)
 
     def check_run(self) -> Generator[dict, None, None]:
         """
@@ -214,7 +221,7 @@ class OptimizationDataset(BaseModel):
         return self.check_run_by_id(self.run_id)
 
     @staticmethod
-    async def acheck_run_by_id(run_id: int) -> AsyncGenerator[dict, None]:
+    async def acheck_run_by_id(run_id: int, retry = 0) -> AsyncGenerator[dict, None]:
         """
         Async version of :func:`check_run_by_id`
 
@@ -226,6 +233,9 @@ class OptimizationDataset(BaseModel):
         - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
 
         """
+        if retry > MAX_RETRIES:
+            raise HirundoError("Max retries reached")
+        last_event = None
         async with httpx.AsyncClient(timeout=httpx.Timeout(None, connect=5.0)) as client:
             async_iterator = await aiter_sse_retrying(
                 client,
@@ -245,6 +255,8 @@ class OptimizationDataset(BaseModel):
                 )
                 last_event = json.loads(sse.data)
                 yield last_event["data"]
+        if not last_event or last_event["data"]["state"] == "PENDING":
+            OptimizationDataset.acheck_run_by_id(run_id, retry + 1)
 
     async def acheck_run(self) -> AsyncGenerator[dict, None]:
         """
