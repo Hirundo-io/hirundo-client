@@ -35,7 +35,7 @@ class OptimizationDataset(BaseModel):
 
     storage_integration_id: Union[int, None] = Field(default=None, init=False)
     dataset_id: Union[int, None] = Field(default=None, init=False)
-    run_id: Union[int, None] = Field(default=None, init=False)
+    run_id: Union[str, None] = Field(default=None, init=False)
 
     @staticmethod
     def list(organization_id: Union[int, None] = None) -> list[dict]:
@@ -123,7 +123,7 @@ class OptimizationDataset(BaseModel):
         return self.dataset_id
 
     @staticmethod
-    def launch_optimization_run(dataset_id: int) -> int:
+    def launch_optimization_run(dataset_id: int) -> str:
         """
         Run the dataset optimization process on the server using the dataset with the given ID
         i.e. `dataset_id`
@@ -136,7 +136,7 @@ class OptimizationDataset(BaseModel):
         run_response.raise_for_status()
         return run_response.json()["run_id"]
 
-    def run_optimization(self) -> int:
+    def run_optimization(self) -> str:
         """
         If the dataset was not created on the server yet, it is created.
         Run the dataset optimization process on the server using the active `OptimizationDataset` instance
@@ -174,7 +174,7 @@ class OptimizationDataset(BaseModel):
         self.run_id = None
 
     @staticmethod
-    def check_run_by_id(run_id: int, retry = 0) -> Generator[dict, None, None]:
+    def check_run_by_id(run_id: str, retry = 0) -> Generator[dict, None, None]:
         """
         Check the status of a run given its ID
 
@@ -223,7 +223,7 @@ class OptimizationDataset(BaseModel):
         return self.check_run_by_id(self.run_id)
 
     @staticmethod
-    async def acheck_run_by_id(run_id: int, retry = 0) -> AsyncGenerator[dict, None]:
+    async def acheck_run_by_id(run_id: str, retry = 0) -> AsyncGenerator[dict, None]:
         """
         Async version of :func:`check_run_by_id`
 
@@ -276,3 +276,24 @@ class OptimizationDataset(BaseModel):
             raise ValueError("No run has been started")
         async for iteration in self.acheck_run_by_id(self.run_id):
             yield iteration
+    
+    @staticmethod
+    def cancel_by_id(run_id: str) -> None:
+        """
+        Cancel the dataset optimization run for the given `run_id`
+        """
+        if not run_id:
+            raise ValueError("No run has been started")
+        response = requests.delete(
+            f"{API_HOST}/dataset-optimization/run/{run_id}",
+            headers=auth_headers,
+        )
+        response.raise_for_status()
+
+    def cancel(self) -> None:
+        """
+        Cancel the current active instance's run
+        """
+        if not self.run_id:
+            raise ValueError("No run has been started")
+        self.cancel_by_id(self.run_id)

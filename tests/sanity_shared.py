@@ -10,11 +10,25 @@ logger = logging.getLogger(__name__)
 def cleanup(test_dataset: OptimizationDataset):
     datasets = OptimizationDataset.list()
     dataset_ids = [dataset["id"] for dataset in datasets]
+    running_datasets = {
+        dataset["id"]: dataset["run_id"]
+        for dataset in datasets
+        if (
+            dataset["run_id"] is not None
+            and ("completed" not in dataset or dataset["completed"] is None)
+        )
+    }
     if len(dataset_ids) > 0:
         logger.debug("Found %s optimization datasets, deleting them", len(dataset_ids))
         logger.debug("Note: If I am not the owner, I will not be able to delete them")
     for dataset_id in dataset_ids:
         try:
+            if dataset_id in running_datasets:
+                run_id = running_datasets[dataset_id]
+                logger.debug(
+                    "Cancelling optimization dataset with run ID %s", run_id
+                )
+                OptimizationDataset.cancel_by_id(run_id)
             OptimizationDataset.delete_by_id(dataset_id)
         except Exception as e:
             logger.warning(
@@ -63,6 +77,7 @@ def dataset_optimization_sync_test(test_dataset: OptimizationDataset):
     assert last_event["state"] == "SUCCESS"
     assert last_event["result"] is not None
     logger.info("Sync: Results %s", last_event["result"])
+
 
 async def dataset_optimization_async_test(test_dataset: OptimizationDataset):
     logger.info("Async: Finished cleanup")
