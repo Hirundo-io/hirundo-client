@@ -72,6 +72,8 @@ def dataset_optimization_sync_test(test_dataset: OptimizationDataset):
             last_event = next(events_generator)
             assert last_event is not None
             logger.info("Sync: Run event %s", last_event)
+            if last_event["state"] == "AWAITING MANUAL APPROVAL":
+                raise StopIteration("Currently we require manual approval")
         except StopIteration:
             break
     assert last_event["state"] == "SUCCESS"
@@ -89,6 +91,9 @@ async def dataset_optimization_async_test(test_dataset: OptimizationDataset):
     async for last_event in events_generator:
         assert last_event is not None
         logger.info("Async: Run event %s", last_event)
+        if last_event["state"] == "AWAITING_MANUAL_APPROVAL":
+            # Currently we require manual approval
+            break
     assert last_event["state"] == "SUCCESS"
     assert last_event["result"] is not None
     logger.info("Async: Results %s", last_event["result"])
