@@ -8,4 +8,3 @@ class LabellingType(str, Enum):
 
 class DatasetMetadataType(str, Enum):
     HirundoCSV = "HirundoCSV"
-    # TODO: Add support for COCO and YOLO
