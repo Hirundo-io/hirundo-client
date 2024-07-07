@@ -48,7 +48,12 @@ def test_dataset_optimization():
     cleanup(test_dataset)
     dataset_optimization_sync_test(test_dataset)
 
+def skip_test():
+    if "FULL_TEST" in os.environ and os.environ["FULL_TEST"] == "true":
+        return 0
+    return 1
 
+@pytest.mark.skipif("skip_test() == 1")
 @pytest.mark.asyncio
 async def test_async_dataset_optimization():
     cleanup(test_dataset)

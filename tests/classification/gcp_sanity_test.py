@@ -15,6 +15,7 @@ from tests.sanity_shared import (
     dataset_optimization_async_test,
     dataset_optimization_sync_test,
 )
+from tests.classification.cifar100_classes import cifar100_classes
 
 logger = logging.getLogger(__name__)
 
@@ -23,29 +24,18 @@ test_dataset = OptimizationDataset(
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
-            name="cifar10bucket",
+            name="cifar100bucket",
             type=StorageTypes.GCP,
             gcp=StorageGCP(
-                bucket_name="cifar10bucket",
+                bucket_name="cifar100bucket",
                 project="Hirundo-global",
                 credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
             ),
         ),
         path="/pytorch-cifar/data",
     ),
-    dataset_metadata_path="cifar10.csv",
-    classes=[
-        "airplane",
-        "automobile",
-        "bird",
-        "cat",
-        "deer",
-        "dog",
-        "frog",
-        "horse",
-        "ship",
-        "truck",
-    ],
+    dataset_metadata_path="cifar100.csv",
+    classes=cifar100_classes,
 )
 
 

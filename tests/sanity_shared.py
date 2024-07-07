@@ -1,4 +1,5 @@
 import logging
+import os
 
 from hirundo import OptimizationDataset
 from hirundo.storage import StorageIntegration
@@ -9,12 +10,18 @@ logger = logging.getLogger(__name__)
 
 def cleanup(test_dataset: OptimizationDataset):
     datasets = OptimizationDataset.list()
-    dataset_ids = [dataset["id"] for dataset in datasets]
+    dataset_ids = [dataset["id"] for dataset in datasets if dataset["name"] == test_dataset.name]
+    storage_integration_ids = [
+        dataset["storage_link"]["storage_integration_id"]
+        for dataset in datasets
+        if dataset["name"] == test_dataset.name
+    ]
     running_datasets = {
         dataset["id"]: dataset["run_id"]
         for dataset in datasets
         if (
-            dataset["run_id"] is not None
+            dataset["name"] == test_dataset.name
+            and dataset["run_id"] is not None
             and ("completed" not in dataset or dataset["completed"] is None)
         )
     }
@@ -38,7 +45,7 @@ def cleanup(test_dataset: OptimizationDataset):
             )
     storage_integrations = StorageIntegration.list()
     storage_integration_ids = [
-        integration["id"] for integration in storage_integrations
+        integration["id"] for integration in storage_integrations if integration["id"] in storage_integration_ids
     ]
     if len(storage_integration_ids) > 0:
         logger.debug(
@@ -62,29 +69,33 @@ def cleanup(test_dataset: OptimizationDataset):
 
 def dataset_optimization_sync_test(test_dataset: OptimizationDataset):
     logger.info("Sync: Finished cleanup")
-    test_dataset.run_optimization()
-    logger.info("Sync: Started dataset optimization run")
-    events_generator = test_dataset.check_run()
-    logger.info("Sync: Checking run progress")
-    last_event = {}
-    while True:
-        try:
-            last_event = next(events_generator)
-            assert last_event is not None
-            logger.info("Sync: Run event %s", last_event)
-            if last_event["state"] == "AWAITING MANUAL APPROVAL":
-                raise StopIteration("Currently we require manual approval")
-        except StopIteration:
-            break
-    assert last_event["state"] == "SUCCESS"
-    assert last_event["result"] is not None
-    logger.info("Sync: Results %s", last_event["result"])
+    if "FULL_TEST" in os.environ and os.environ["FULL_TEST"] == "true":
+        run_id = test_dataset.run_optimization()
+        logger.info("Sync: Started dataset optimization run with run ID %s", run_id)
+        events_generator = test_dataset.check_run()
+        logger.info("Sync: Checking run progress")
+        last_event = {}
+        while True:
+            try:
+                last_event = next(events_generator)
+                assert last_event is not None
+                logger.info("Sync: Run event %s", last_event)
+                if last_event["state"] == "AWAITING MANUAL APPROVAL":
+                    raise StopIteration("Currently we require manual approval")
+            except StopIteration:
+                break
+        assert last_event["state"] == "SUCCESS"
+        assert last_event["result"] is not None
+        logger.info("Sync: Results %s", last_event["result"])
+    else:
+        test_dataset.create()
+        logger.info("Sync: Created dataset %s", test_dataset.name)
 
 
 async def dataset_optimization_async_test(test_dataset: OptimizationDataset):
     logger.info("Async: Finished cleanup")
-    test_dataset.run_optimization()
-    logger.info("Async: Started dataset optimization run")
+    run_id = test_dataset.run_optimization()
+    logger.info("Async: Started dataset optimization run with run ID %s", run_id)
     events_generator = test_dataset.acheck_run()
     logger.info("Async: Checking run progress")
     last_event = {}
