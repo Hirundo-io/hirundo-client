@@ -16,7 +16,7 @@ from tests.sanity_shared import (
 logger = logging.getLogger(__name__)
 
 test_dataset = OptimizationDataset(
-    name="AWS test OD BDD validation dataset",
+    name=f"AWS test OD BDD validation dataset{os.getenv('UNIQUE_DATASET_ID', '')}",
     labelling_type=LabellingType.ObjectDetection,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(

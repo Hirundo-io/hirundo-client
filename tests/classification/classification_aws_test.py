@@ -14,7 +14,7 @@ from tests.sanity_shared import cleanup, dataset_optimization_async_test, datase
 logger = logging.getLogger(__name__)
 
 test_dataset = OptimizationDataset(
-    name="AWS test dataset",
+    name=f"AWS test dataset{os.getenv('UNIQUE_DATASET_ID', '')}",
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(

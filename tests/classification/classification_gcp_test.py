@@ -20,7 +20,7 @@ from tests.classification.cifar100_classes import cifar100_classes
 logger = logging.getLogger(__name__)
 
 test_dataset = OptimizationDataset(
-    name="GCP test dataset",
+    name=f"GCP test dataset{os.getenv('UNIQUE_DATASET_ID', '')}",
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
