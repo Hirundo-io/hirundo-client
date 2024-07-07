@@ -44,5 +44,5 @@ jobs:
           GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          UNIQUE_DATASET_ID: ${{ matrix.os }}-${{ matrix.python-version }}-${{ github.run_number }}
+          UNIQUE_ID: ${{ matrix.os }}-${{ matrix.python-version }}-${{ github.run_number }}
           FULL_TEST: ${{ (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9') && 'true' || 'false' }}

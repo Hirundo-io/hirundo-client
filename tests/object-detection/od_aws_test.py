@@ -15,12 +15,13 @@ from tests.sanity_shared import (
 
 logger = logging.getLogger(__name__)
 
+unique_id = os.getenv("UNIQUE_ID", "")
 test_dataset = OptimizationDataset(
-    name=f"AWS test OD BDD validation dataset{os.getenv('UNIQUE_DATASET_ID', '')}",
+    name=f"AWS test OD BDD validation dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
-            name="AWS-open-source-datasets",
+            name=f"AWS-open-source-datasets{unique_id}",
             type=StorageTypes.S3,
             s3=StorageS3(
                 bucket_url="s3://hirundo-open-source-datasets",

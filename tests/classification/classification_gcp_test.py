@@ -19,12 +19,13 @@ from tests.classification.cifar100_classes import cifar100_classes
 
 logger = logging.getLogger(__name__)
 
+unique_id = os.getenv("UNIQUE_ID", "")
 test_dataset = OptimizationDataset(
-    name=f"GCP test dataset{os.getenv('UNIQUE_DATASET_ID', '')}",
+    name=f"GCP test dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
-            name="cifar100bucket",
+            name=f"cifar100bucket{unique_id}",
             type=StorageTypes.GCP,
             gcp=StorageGCP(
                 bucket_name="cifar100bucket",

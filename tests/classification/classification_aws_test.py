@@ -13,12 +13,13 @@ from tests.sanity_shared import cleanup, dataset_optimization_async_test, datase
 
 logger = logging.getLogger(__name__)
 
+unique_id = os.getenv('UNIQUE_ID', '')
 test_dataset = OptimizationDataset(
-    name=f"AWS test dataset{os.getenv('UNIQUE_DATASET_ID', '')}",
+    name=f"AWS test dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
-            name="cifar10bucket",
+            name=f"cifar10bucket{unique_id}",
             type=StorageTypes.S3,
             s3=StorageS3(
                 bucket_url="s3://cifar10bucket",
