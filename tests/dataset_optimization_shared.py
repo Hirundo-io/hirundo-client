@@ -1,8 +1,7 @@
 import logging
 import os
 
-from hirundo import OptimizationDataset
-from hirundo.storage import StorageIntegration
+from hirundo import GitRepo, OptimizationDataset, StorageIntegration
 
 
 logger = logging.getLogger(__name__)
@@ -47,6 +46,11 @@ def cleanup(test_dataset: OptimizationDataset):
     storage_integration_ids = [
         integration["id"] for integration in storage_integrations if integration["id"] in storage_integration_ids
     ]
+    git_repo_ids = [
+        integration["git"]["repo"]["id"]
+        for integration in storage_integrations
+        if integration["git"] is not None and integration["git"]["repo"] is not None
+    ]
     if len(storage_integration_ids) > 0:
         logger.debug(
             "Found %s storage integrations, deleting them", len(storage_integration_ids)
@@ -61,6 +65,15 @@ def cleanup(test_dataset: OptimizationDataset):
                 storage_integration_id,
                 e,
             )
+    for git_repo_id in git_repo_ids:
+        try:
+            GitRepo.delete_by_id(git_repo_id)
+        except Exception as e:
+            logger.warning(
+                "Failed to delete git repo with ID %s and exception %s",
+                git_repo_id,
+                e,
+            )
     # ⬆️ Delete all datasets and storage integrations from the server for the given user's default organization
     test_dataset.clean_ids()
     # ⬆️ Reset `dataset_id`, `storage_integration_id`, and `run_id` values on `test_dataset` to default value of `None`
@@ -69,7 +82,7 @@ def cleanup(test_dataset: OptimizationDataset):
 
 def dataset_optimization_sync_test(test_dataset: OptimizationDataset):
     logger.info("Sync: Finished cleanup")
-    if "FULL_TEST" in os.environ and os.environ["FULL_TEST"] == "true":
+    if os.getenv("FULL_TEST", "false") == "true":
         run_id = test_dataset.run_optimization()
         logger.info("Sync: Started dataset optimization run with run ID %s", run_id)
         events_generator = test_dataset.check_run()

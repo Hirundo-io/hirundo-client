@@ -10,7 +10,7 @@ from hirundo import (
     StorageTypes,
     StorageGCP,
 )
-from tests.sanity_shared import (
+from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_async_test,
     dataset_optimization_sync_test,
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-")
 test_dataset = OptimizationDataset(
-    name=f"GCP test dataset{unique_id}",
+    name=f"GCP cifar 100 classification dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(

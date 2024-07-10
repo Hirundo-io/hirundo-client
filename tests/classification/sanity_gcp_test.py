@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import pytest
@@ -7,30 +8,33 @@ from hirundo import (
     StorageLink,
     StorageIntegration,
     StorageTypes,
-    StorageS3,
+    StorageGCP,
 )
-from tests.dataset_optimization_shared import cleanup, dataset_optimization_async_test, dataset_optimization_sync_test
+from tests.dataset_optimization_shared import (
+    cleanup,
+    dataset_optimization_async_test,
+    dataset_optimization_sync_test,
+)
 
 logger = logging.getLogger(__name__)
 
-unique_id = os.getenv('UNIQUE_ID', '').replace(".", "-")
+unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-")
 test_dataset = OptimizationDataset(
-    name=f"AWS cifar10 classification dataset{unique_id}",
+    name=f"GCP sanity dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
-            name=f"cifar10bucket{unique_id}",
-            type=StorageTypes.S3,
-            s3=StorageS3(
-                bucket_url="s3://cifar10bucket",
-                region_name="us-east-2",
-                access_key_id=os.environ["AWS_ACCESS_KEY"],
-                secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+            name=f"cifar1bucket{unique_id}",
+            type=StorageTypes.GCP,
+            gcp=StorageGCP(
+                bucket_name="cifar1bucket",
+                project="Hirundo-global",
+                credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
             ),
         ),
         path="/pytorch-cifar/data",
     ),
-    dataset_metadata_path="cifar10.csv",
+    dataset_metadata_path="cifar1.csv",
     classes=[
         "airplane",
         "automobile",
@@ -45,17 +49,14 @@ test_dataset = OptimizationDataset(
     ],
 )
 
+
 def test_dataset_optimization():
     cleanup(test_dataset)
     dataset_optimization_sync_test(test_dataset)
 
-def skip_test():
-    if os.getenv("FULL_TEST", "false") == "true":
-        return 0
-    return 1
 
-@pytest.mark.skipif("skip_test() == 1")
 @pytest.mark.asyncio
 async def test_async_dataset_optimization():
+    pass
     cleanup(test_dataset)
     await dataset_optimization_async_test(test_dataset)

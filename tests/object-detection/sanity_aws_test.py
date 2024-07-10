@@ -17,11 +17,11 @@ logger = logging.getLogger(__name__)
 
 unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-")
 test_dataset = OptimizationDataset(
-    name=f"AWS-BDD-100k-validation-OD-dataset{unique_id}",
+    name=f"AWS-BDD-100k-subset-1000-OD-dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
-            name=f"AWS-open-source-datasets{unique_id}",
+            name=f"AWS-open-source-datasets-sanity{unique_id}",
             type=StorageTypes.S3,
             s3=StorageS3(
                 bucket_url="s3://hirundo-open-source-datasets",
@@ -30,7 +30,7 @@ test_dataset = OptimizationDataset(
                 secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
             ),
         ),
-        path="/bdd100k_val_hirundo.zip/bdd100k",
+        path="/bdd100k_subset_1000_hirundo.zip/bdd100k",
     ),
     dataset_metadata_path="bdd100k.csv",
     classes=[
