@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Union
 import typing
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 import pydantic
 from pydantic_core import Url
 import requests
@@ -34,10 +34,15 @@ class StorageAzure(BaseModel):
 
 
 class StorageGit(BaseModel):
-    repo_id: int
-    repo: GitRepo
+    repo_id: int | None = None
+    repo: GitRepo | None = None
     branch: str
-    path: str
+
+    @model_validator(mode='after')
+    def validate_repo(self) -> typing.Self:
+        if self.repo_id is None and self.repo is None:
+            raise ValueError("Either repo_id or repo must be provided")
+        return self
 
 
 class StorageTypes(str, Enum):
@@ -48,6 +53,8 @@ class StorageTypes(str, Enum):
 
 
 class StorageIntegration(BaseModel):
+    id: Union[int, None] = None
+
     organization_id: Union[int, None] = None
 
     name: StorageIntegrationName
@@ -154,10 +161,20 @@ class StorageIntegration(BaseModel):
         )
         storage_integration.raise_for_status()
 
+    def delete(self) -> None:
+        """
+        Deletes the `StorageIntegration` instance from the server
+        """
+        if not self.id:
+            raise ValueError("No StorageIntegration has been created")
+        self.delete_by_id(self.id)
+
     def create(self) -> int:
         """
         Create a `StorageIntegration` instance on the server
         """
+        if self.git and self.git.repo:
+            self.git.repo_id = self.git.repo.create()
         storage_integration = requests.post(
             f"{API_HOST}/storage-integration/",
             json=self.model_dump(),
@@ -167,7 +184,9 @@ class StorageIntegration(BaseModel):
             },
         )
         storage_integration.raise_for_status()
-        return storage_integration.json()["id"]
+        storage_integration_id = storage_integration.json()["id"]
+        self.id = storage_integration_id
+        return storage_integration_id
 
 
 class StorageLink(BaseModel):
