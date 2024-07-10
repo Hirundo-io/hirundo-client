@@ -12,7 +12,7 @@ from .storage import (
     StorageTypes,
     StorageS3,
     StorageGCP,
-    StorageAzure,
+    # StorageAzure,  TODO: Azure storage integration is coming soon
     StorageGit,
     StorageIntegration,
 )
@@ -27,7 +27,7 @@ __all__ = [
     "StorageTypes",
     "StorageS3",
     "StorageGCP",
-    "StorageAzure",
+    # "StorageAzure",  TODO: Azure storage integration is coming soon
     "StorageGit",
     "StorageIntegration",
 ]

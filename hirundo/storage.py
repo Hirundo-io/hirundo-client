@@ -27,10 +27,11 @@ class StorageGCP(BaseModel):
     credentials_json: Union[dict, None] = None
 
 
-class StorageAzure(BaseModel):
-    container: str
-    account_name: str
-    account_key: str
+# TODO: Azure storage integration is coming soon
+# class StorageAzure(BaseModel):
+#     container: str
+#     account_name: str
+#     account_key: str
 
 
 class StorageGit(BaseModel):
@@ -48,7 +49,7 @@ class StorageGit(BaseModel):
 class StorageTypes(str, Enum):
     S3 = "S3"
     GCP = "GCP"
-    AZURE = "Azure"
+    # AZURE = "Azure"  TODO: Azure storage integration is coming soon
     GIT = "Git"
 
 
@@ -62,7 +63,7 @@ class StorageIntegration(BaseModel):
         examples=[
             StorageTypes.S3,
             StorageTypes.GCP,
-            StorageTypes.AZURE,
+            # StorageTypes.AZURE,  TODO: Azure storage integration is coming soon
             StorageTypes.GIT,
         ]
     )
@@ -105,19 +106,20 @@ class StorageIntegration(BaseModel):
             None,
         ],
     )
-    azure: Union[StorageAzure, None] = pydantic.Field(
-        default=None,
-        examples=[
-            None,
-            None,
-            {
-                "container": "my-container",
-                "account_name": "my-account-name",
-                "account_key": "my-account",
-            },
-            None,
-        ],
-    )
+    azure: None = None
+    # azure: Union[StorageAzure, None] = pydantic.Field(
+    #     default=None,
+    #     examples=[
+    #         None,
+    #         None,
+    #         {
+    #             "container": "my-container",
+    #             "account_name": "my-account-name",
+    #             "account_key": "my-account",
+    #         },
+    #         None,
+    #     ],
+    # )  TODO: Azure storage integration is coming soon
     git: Union[StorageGit, None] = pydantic.Field(
         default=None,
         examples=[
