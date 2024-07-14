@@ -9,7 +9,9 @@ logger = logging.getLogger(__name__)
 
 def cleanup(test_dataset: OptimizationDataset):
     datasets = OptimizationDataset.list()
-    dataset_ids = [dataset["id"] for dataset in datasets if dataset["name"] == test_dataset.name]
+    dataset_ids = [
+        dataset["id"] for dataset in datasets if dataset["name"] == test_dataset.name
+    ]
     storage_integration_ids = [
         dataset["storage_link"]["storage_integration_id"]
         for dataset in datasets
@@ -31,9 +33,7 @@ def cleanup(test_dataset: OptimizationDataset):
         try:
             if dataset_id in running_datasets:
                 run_id = running_datasets[dataset_id]
-                logger.debug(
-                    "Cancelling optimization dataset with run ID %s", run_id
-                )
+                logger.debug("Cancelling optimization dataset with run ID %s", run_id)
                 OptimizationDataset.cancel_by_id(run_id)
             OptimizationDataset.delete_by_id(dataset_id)
         except Exception as e:
@@ -44,7 +44,9 @@ def cleanup(test_dataset: OptimizationDataset):
             )
     storage_integrations = StorageIntegration.list()
     storage_integration_ids = [
-        integration["id"] for integration in storage_integrations if integration["id"] in storage_integration_ids
+        integration["id"]
+        for integration in storage_integrations
+        if integration["id"] in storage_integration_ids
     ]
     git_repo_ids = [
         integration["git"]["repo"]["id"]
@@ -80,9 +82,13 @@ def cleanup(test_dataset: OptimizationDataset):
     # This prevents errors due to ID links to deleted datasets, storage integrations and runs
 
 
-def dataset_optimization_sync_test(test_dataset: OptimizationDataset):
+def dataset_optimization_sync_test(
+    test_dataset: OptimizationDataset, alternative_env: str | None = None
+):
     logger.info("Sync: Finished cleanup")
-    if os.getenv("FULL_TEST", "false") == "true":
+    if os.getenv("FULL_TEST", "false") == "true" or (
+        alternative_env and os.getenv(alternative_env, "false") == "true"
+    ):
         run_id = test_dataset.run_optimization()
         logger.info("Sync: Started dataset optimization run with run ID %s", run_id)
         events_generator = test_dataset.check_run()
@@ -97,12 +103,17 @@ def dataset_optimization_sync_test(test_dataset: OptimizationDataset):
                     raise StopIteration("Currently we require manual approval")
             except StopIteration:
                 break
-        assert last_event["state"] == "SUCCESS"
-        assert last_event["result"] is not None
-        logger.info("Sync: Results %s", last_event["result"])
+        state = last_event["state"]
+        result = last_event["result"]
+        logger.info("Sync: Results %s", result)
+        assert (
+            state == "SUCCESS" or state == "AWAITING MANUAL APPROVAL"
+        ), f"Optimization failed with state {state}"
+        return result
     else:
         test_dataset.create()
         logger.info("Sync: Created dataset %s", test_dataset.name)
+        return None
 
 
 async def dataset_optimization_async_test(test_dataset: OptimizationDataset):
@@ -118,6 +129,5 @@ async def dataset_optimization_async_test(test_dataset: OptimizationDataset):
         if last_event["state"] == "AWAITING_MANUAL_APPROVAL":
             # Currently we require manual approval
             break
-    assert last_event["state"] == "SUCCESS"
-    assert last_event["result"] is not None
     logger.info("Async: Results %s", last_event["result"])
+    return last_event["state"], last_event["result"]

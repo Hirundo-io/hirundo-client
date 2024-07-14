@@ -52,7 +52,12 @@ test_dataset = OptimizationDataset(
 
 def test_dataset_optimization():
     cleanup(test_dataset)
-    dataset_optimization_sync_test(test_dataset)
+    full_run = dataset_optimization_sync_test(test_dataset)
+    if full_run:
+        pass
+        # TODO: Add add assertion for result
+    else:
+        logger.info("Full dataset optimization was not run!")
 
 
 @pytest.mark.asyncio

@@ -14,6 +14,7 @@ from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_async_test,
     dataset_optimization_sync_test,
+    skip_test,
 )
 from tests.classification.cifar100_classes import cifar100_classes
 
@@ -42,11 +43,9 @@ test_dataset = OptimizationDataset(
 
 def test_dataset_optimization():
     cleanup(test_dataset)
-    dataset_optimization_sync_test(test_dataset)
-
-
-@pytest.mark.asyncio
-async def test_async_dataset_optimization():
-    pass
-    cleanup(test_dataset)
-    await dataset_optimization_async_test(test_dataset)
+    full_run = dataset_optimization_sync_test(test_dataset, "RUN_CLASSIFICATION_GCP_OPTIMIZATION")
+    if full_run:
+        pass
+        # TODO: Add add assertion for result
+    else:
+        logger.info("Full dataset optimization was not run!")

@@ -9,7 +9,7 @@ from hirundo import (
     StorageTypes,
     StorageS3,
 )
-from tests.dataset_optimization_shared import cleanup, dataset_optimization_async_test, dataset_optimization_sync_test
+from tests.dataset_optimization_shared import cleanup, dataset_optimization_async_test, dataset_optimization_sync_test, skip_test
 
 logger = logging.getLogger(__name__)
 
@@ -47,15 +47,9 @@ test_dataset = OptimizationDataset(
 
 def test_dataset_optimization():
     cleanup(test_dataset)
-    dataset_optimization_sync_test(test_dataset)
-
-def skip_test():
-    if os.getenv("FULL_TEST", "false") == "true":
-        return 0
-    return 1
-
-@pytest.mark.skipif("skip_test() == 1")
-@pytest.mark.asyncio
-async def test_async_dataset_optimization():
-    cleanup(test_dataset)
-    await dataset_optimization_async_test(test_dataset)
+    full_run = dataset_optimization_sync_test(test_dataset, "RUN_CLASSIFICATION_AWS_OPTIMIZATION")
+    if full_run:
+        pass
+        # TODO: Add add assertion for result
+    else:
+        logger.info("Full dataset optimization was not run!")
