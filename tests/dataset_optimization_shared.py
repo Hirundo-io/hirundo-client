@@ -43,15 +43,12 @@ def cleanup(test_dataset: OptimizationDataset):
                 e,
             )
     storage_integrations = StorageIntegration.list()
-    storage_integration_ids = [
-        integration["id"]
-        for integration in storage_integrations
-        if integration["id"] in storage_integration_ids
-    ]
     git_repo_ids = [
         integration["git"]["repo"]["id"]
         for integration in storage_integrations
-        if integration["git"] is not None and integration["git"]["repo"] is not None
+        if integration["id"] in storage_integration_ids
+        and integration["git"] is not None
+        and integration["git"]["repo"] is not None
     ]
     if len(storage_integration_ids) > 0:
         logger.debug(
