@@ -1,7 +1,6 @@
 import json
 import logging
 from typing import AsyncGenerator, Generator, Union
-import typing
 from pydantic import BaseModel, Field, model_validator
 import requests
 import httpx
@@ -40,7 +39,7 @@ class OptimizationDataset(BaseModel):
     run_id: Union[str, None] = Field(default=None, init=False)
 
     @model_validator(mode="after")
-    def validate_repo(self) -> typing.Self:
+    def validate_repo(self):
         if self.dataset_storage is None and self.storage_integration_id is None:
             raise ValueError("No dataset storage has been provided")
         return self
