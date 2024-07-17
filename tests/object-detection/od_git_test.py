@@ -27,7 +27,7 @@ test_dataset = OptimizationDataset(
             type=StorageTypes.GIT,
             git=StorageGit(
                 repo=GitRepo(
-                    name="BDD-100k-validation-dataset",
+                    name=f"BDD-100k-validation-dataset{unique_id}",
                     repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
                 ),
                 branch="main",
