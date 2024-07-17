@@ -1,11 +1,9 @@
-name: Run tests with PyTest
+name: Run sanity tests with PyTest
 
 on:
   push:
     branches:
       - "main"
-    tags:
-      - "v*"
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -57,4 +55,4 @@ jobs:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           UNIQUE_ID: ${{ matrix.os }}-${{ matrix.python-version }}-${{ github.run_number }}
-          FULL_TEST: ${{ (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9') && 'true' || 'false' }}
+          FULL_TEST: false

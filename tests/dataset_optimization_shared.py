@@ -83,9 +83,10 @@ def cleanup(test_dataset: OptimizationDataset):
 def dataset_optimization_sync_test(
     test_dataset: OptimizationDataset,
     alternative_env: Union[str, None] = None,
+    sanity=False,
 ):
     logger.info("Sync: Finished cleanup")
-    if os.getenv("FULL_TEST", "false") == "true" or (
+    if (os.getenv("FULL_TEST", "false") == "true" and sanity) or (
         alternative_env and os.getenv(alternative_env, "false") == "true"
     ):
         run_id = test_dataset.run_optimization()
@@ -115,18 +116,23 @@ def dataset_optimization_sync_test(
         return None
 
 
-async def dataset_optimization_async_test(test_dataset: OptimizationDataset):
+async def dataset_optimization_async_test(test_dataset: OptimizationDataset, env: str):
     logger.info("Async: Finished cleanup")
-    run_id = test_dataset.run_optimization()
-    logger.info("Async: Started dataset optimization run with run ID %s", run_id)
-    events_generator = test_dataset.acheck_run()
-    logger.info("Async: Checking run progress")
-    last_event = {}
-    async for last_event in events_generator:
-        assert last_event is not None
-        logger.info("Async: Run event %s", last_event)
-        if last_event["state"] == "AWAITING_MANUAL_APPROVAL":
-            # Currently we require manual approval
-            break
-    logger.info("Async: Results %s", last_event["result"])
-    return last_event["state"], last_event["result"]
+    if os.getenv(env, "false") == "true":
+        run_id = test_dataset.run_optimization()
+        logger.info("Async: Started dataset optimization run with run ID %s", run_id)
+        events_generator = test_dataset.acheck_run()
+        logger.info("Async: Checking run progress")
+        last_event = {}
+        async for last_event in events_generator:
+            assert last_event is not None
+            logger.info("Async: Run event %s", last_event)
+            if last_event["state"] == "AWAITING_MANUAL_APPROVAL":
+                # Currently we require manual approval
+                break
+        logger.info("Async: Results %s", last_event["result"])
+        return last_event["result"]
+    else:
+        test_dataset.create()
+        logger.info("Async: Created dataset %s", test_dataset.name)
+        return None
