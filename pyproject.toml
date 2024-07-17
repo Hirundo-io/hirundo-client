@@ -63,6 +63,7 @@ dev = [
     "pip-tools",
     "pre-commit",
     "ruff",
+    "bumpver",
 ]
 
 [tool.ruff]
