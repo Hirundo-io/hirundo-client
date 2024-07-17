@@ -1,14 +1,15 @@
 import json
 import logging
 import os
+
 import pytest
 from hirundo import (
-    OptimizationDataset,
     LabellingType,
-    StorageLink,
-    StorageIntegration,
-    StorageTypes,
+    OptimizationDataset,
     StorageGCP,
+    StorageIntegration,
+    StorageLink,
+    StorageTypes,
 )
 from tests.dataset_optimization_shared import (
     cleanup,

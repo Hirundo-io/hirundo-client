@@ -1,15 +1,17 @@
+import typing
 from enum import Enum
 from typing import Union
-import typing
-from pydantic import BaseModel, model_validator
+
 import pydantic
-from pydantic_core import Url
 import requests
+from pydantic import BaseModel, model_validator
+from pydantic_core import Url
 
 from hirundo.constraints import S3BucketUrl, StorageIntegrationName
-from hirundo.headers import auth_headers, json_headers
 from hirundo.env import API_HOST
 from hirundo.git import GitRepo
+from hirundo.headers import auth_headers, json_headers
+from hirundo.timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 
 
 class StorageS3(BaseModel):
@@ -148,6 +150,7 @@ class StorageIntegration(BaseModel):
             f"{API_HOST}/storage-integration/",
             params={"storage_integration_organization_id": organization_id},
             headers=auth_headers,
+            timeout=READ_TIMEOUT,
         )
         storage_integrations.raise_for_status()
         return storage_integrations.json()
@@ -160,6 +163,7 @@ class StorageIntegration(BaseModel):
         storage_integration = requests.delete(
             f"{API_HOST}/storage-integration/{storage_integration_id}",
             headers=auth_headers,
+            timeout=MODIFY_TIMEOUT,
         )
         storage_integration.raise_for_status()
 
@@ -184,6 +188,7 @@ class StorageIntegration(BaseModel):
                 **json_headers,
                 **auth_headers,
             },
+            timeout=MODIFY_TIMEOUT,
         )
         storage_integration.raise_for_status()
         storage_integration_id = storage_integration.json()["id"]

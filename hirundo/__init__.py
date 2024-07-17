@@ -3,18 +3,18 @@ from .dataset_optimization import (
     OptimizationDataset,
 )
 from .enum import (
-    LabellingType,
     DatasetMetadataType,
+    LabellingType,
 )
 from .git import GitRepo
 from .storage import (
-    StorageLink,
-    StorageTypes,
-    StorageS3,
     StorageGCP,
     # StorageAzure,  TODO: Azure storage integration is coming soon
     StorageGit,
     StorageIntegration,
+    StorageLink,
+    StorageS3,
+    StorageTypes,
 )
 
 __all__ = [

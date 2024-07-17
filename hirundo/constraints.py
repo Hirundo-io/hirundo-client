@@ -2,7 +2,6 @@ from typing import Annotated
 
 from pydantic import StringConstraints
 
-
 S3BucketUrl = Annotated[
     str,
     StringConstraints(

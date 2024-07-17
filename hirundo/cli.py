@@ -1,10 +1,10 @@
 import re
 from typing import Annotated
 from urllib.parse import urlparse
+
 import typer
 
 from hirundo.env import API_HOST
-
 
 app = typer.Typer(name="hirundo", no_args_is_help=True)
 
@@ -19,7 +19,7 @@ def upsert_env(var_name: str, var_value: str):
     """
     dotenv = "./.env"
     regex = re.compile(rf"^{var_name}=.*$")
-    with open(dotenv, "r") as f:
+    with open(dotenv) as f:
         lines = f.readlines()
 
     with open(dotenv, "w") as f:

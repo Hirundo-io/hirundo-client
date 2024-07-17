@@ -1,6 +1,7 @@
 import asyncio
 import time
-from typing import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator, Generator
+
 import httpx
 from httpx_sse import ServerSentEvent, aconnect_sse, connect_sse
 from stamina import retry
@@ -11,8 +12,10 @@ def iter_sse_retrying(
     client: httpx.Client,
     method: str,
     url: str,
-    headers: dict[str, str] = {},
+    headers: dict[str, str] = None,
 ) -> Generator[ServerSentEvent, None, None]:
+    if headers is None:
+        headers = {}
     last_event_id = ""
     reconnection_delay = 0.0
 

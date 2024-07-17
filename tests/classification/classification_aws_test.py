@@ -1,12 +1,13 @@
 import logging
 import os
+
 from hirundo import (
-    OptimizationDataset,
     LabellingType,
-    StorageLink,
+    OptimizationDataset,
     StorageIntegration,
-    StorageTypes,
+    StorageLink,
     StorageS3,
+    StorageTypes,
 )
 from tests.dataset_optimization_shared import cleanup, dataset_optimization_sync_test
 

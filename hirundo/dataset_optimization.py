@@ -12,11 +12,9 @@ from hirundo.env import API_HOST
 from hirundo.headers import auth_headers, json_headers
 from hirundo.iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo.storage import StorageIntegration, StorageLink
+from hirundo.timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 
 logger = logging.getLogger(__name__)
-
-READ_TIMEOUT = 5.0
-MODIFY_TIMEOUT = 10.0
 
 
 class HirundoError(Exception):

@@ -3,10 +3,10 @@ import os
 
 import pytest
 from hirundo import (
-    OptimizationDataset,
     LabellingType,
-    StorageLink,
+    OptimizationDataset,
     StorageIntegration,
+    StorageLink,
     StorageS3,
     StorageTypes,
 )

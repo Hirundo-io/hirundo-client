@@ -1,19 +1,20 @@
 import json
 import logging
 import os
+
 from hirundo import (
-    OptimizationDataset,
     LabellingType,
-    StorageLink,
-    StorageIntegration,
-    StorageTypes,
+    OptimizationDataset,
     StorageGCP,
+    StorageIntegration,
+    StorageLink,
+    StorageTypes,
 )
+from tests.classification.cifar100_classes import cifar100_classes
 from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_sync_test,
 )
-from tests.classification.cifar100_classes import cifar100_classes
 
 logger = logging.getLogger(__name__)
 

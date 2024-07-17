@@ -1,10 +1,11 @@
 import logging
 import os
+
 from hirundo import (
-    OptimizationDataset,
     LabellingType,
-    StorageLink,
+    OptimizationDataset,
     StorageIntegration,
+    StorageLink,
     StorageS3,
     StorageTypes,
 )

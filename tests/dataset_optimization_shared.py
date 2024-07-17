@@ -4,7 +4,6 @@ from typing import Union
 
 from hirundo import GitRepo, OptimizationDataset, StorageIntegration
 
-
 logger = logging.getLogger(__name__)
 
 

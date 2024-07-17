@@ -1,27 +1,41 @@
 repos:
-
-- repo: local
-  hooks:
-  - id: pip-compile
-    name: compile requirements.txt
-    entry: pip-compile
-    language: system
-    always_run: false
-    files: pyproject.toml$
-    stages: [push]
-  - id: pip-compile-dev
-    name: compile dev-requirements.txt
-    entry: pip-compile
-    args: ["--extra", "dev", "-o", "dev-requirements.txt", "-c", "requirements.txt"]
-    language: system
-    always_run: false
-    files: pyproject.toml$
-    stages: [push]
-  - id: pip-sync-dev
-    name: sync dev-requirements.txt
-    entry: pip-sync
-    args: ["dev-requirements.txt"]
-    language: system
-    always_run: false
-    files: dev-requirements.txt$
-    stages: [push]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.2.2
+    hooks:
+      # Run the linter.
+      - id: ruff
+        args: [--fix, --show-fixes]
+      # Run the formatter.
+      - id: ruff-format
+  - repo: local
+    hooks:
+    - id: pip-compile
+      name: compile requirements.txt
+      entry: pip-compile
+      language: system
+      always_run: false
+      files: pyproject.toml$
+      stages: [push]
+    - id: pip-compile-dev
+      name: compile dev-requirements.txt
+      entry: pip-compile
+      args: ["--extra", "dev", "-o", "dev-requirements.txt", "-c", "requirements.txt"]
+      language: system
+      always_run: false
+      files: pyproject.toml$
+      stages: [push]
+    - id: pip-sync-dev
+      name: sync dev-requirements.txt
+      entry: pip-sync
+      args: ["dev-requirements.txt"]
+      language: system
+      always_run: false
+      files: dev-requirements.txt$
+      stages: [push]

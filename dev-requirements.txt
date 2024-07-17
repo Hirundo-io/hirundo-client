@@ -200,6 +200,8 @@ rich==13.7.1
     #   -c requirements.txt
     #   twine
     #   typer
+ruff==0.5.2
+    # via hirundo (pyproject.toml)
 shellingham==1.5.4
     # via
     #   -c requirements.txt

@@ -1,12 +1,13 @@
 import logging
 import os
+
 from hirundo import (
     GitRepo,
-    OptimizationDataset,
     LabellingType,
+    OptimizationDataset,
     StorageGit,
-    StorageLink,
     StorageIntegration,
+    StorageLink,
     StorageTypes,
 )
 from tests.dataset_optimization_shared import (
