@@ -22,7 +22,6 @@ repos:
       language: python
       always_run: false
       files: pyproject.toml$
-      stages: [pre-push]
       additional_dependencies: [pip-tools]
     - id: pip-compile-dev
       name: compile dev-requirements.txt
@@ -31,7 +30,6 @@ repos:
       language: python
       always_run: false
       files: pyproject.toml$
-      stages: [pre-push]
       additional_dependencies: [pip-tools]
     - id: pip-sync-dev
       name: sync dev-requirements.txt
@@ -40,5 +38,4 @@ repos:
       language: python
       always_run: false
       files: dev-requirements.txt$
-      stages: [pre-push]
       additional_dependencies: [pip-tools]
