@@ -9,6 +9,7 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 2
       matrix:
         optimization-test:
           - FULL_TEST
