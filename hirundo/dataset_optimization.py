@@ -1,17 +1,22 @@
 import json
 import logging
-from typing import AsyncGenerator, Generator, Union
-from pydantic import BaseModel, Field, model_validator
-import requests
+from collections.abc import AsyncGenerator, Generator
+from typing import Union
+
 import httpx
+import requests
+from pydantic import BaseModel, Field, model_validator
 
 from hirundo.enum import DatasetMetadataType, LabellingType
 from hirundo.env import API_HOST
 from hirundo.headers import auth_headers, json_headers
-from hirundo.iter_sse_retrying import iter_sse_retrying, aiter_sse_retrying
+from hirundo.iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo.storage import StorageIntegration, StorageLink
 
 logger = logging.getLogger(__name__)
+
+READ_TIMEOUT = 5.0
+MODIFY_TIMEOUT = 10.0
 
 
 class HirundoError(Exception):
@@ -55,6 +60,7 @@ class OptimizationDataset(BaseModel):
             f"{API_HOST}/dataset-optimization/dataset/",
             params={"dataset_organization_id": organization_id},
             headers=auth_headers,
+            timeout=READ_TIMEOUT,
         )
         response.raise_for_status()
         return response.json()
@@ -67,6 +73,7 @@ class OptimizationDataset(BaseModel):
         response = requests.delete(
             f"{API_HOST}/dataset-optimization/dataset/{dataset_id}",
             headers=auth_headers,
+            timeout=MODIFY_TIMEOUT,
         )
         response.raise_for_status()
 
@@ -119,6 +126,7 @@ class OptimizationDataset(BaseModel):
                 **json_headers,
                 **auth_headers,
             },
+            timeout=MODIFY_TIMEOUT,
         )
         dataset_response.raise_for_status()
         self.dataset_id = dataset_response.json()["id"]
@@ -136,6 +144,7 @@ class OptimizationDataset(BaseModel):
         run_response = requests.post(
             f"{API_HOST}/dataset-optimization/run/{dataset_id}",
             headers=auth_headers,
+            timeout=MODIFY_TIMEOUT,
         )
         run_response.raise_for_status()
         return run_response.json()["run_id"]
@@ -293,6 +302,7 @@ class OptimizationDataset(BaseModel):
         response = requests.delete(
             f"{API_HOST}/dataset-optimization/run/{run_id}",
             headers=auth_headers,
+            timeout=MODIFY_TIMEOUT,
         )
         response.raise_for_status()
 
