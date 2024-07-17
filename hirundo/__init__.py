@@ -31,3 +31,5 @@ __all__ = [
     "StorageGit",
     "StorageIntegration",
 ]
+
+__version__ = "0.1.0"

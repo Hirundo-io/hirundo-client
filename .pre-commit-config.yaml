@@ -1,0 +1,27 @@
+repos:
+
+- repo: local
+  hooks:
+  - id: pip-compile
+    name: compile requirements.txt
+    entry: pip-compile
+    language: system
+    always_run: false
+    files: pyproject.toml$
+    stages: [push]
+  - id: pip-compile-dev
+    name: compile dev-requirements.txt
+    entry: pip-compile
+    args: ["--extra", "dev", "-o", "dev-requirements.txt", "-c", "requirements.txt"]
+    language: system
+    always_run: false
+    files: pyproject.toml$
+    stages: [push]
+  - id: pip-sync-dev
+    name: sync dev-requirements.txt
+    entry: pip-sync
+    args: ["dev-requirements.txt"]
+    language: system
+    always_run: false
+    files: dev-requirements.txt$
+    stages: [push]
