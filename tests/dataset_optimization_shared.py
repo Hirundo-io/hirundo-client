@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Union
 
 from hirundo import GitRepo, OptimizationDataset, StorageIntegration
 
@@ -80,7 +81,8 @@ def cleanup(test_dataset: OptimizationDataset):
 
 
 def dataset_optimization_sync_test(
-    test_dataset: OptimizationDataset, alternative_env: str | None = None
+    test_dataset: OptimizationDataset,
+    alternative_env: Union[str, None] = None,
 ):
     logger.info("Sync: Finished cleanup")
     if os.getenv("FULL_TEST", "false") == "true" or (

@@ -35,8 +35,8 @@ class StorageGCP(BaseModel):
 
 
 class StorageGit(BaseModel):
-    repo_id: int | None = None
-    repo: GitRepo | None = None
+    repo_id: Union[int, None] = None
+    repo: Union[GitRepo, None] = None
     branch: str
 
     @model_validator(mode="after")
