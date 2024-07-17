@@ -4,8 +4,6 @@
 #
 #    pip-compile --constraint=requirements.txt --extra=dev --output-file=dev-requirements.txt pyproject.toml
 #
-alabaster==0.7.16
-    # via sphinx
 annotated-types==0.7.0
     # via
     #   -c requirements.txt
@@ -14,8 +12,6 @@ anyio==4.4.0
     # via
     #   -c requirements.txt
     #   httpx
-babel==2.15.0
-    # via sphinx
 backports-tarfile==1.2.0
     # via
     #   -c requirements.txt
@@ -50,7 +46,6 @@ docutils==0.21.2
     # via
     #   -c requirements.txt
     #   readme-renderer
-    #   sphinx
 exceptiongroup==1.2.2
     # via
     #   -c requirements.txt
@@ -82,14 +77,11 @@ idna==3.7
     #   anyio
     #   httpx
     #   requests
-imagesize==1.4.1
-    # via sphinx
 importlib-metadata==8.0.0
     # via
     #   -c requirements.txt
     #   build
     #   keyring
-    #   sphinx
     #   twine
 iniconfig==2.0.0
     # via pytest
@@ -105,8 +97,6 @@ jaraco-functools==4.0.1
     # via
     #   -c requirements.txt
     #   keyring
-jinja2==3.1.4
-    # via sphinx
 keyring==25.2.1
     # via
     #   -c requirements.txt
@@ -119,8 +109,6 @@ markdown-it-py==3.0.0
     # via
     #   -c requirements.txt
     #   rich
-markupsafe==2.1.5
-    # via jinja2
 mdurl==0.1.2
     # via
     #   -c requirements.txt
@@ -140,7 +128,6 @@ packaging==24.1
     # via
     #   build
     #   pytest
-    #   sphinx
 pip-tools==7.4.1
     # via hirundo (pyproject.toml)
 pkginfo==1.10.0
@@ -166,7 +153,6 @@ pygments==2.18.0
     #   -c requirements.txt
     #   readme-renderer
     #   rich
-    #   sphinx
 pyproject-hooks==1.1.0
     # via
     #   build
@@ -194,7 +180,6 @@ requests==2.32.3
     # via
     #   -c requirements.txt
     #   requests-toolbelt
-    #   sphinx
     #   twine
 requests-toolbelt==1.0.0
     # via
@@ -220,22 +205,6 @@ sniffio==1.3.1
     #   -c requirements.txt
     #   anyio
     #   httpx
-snowballstemmer==2.2.0
-    # via sphinx
-sphinx==7.4.5
-    # via hirundo (pyproject.toml)
-sphinxcontrib-applehelp==1.0.8
-    # via sphinx
-sphinxcontrib-devhelp==1.0.6
-    # via sphinx
-sphinxcontrib-htmlhelp==2.0.5
-    # via sphinx
-sphinxcontrib-jsmath==1.0.1
-    # via sphinx
-sphinxcontrib-qthelp==1.0.7
-    # via sphinx
-sphinxcontrib-serializinghtml==1.1.10
-    # via sphinx
 stamina==24.2.0
     # via
     #   -c requirements.txt
@@ -251,7 +220,6 @@ tomli==2.0.1
     #   build
     #   pip-tools
     #   pytest
-    #   sphinx
 twine==5.1.1
     # via
     #   -c requirements.txt
