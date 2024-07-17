@@ -24,7 +24,11 @@ def iter_sse_retrying(
 
         time.sleep(reconnection_delay)
 
-        connect_headers = {**headers, "Accept": "text/event-stream", "X-Accel-Buffering": "no"}
+        connect_headers = {
+            **headers,
+            "Accept": "text/event-stream",
+            "X-Accel-Buffering": "no",
+        }
 
         if last_event_id:
             connect_headers["Last-Event-ID"] = last_event_id

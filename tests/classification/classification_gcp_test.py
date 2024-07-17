@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import pytest
 from hirundo import (
     OptimizationDataset,
     LabellingType,
@@ -12,9 +11,7 @@ from hirundo import (
 )
 from tests.dataset_optimization_shared import (
     cleanup,
-    dataset_optimization_async_test,
     dataset_optimization_sync_test,
-    skip_test,
 )
 from tests.classification.cifar100_classes import cifar100_classes
 
@@ -43,7 +40,9 @@ test_dataset = OptimizationDataset(
 
 def test_dataset_optimization():
     cleanup(test_dataset)
-    full_run = dataset_optimization_sync_test(test_dataset, "RUN_CLASSIFICATION_GCP_OPTIMIZATION")
+    full_run = dataset_optimization_sync_test(
+        test_dataset, "RUN_CLASSIFICATION_GCP_OPTIMIZATION"
+    )
     if full_run:
         pass
         # TODO: Add add assertion for result

@@ -1,5 +1,6 @@
 import yaml
 
+
 def get_requirements(file_name: str) -> list[str]:
     with open(file_name, "r") as f:
         try:
@@ -7,7 +8,9 @@ def get_requirements(file_name: str) -> list[str]:
             for dep in dependencies:
                 if isinstance(dep, dict) and dep.get("pip"):
                     return [
-                        pip_dep for pip_dep in dep["pip"] if not pip_dep.startswith("-e")
+                        pip_dep
+                        for pip_dep in dep["pip"]
+                        if not pip_dep.startswith("-e")
                     ]
                 else:
                     continue
@@ -15,6 +18,7 @@ def get_requirements(file_name: str) -> list[str]:
         except yaml.YAMLError as exc:
             print(exc)
             raise Exception("Failed to parse environment.yaml") from exc
+
 
 pip_requirements = get_requirements("environment.yml")
 pip_dev_requirements = get_requirements("dev-environment.yml")

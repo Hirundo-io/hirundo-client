@@ -12,6 +12,7 @@ from hirundo.headers import auth_headers, json_headers
 
 logger = logging.getLogger(__name__)
 
+
 class GitPlainAuthBase(BaseModel):
     username: str
     password: str
@@ -30,8 +31,7 @@ class GitRepo(BaseModel):
     organization_id: Union[int, None] = None
 
     plain_auth: Union[GitPlainAuthBase, None] = pydantic.Field(
-        default=None,
-        examples=[None, {"username": "ben", "password": "password"}]
+        default=None, examples=[None, {"username": "ben", "password": "password"}]
     )
     ssh_auth: Union[GitSSHAuthBase, None] = pydantic.Field(
         default=None,
@@ -43,21 +43,23 @@ class GitRepo(BaseModel):
             None,
         ],
     )
-    
+
     @field_validator("repository_url", mode="before", check_fields=True)
     @classmethod
     def check_valid_repository_url(cls, repository_url: str):
         # Check if the URL already has a protocol
-        if not re.match(r'^[a-z]+://', repository_url):
+        if not re.match(r"^[a-z]+://", repository_url):
             # Check if the URL has the `@` and `:` pattern with a non-numeric section before the next slash
             match = re.match(r"([^@]+@[^:]+):([^0-9/][^/]*)/(.+)", repository_url)
             if match:
                 user_host = match.group(1)
-                path = match.group(2) + '/' + match.group(3)
+                path = match.group(2) + "/" + match.group(3)
                 rewritten_url = f"ssh://{user_host}/{path}"
                 logger.info("Modified Git repo to add SSH protocol", rewritten_url)
                 return rewritten_url
-        if not repository_url.startswith("ssh://") and not repository_url.startswith("https://"):
+        if not repository_url.startswith("ssh://") and not repository_url.startswith(
+            "https://"
+        ):
             raise ValueError("Repository URL must start with 'ssh://' or 'https://'")
         return repository_url
 
@@ -73,8 +75,8 @@ class GitRepo(BaseModel):
         git_repo.raise_for_status()
         git_repo_id = git_repo.json()["id"]
         self.id = git_repo_id
-        return git_repo_id    
-    
+        return git_repo_id
+
     @staticmethod
     def list():
         git_repos = requests.get(

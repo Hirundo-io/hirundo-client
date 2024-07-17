@@ -18,7 +18,8 @@ logger = logging.getLogger(__name__)
 class HirundoError(Exception):
     pass
 
-MAX_RETRIES = 200 # Max 200 retries for HTTP SSE connection
+
+MAX_RETRIES = 200  # Max 200 retries for HTTP SSE connection
 
 
 class OptimizationDataset(BaseModel):
@@ -113,10 +114,7 @@ class OptimizationDataset(BaseModel):
                     "storage_integration_id": self.storage_integration_id,
                     "path": self.dataset_storage.path,
                 },
-                **{
-                    k: model_dict[k]
-                    for k in model_dict.keys() - {"dataset_storage"}
-                },
+                **{k: model_dict[k] for k in model_dict.keys() - {"dataset_storage"}},
             },
             headers={
                 **json_headers,
@@ -181,7 +179,7 @@ class OptimizationDataset(BaseModel):
         self.run_id = None
 
     @staticmethod
-    def check_run_by_id(run_id: str, retry = 0) -> Generator[dict, None, None]:
+    def check_run_by_id(run_id: str, retry=0) -> Generator[dict, None, None]:
         """
         Check the status of a run given its ID
 
@@ -230,7 +228,7 @@ class OptimizationDataset(BaseModel):
         return self.check_run_by_id(self.run_id)
 
     @staticmethod
-    async def acheck_run_by_id(run_id: str, retry = 0) -> AsyncGenerator[dict, None]:
+    async def acheck_run_by_id(run_id: str, retry=0) -> AsyncGenerator[dict, None]:
         """
         Async version of :func:`check_run_by_id`
 
@@ -245,7 +243,9 @@ class OptimizationDataset(BaseModel):
         if retry > MAX_RETRIES:
             raise HirundoError("Max retries reached")
         last_event = None
-        async with httpx.AsyncClient(timeout=httpx.Timeout(None, connect=5.0)) as client:
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(None, connect=5.0)
+        ) as client:
             async_iterator = await aiter_sse_retrying(
                 client,
                 "GET",
@@ -283,7 +283,7 @@ class OptimizationDataset(BaseModel):
             raise ValueError("No run has been started")
         async for iteration in self.acheck_run_by_id(self.run_id):
             yield iteration
-    
+
     @staticmethod
     def cancel_by_id(run_id: str) -> None:
         """

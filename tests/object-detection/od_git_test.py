@@ -61,4 +61,3 @@ def test_dataset_optimization():
         # TODO: Add add assertion for result
     else:
         logger.info("Full dataset optimization was not run!")
-

@@ -28,6 +28,7 @@ def upsert_env(var_name: str, var_value: str):
     with open(dotenv, "a") as f:
         f.writelines(f"\n{var_name}={var_value}")
 
+
 def fix_api_host(api_host: str):
     if not api_host.startswith("http") and not api_host.startswith("https"):
         api_host = f"https://{api_host}"
@@ -73,9 +74,10 @@ def change_api_remote(
     This is the same address where you access the Hirundo web interface.
     """
     api_host = fix_api_host(api_host)
-        
+
     upsert_env("API_HOST", api_host)
     print("API host saved to .env for future use. Please do not share this file")
+
 
 @app.command("setup")
 def setup(
@@ -100,7 +102,9 @@ def setup(
     api_host = fix_api_host(api_host)
     upsert_env("API_HOST", api_host)
     upsert_env("API_KEY", api_key)
-    print("API host and API key saved to .env for future use. Please do not share this file")
+    print(
+        "API host and API key saved to .env for future use. Please do not share this file"
+    )
 
 
 if __name__ == "__main__":

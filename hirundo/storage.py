@@ -39,7 +39,7 @@ class StorageGit(BaseModel):
     repo: GitRepo | None = None
     branch: str
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_repo(self) -> typing.Self:
         if self.repo_id is None and self.repo is None:
             raise ValueError("Either repo_id or repo must be provided")
