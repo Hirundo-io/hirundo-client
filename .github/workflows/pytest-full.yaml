@@ -6,7 +6,7 @@ on:
       - "v*"
 
 jobs:
-  build_and_push:
+  pytest_full:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 2
