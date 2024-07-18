@@ -67,6 +67,18 @@ docs = [
     "sphinx>=7.4.5",
 ]
 
+[tool.bumpver]
+current_version = "0.1.0"
+version_pattern = "MAJOR.MINOR.PATCH[PYTAGNUM]"
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    '^version = "{version}"$',
+]
+"hirundo/__init__.py" = [
+    '^__version__ = "{version}"$',
+]
+
 [tool.ruff]
 src = ["hirundo"]
 
