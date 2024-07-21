@@ -50,8 +50,8 @@ jobs:
             sphinx-multiversion docs docs/_build/html
             cp docs/_templates/github-pages-redirect.html docs/_build/html/index.html
           env:
-            API_HOST: null
-            API_KEY: null
+            API_HOST: something
+            API_KEY: something
         - name: Setup Pages
           uses: actions/configure-pages@v5
         - name: Upload artifact
