@@ -38,8 +38,19 @@ class StorageGCP(BaseModel):
 
 class StorageGit(BaseModel):
     repo_id: Union[int, None] = None
+    """
+    The ID of the Git repository in the Hirundo system.
+    Either `repo_id` or `repo` must be provided.
+    """
     repo: Union[GitRepo, None] = None
+    """
+    The Git repository to link to.
+    Either `repo_id` or `repo` must be provided.
+    """
     branch: str
+    """
+    The branch of the Git repository to link to.
+    """
 
     @model_validator(mode="after")
     def validate_repo(self):
@@ -64,8 +75,15 @@ class StorageIntegration(BaseModel):
     id: Union[int, None] = None
 
     organization_id: Union[int, None] = None
+    """
+    The ID of the organization that the `StorageIntegration` belongs to.
+    If not provided, it will be assigned to your default organization.
+    """
 
     name: StorageIntegrationName
+    """
+    A name to identify the `StorageIntegration` in the Hirundo system.
+    """
     type: StorageTypes = pydantic.Field(
         examples=[
             StorageTypes.S3,
@@ -74,6 +92,14 @@ class StorageIntegration(BaseModel):
             StorageTypes.GIT,
         ]
     )
+    """
+    The type of the `StorageIntegration`.
+    Supported types are:
+    - `S3`
+    - `GCP`
+    - `Azure` (coming soon)
+    - `Git`
+    """
     s3: Union[StorageS3, None] = pydantic.Field(
         default=None,
         examples=[
@@ -88,6 +114,10 @@ class StorageIntegration(BaseModel):
             None,
         ],
     )
+    """
+    The Amazon Web Services (AWS) S3 storage integration details.
+    Use this if you want to link to an S3 bucket.
+    """
     gcp: Union[StorageGCP, None] = pydantic.Field(
         default=None,
         examples=[
@@ -113,6 +143,10 @@ class StorageIntegration(BaseModel):
             None,
         ],
     )
+    """
+    The Google Cloud (GCP) Storage integration details.
+    Use this if you want to link to an GCS bucket.
+    """
     azure: None = None
     # azure: Union[StorageAzure, None] = pydantic.Field(
     #     default=None,
@@ -144,6 +178,10 @@ class StorageIntegration(BaseModel):
             },
         ],
     )
+    """
+    The Git storage integration details.
+    Use this if you want to link to a Git repository.
+    """
 
     @staticmethod
     def list(organization_id: typing.Union[int, None] = None) -> list[dict]:
@@ -203,8 +241,13 @@ class StorageIntegration(BaseModel):
 
 class StorageLink(BaseModel):
     storage_integration: StorageIntegration
+    """
+    The `StorageIntegration` instance to link to.
+    """
     path: str = "/"
     """
-    Path to link to within the `StorageIntegration` instance,
-    e.g. a prefix path/folder within an S3 Bucket / GCP Bucket / Azure Blob storage / Git repo
+    Path for the `root` to link to within the `StorageIntegration` instance,
+    e.g. a prefix path/folder within an S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
+
+    Note: Only files in this path will be retrieved and it will be used as the root for paths in the CSV.
     """

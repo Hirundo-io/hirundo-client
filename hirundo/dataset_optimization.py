@@ -30,20 +30,52 @@ MAX_RETRIES = 200  # Max 200 retries for HTTP SSE connection
 
 class OptimizationDataset(BaseModel):
     name: str
+    """
+    The name of the dataset. Used to identify it amongst the list of datasets
+    belonging to your organization in `hirundo`.
+    """
     labelling_type: LabellingType
+    """
+    Indicates the labelling type of the dataset. The labelling type can be one of the following:
+    - `LabellingType.SingleLabelClassification`: Indicates that the dataset is for classification tasks
+    - `LabellingType.ObjectDetection`: Indicates that the dataset is for object detection tasks
+    """
     dataset_storage: Union[StorageLink, None]
+    """
+    The storage link to the dataset. This can be a link to a file or a directory containing the dataset.
+    If `None`, the `dataset_id` field must be set.
+    """
 
     classes: list[str]
+    """
+    A full list of possible classes used in classification / object detection.
+    It is currently required for clarity and performance.
+    """
     dataset_metadata_path: str = "metadata.csv"
     """
     The path to the dataset metadata file within storage integration, e.g. S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
-    Note: This path will be prefixed with the `StorageLink`'s `path`
+    Note: This path will be prefixed with the `StorageLink`'s `path`.
     """
     dataset_metadata_type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
+    """
+    The type of dataset metadata file. The dataset metadata file can be one of the following:
+    - `DatasetMetadataType.HirundoCSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
+
+    Currently no other formats are supported. Future versions of `hirundo` may support additional formats.
+    """
 
     storage_integration_id: Union[int, None] = Field(default=None, init=False)
+    """
+    The ID of the storage integration used to store the dataset and metadata.
+    """
     dataset_id: Union[int, None] = Field(default=None, init=False)
+    """
+    The ID of the dataset created on the server.
+    """
     run_id: Union[str, None] = Field(default=None, init=False)
+    """
+    The ID of the Dataset Optimization run created on the server.
+    """
 
     @model_validator(mode="after")
     def validate_dataset(self):
@@ -140,8 +172,8 @@ class OptimizationDataset(BaseModel):
     def launch_optimization_run(dataset_id: int) -> str:
         """
         Run the dataset optimization process on the server using the dataset with the given ID
-        i.e. `dataset_id`
-        Returns the ID of the run (`run_id`)
+        i.e. `dataset_id`.
+        Returns the ID of the run (`run_id`).
         """
         run_response = requests.post(
             f"{API_HOST}/dataset-optimization/run/{dataset_id}",
@@ -225,7 +257,7 @@ class OptimizationDataset(BaseModel):
 
     def check_run(self) -> Generator[dict, None, None]:
         """
-        Check the status of the current active instance's run
+        Check the status of the current active instance's run.
 
         This generator will produce values to show progress of the run.
         Each event will be a dict, where:
@@ -242,7 +274,7 @@ class OptimizationDataset(BaseModel):
         """
         Async version of :func:`check_run_by_id`
 
-        Check the status of a run given its ID
+        Check the status of a run given its ID.
 
         This generator will produce values to show progress of the run.
         Each event will be a dict, where:
@@ -281,7 +313,7 @@ class OptimizationDataset(BaseModel):
         """
         Async version of :func:`check_run`
 
-        Check the status of the current active instance's run
+        Check the status of the current active instance's run.
 
         This generator will produce values to show progress of the run.
         Each event will be a dict, where:
@@ -297,7 +329,7 @@ class OptimizationDataset(BaseModel):
     @staticmethod
     def cancel_by_id(run_id: str) -> None:
         """
-        Cancel the dataset optimization run for the given `run_id`
+        Cancel the dataset optimization run for the given `run_id`.
         """
         if not run_id:
             raise ValueError("No run has been started")
@@ -310,7 +342,7 @@ class OptimizationDataset(BaseModel):
 
     def cancel(self) -> None:
         """
-        Cancel the current active instance's run
+        Cancel the current active instance's run.
         """
         if not self.run_id:
             raise ValueError("No run has been started")
