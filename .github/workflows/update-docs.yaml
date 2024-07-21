@@ -42,6 +42,10 @@ jobs:
         - name: Sphinx multi-version build
           run: |
             source .venv/bin/activate
+            git branch -a
+            git tag
+            git rev-parse --abbrev-ref HEAD
+            git rev-parse HEAD
             sphinx-multiversion docs docs/_build/html
             cp docs/_templates/github-pages-redirect.html docs/_build/html/index.html
         - name: Setup Pages
