@@ -12,7 +12,6 @@ Submodules
    hirundo.enum
    hirundo.git
    hirundo.storage
-   hirundo.timeouts
 
 Module contents
 ---------------

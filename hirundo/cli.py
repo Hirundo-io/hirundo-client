@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 import typer
 
-from hirundo.env import API_HOST
+from hirundo._env import API_HOST
 
 docs = "sphinx" in sys.modules
 hirundo_epilog = (

@@ -7,12 +7,12 @@ import httpx
 import requests
 from pydantic import BaseModel, Field, model_validator
 
+from hirundo._env import API_HOST
+from hirundo._headers import auth_headers, json_headers
+from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
+from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.enum import DatasetMetadataType, LabellingType
-from hirundo.env import API_HOST
-from hirundo.headers import auth_headers, json_headers
-from hirundo.iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo.storage import StorageIntegration, StorageLink
-from hirundo.timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class OptimizationDataset(BaseModel):
     run_id: Union[str, None] = Field(default=None, init=False)
 
     @model_validator(mode="after")
-    def validate_repo(self):
+    def validate_dataset(self):
         if self.dataset_storage is None and self.storage_integration_id is None:
             raise ValueError("No dataset storage has been provided")
         return self

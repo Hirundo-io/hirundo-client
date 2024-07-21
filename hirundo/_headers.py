@@ -1,4 +1,4 @@
-from hirundo.env import API_KEY
+from hirundo._env import API_KEY
 
 json_headers = {
     "Content-Type": "application/json",

@@ -7,11 +7,11 @@ import requests
 from pydantic import BaseModel, model_validator
 from pydantic_core import Url
 
-from hirundo.constraints import S3BucketUrl, StorageIntegrationName
-from hirundo.env import API_HOST
+from hirundo._constraints import S3BucketUrl, StorageIntegrationName
+from hirundo._env import API_HOST
+from hirundo._headers import auth_headers, json_headers
+from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.git import GitRepo
-from hirundo.headers import auth_headers, json_headers
-from hirundo.timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 
 
 class StorageS3(BaseModel):

@@ -7,9 +7,9 @@ import requests
 from pydantic import BaseModel, field_validator
 from pydantic_core import Url
 
-from hirundo.env import API_HOST
-from hirundo.headers import auth_headers, json_headers
-from hirundo.timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
+from hirundo._env import API_HOST
+from hirundo._headers import auth_headers, json_headers
+from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 
 logger = logging.getLogger(__name__)
 

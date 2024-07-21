@@ -21,7 +21,10 @@ extensions = [
     "sphinx_click",  # Used with Typer to document CLI commands
     "sphinxcontrib.autodoc_pydantic",
 ]
+
 autodoc_pydantic_field_show_constraints = False
+autodoc_pydantic_field_list_validators = False
+autodoc_pydantic_model_hide_reused_validator = True
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
