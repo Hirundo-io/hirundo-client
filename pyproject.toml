@@ -64,7 +64,14 @@ dev = [
     "bumpver",
 ]
 docs = [
-    "sphinx>=7.4.5",
+    "sphinx>=7.4.7",
+    "sphinx-autobuild>=2024.4.16",
+    # ⬆️ Currently doesn't support Python 3.9: https://github.com/sphinx-doc/sphinx-autobuild/pull/157
+    # As such, keeping it, but will not use it until the new version is released.
+    "sphinx-click>=5.0.1",
+    "autodoc_pydantic>=2.2.0",
+    "furo",
+    "hirundo",
 ]
 
 [tool.bumpver]

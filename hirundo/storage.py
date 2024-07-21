@@ -49,6 +49,11 @@ class StorageGit(BaseModel):
 
 
 class StorageTypes(str, Enum):
+    """
+    Enum for the different types of storage integrations.
+    Supported types are:
+    """
+
     S3 = "S3"
     GCP = "GCP"
     # AZURE = "Azure"  TODO: Azure storage integration is coming soon

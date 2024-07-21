@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 class HirundoError(Exception):
+    """
+    Custom exception used to indicate errors in `hirundo` dataset optimization runs
+    """
+
     pass
 
 

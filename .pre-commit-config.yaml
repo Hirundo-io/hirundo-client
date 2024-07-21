@@ -39,3 +39,19 @@ repos:
       always_run: false
       files: dev-requirements.txt$
       additional_dependencies: [pip-tools]
+    - id: pip-compile-docs
+      name: compile docs-requirements.txt
+      entry: pip-compile
+      args: ["--extra", "docs", "-o", "docs-requirements.txt", "-c", "requirements.txt"]
+      language: python
+      always_run: false
+      files: pyproject.toml$
+      additional_dependencies: [pip-tools]
+    - id: pip-sync-docs
+      name: sync docs-requirements.txt
+      entry: pip-sync
+      args: ["docs-requirements.txt"]
+      language: python
+      always_run: false
+      files: docs-requirements.txt$
+      additional_dependencies: [pip-tools]
