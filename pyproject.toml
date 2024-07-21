@@ -71,6 +71,7 @@ docs = [
     "sphinx-click>=5.0.1",
     "autodoc_pydantic>=2.2.0",
     "furo",
+    "sphinx-multiversion",
     "hirundo",
 ]
 

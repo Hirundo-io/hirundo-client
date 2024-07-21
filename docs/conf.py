@@ -20,6 +20,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx_click",  # Used with Typer to document CLI commands
     "sphinxcontrib.autodoc_pydantic",
+    "sphinx_multiversion",
 ]
 
 autodoc_pydantic_field_show_constraints = False
@@ -27,6 +28,16 @@ autodoc_pydantic_field_list_validators = False
 autodoc_pydantic_model_hide_reused_validator = True
 
 templates_path = ["_templates"]
+html_sidebars = {
+    "**": [
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/scroll-start.html",
+        "sidebar/navigation.html",
+        "sidebar/versions.html",
+        "sidebar/scroll-end.html",
+    ],
+}
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
