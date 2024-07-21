@@ -18,40 +18,41 @@ repos:
     hooks:
     - id: pip-compile
       name: compile requirements.txt
-      entry: pip-compile
+      entry: uv
+      args: ["pip", "compile"]
       language: python
       always_run: false
       files: pyproject.toml$
-      additional_dependencies: [pip-tools]
+      additional_dependencies: [uv]
     - id: pip-compile-dev
       name: compile dev-requirements.txt
-      entry: pip-compile
-      args: ["--extra", "dev", "-o", "dev-requirements.txt", "-c", "requirements.txt"]
+      entry: uv
+      args: ["pip", "compile", "--extra", "dev", "-o", "dev-requirements.txt", "-c", "requirements.txt"]
       language: python
       always_run: false
       files: pyproject.toml$
-      additional_dependencies: [pip-tools]
+      additional_dependencies: [uv]
     - id: pip-sync-dev
       name: sync dev-requirements.txt
-      entry: pip-sync
-      args: ["dev-requirements.txt"]
+      entry: uv
+      args: ["pip", "sync", "dev-requirements.txt"]
       language: python
       always_run: false
       files: dev-requirements.txt$
-      additional_dependencies: [pip-tools]
+      additional_dependencies: [uv]
     - id: pip-compile-docs
       name: compile docs-requirements.txt
-      entry: pip-compile
-      args: ["--extra", "docs", "-o", "docs-requirements.txt", "-c", "requirements.txt"]
+      entry: uv
+      args: ["pip", "compile", "--extra", "docs", "-o", "docs-requirements.txt", "-c", "requirements.txt"]
       language: python
       always_run: false
       files: pyproject.toml$
-      additional_dependencies: [pip-tools]
+      additional_dependencies: [uv]
     - id: pip-sync-docs
       name: sync docs-requirements.txt
-      entry: pip-sync
-      args: ["docs-requirements.txt"]
+      entry: uv
+      args: ["pip", "sync", "docs-requirements.txt"]
       language: python
       always_run: false
       files: docs-requirements.txt$
-      additional_dependencies: [pip-tools]
+      additional_dependencies: [uv]
