@@ -27,5 +27,5 @@ jobs:
           source .venv/bin/activate
           python -m build
           twine check dist/*
-          twine upload -r testpypi hirundo dist/*
-          twine upload hirundo dist/*
+          twine upload -r testpypi dist/*
+          twine upload dist/*
