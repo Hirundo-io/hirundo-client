@@ -17,7 +17,7 @@ from tests.dataset_optimization_shared import (
 
 logger = logging.getLogger(__name__)
 
-unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-")
+unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-")
 test_dataset = OptimizationDataset(
     name=f"HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,

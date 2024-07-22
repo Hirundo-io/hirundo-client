@@ -18,7 +18,7 @@ from tests.dataset_optimization_shared import (
 
 logger = logging.getLogger(__name__)
 
-unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-")
+unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-")
 test_dataset = OptimizationDataset(
     name=f"AWS-BDD-100k-subset-1000-OD-dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,
