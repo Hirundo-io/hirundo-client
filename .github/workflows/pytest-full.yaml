@@ -12,11 +12,16 @@ jobs:
       max-parallel: 2
       matrix:
         optimization-test:
-          - RUN_CLASSIFICATION_AWS_OPTIMIZATION
-          - RUN_CLASSIFICATION_GCP_OPTIMIZATION
-          - RUN_CLASSIFICATION_GCP_SANITY_OPTIMIZATION
-          - RUN_AWS_OD_OPTIMIZATION
-          - RUN_OD_GIT_OPTIMIZATION
+          - test: classification/classification_aws_test.py
+            env: RUN_CLASSIFICATION_AWS_OPTIMIZATION
+          - test: classification/classification_gcp_test.py
+            env: RUN_CLASSIFICATION_GCP_OPTIMIZATION
+          - test: classification/sanity_gcp_test.py
+            env: RUN_CLASSIFICATION_GCP_SANITY_OPTIMIZATION
+          - test: object-detection/od_aws_test.py
+            env: RUN_AWS_OD_OPTIMIZATION
+          - test: object-detection/od_git_test.py
+            env: RUN_OD_GIT_OPTIMIZATION
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -31,7 +36,7 @@ jobs:
           source .venv/bin/activate
           pip install -r dev-requirements.txt
       - name: Run PyTest
-        run: .venv/bin/pytest
+        run: .venv/bin/pytest tests/${{ matrix.optimization-test['test'] }}
         env:
           API_HOST: ${{ secrets.API_HOST }}
           API_KEY: ${{ secrets.API_KEY }}
@@ -39,4 +44,4 @@ jobs:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           UNIQUE_ID: ${{ github.ref }}-${{ github.run_number }}
-          ${{ matrix.optimization-test }}: true
+          ${{ matrix.optimization-test['env'] }}: true
