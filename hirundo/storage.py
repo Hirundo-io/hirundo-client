@@ -188,6 +188,10 @@ class StorageIntegration(BaseModel):
         """
         Lists all the `StorageIntegration`'s created by user's default organization
         Note: The return type is `list[dict]` and not `list[StorageIntegration]`
+
+        Args:
+            organization_id: The ID of the organization to list `StorageIntegration`'s for.
+            If not provided, it will list `StorageIntegration`'s for the default organization.
         """
         storage_integrations = requests.get(
             f"{API_HOST}/storage-integration/",
@@ -202,6 +206,9 @@ class StorageIntegration(BaseModel):
     def delete_by_id(storage_integration_id) -> None:
         """
         Deletes a `StorageIntegration` instance from the server by its ID
+
+        Args:
+            storage_integration_id: The ID of the `StorageIntegration` to delete
         """
         storage_integration = requests.delete(
             f"{API_HOST}/storage-integration/{storage_integration_id}",

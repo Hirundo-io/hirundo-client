@@ -89,6 +89,9 @@ class OptimizationDataset(BaseModel):
         Lists all the `OptimizationDataset` instances created by user's default organization
         or the `organization_id` passed
         Note: The return type is `list[dict]` and not `list[OptimizationDataset]`
+
+        Args:
+            organization_id: The ID of the organization to list the datasets for.
         """
         response = requests.get(
             f"{API_HOST}/dataset-optimization/dataset/",
@@ -103,6 +106,9 @@ class OptimizationDataset(BaseModel):
     def delete_by_id(dataset_id: int) -> None:
         """
         Deletes a `OptimizationDataset` instance from the server by its ID
+
+        Args:
+            dataset_id: The ID of the `OptimizationDataset` instance to delete
         """
         response = requests.delete(
             f"{API_HOST}/dataset-optimization/dataset/{dataset_id}",
@@ -116,7 +122,8 @@ class OptimizationDataset(BaseModel):
         Deletes the active `OptimizationDataset` instance from the server.
         It can only be used on a `OptimizationDataset` instance that has been created.
 
-        storage_integration: If True, the `OptimizationDataset`'s `StorageIntegration` will also be deleted
+        Args:
+            storage_integration: If True, the `OptimizationDataset`'s `StorageIntegration` will also be deleted
 
         Note: If `storage_integration` is not set to `False` then the `storage_integration_id` must be set
         This can either be set manually or by creating the `StorageIntegration` instance via the `OptimizationDataset`'s
@@ -173,7 +180,12 @@ class OptimizationDataset(BaseModel):
         """
         Run the dataset optimization process on the server using the dataset with the given ID
         i.e. `dataset_id`.
-        Returns the ID of the run (`run_id`).
+
+        Args:
+            dataset_id: The ID of the dataset to run optimization on.
+
+        Returns:
+            ID of the run (`run_id`).
         """
         run_response = requests.post(
             f"{API_HOST}/dataset-optimization/run/{dataset_id}",
@@ -187,7 +199,9 @@ class OptimizationDataset(BaseModel):
         """
         If the dataset was not created on the server yet, it is created.
         Run the dataset optimization process on the server using the active `OptimizationDataset` instance
-        Returns an ID of the run (`run_id`) and stores that `run_id` on the instance
+
+        Returns:
+            An ID of the run (`run_id`) and stores that `run_id` on the instance
         """
         try:
             if not self.dataset_id:
@@ -226,9 +240,16 @@ class OptimizationDataset(BaseModel):
         Check the status of a run given its ID
 
         This generator will produce values to show progress of the run.
-        Each event will be a dict, where:
-        - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
-        - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
+
+        Args:
+            run_id: The `run_id` produced by a `run_optimization` call
+            retry: A number used to track the number of retries to limit re-checks. *Do not* provide this value manually.
+
+        Yields:
+            Each event will be a dict, where:
+            - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
+            - `"result"` is a string describing the progress as a percentage for a PENDING state,
+              or the error for a FAILURE state or the results for a SUCCESS state
 
         """
         if retry > MAX_RETRIES:
@@ -260,9 +281,11 @@ class OptimizationDataset(BaseModel):
         Check the status of the current active instance's run.
 
         This generator will produce values to show progress of the run.
-        Each event will be a dict, where:
-        - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
-        - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
+
+        Yields:
+            Each event will be a dict, where:
+            - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
+            - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
 
         """
         if not self.run_id:
@@ -277,9 +300,15 @@ class OptimizationDataset(BaseModel):
         Check the status of a run given its ID.
 
         This generator will produce values to show progress of the run.
-        Each event will be a dict, where:
-        - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
-        - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
+
+        Args:
+            run_id: The `run_id` produced by a `run_optimization` call
+            retry: A number used to track the number of retries to limit re-checks. *Do not* provide this value manually.
+
+        Yields:
+            Each event will be a dict, where:
+            - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
+            - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
 
         """
         if retry > MAX_RETRIES:
@@ -316,9 +345,11 @@ class OptimizationDataset(BaseModel):
         Check the status of the current active instance's run.
 
         This generator will produce values to show progress of the run.
-        Each event will be a dict, where:
-        - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
-        - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
+
+        Yields:
+            Each event will be a dict, where:
+            - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
+            - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
 
         """
         if not self.run_id:
@@ -330,6 +361,9 @@ class OptimizationDataset(BaseModel):
     def cancel_by_id(run_id: str) -> None:
         """
         Cancel the dataset optimization run for the given `run_id`.
+
+        Args:
+            run_id: The ID of the run to cancel
         """
         if not run_id:
             raise ValueError("No run has been started")

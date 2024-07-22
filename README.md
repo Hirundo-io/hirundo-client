@@ -4,7 +4,7 @@ This repo contains the source code for the Hirundo client library
 
 ## Usage:
 
-To learn about how to use this library, please visit the [https://hirundo-io.github.io/hirundo-client/](documentation) or see the Google Colab examples.
+To learn about how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the Google Colab examples.
 
 ## Development:
 

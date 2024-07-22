@@ -22,7 +22,7 @@ jobs:
           source .venv/bin/activate
           pip install -r dev-requirements.txt
           pip install build twine
-      - name: Public to PyPI
+      - name: Publish to PyPI
         run: |
           python -m build
           twine check dist/*

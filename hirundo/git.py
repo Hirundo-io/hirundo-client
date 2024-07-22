@@ -136,6 +136,9 @@ class GitRepo(BaseModel):
     def delete_by_id(git_repo_id: int):
         """
         Delete a Git repository by its ID.
+
+        Args:
+            git_repo_id: The ID of the Git repository to delete
         """
         git_repo = requests.delete(
             f"{API_HOST}/git-repo/{git_repo_id}",
