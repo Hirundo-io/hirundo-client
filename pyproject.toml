@@ -72,7 +72,6 @@ docs = [
     "autodoc_pydantic>=2.2.0",
     "furo",
     "sphinx-multiversion",
-    "hirundo @ file:///${PROJECT_ROOT}/hirundo",
 ]
 
 [tool.bumpver]
