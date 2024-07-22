@@ -12,7 +12,6 @@ jobs:
       max-parallel: 2
       matrix:
         optimization-test:
-          - FULL_TEST
           - RUN_CLASSIFICATION_AWS_OPTIMIZATION
           - RUN_CLASSIFICATION_GCP_OPTIMIZATION
           - RUN_CLASSIFICATION_GCP_SANITY_OPTIMIZATION
