@@ -3,6 +3,8 @@ name: Deploy Sphinx docs to GitHub Pages
 on:
     push:
         branches: ["main"]
+        tags:
+          - "v*"
     pull_request:
         types: [opened, synchronize, reopened]
 
@@ -40,6 +42,7 @@ jobs:
             python -m venv .venv
             source .venv/bin/activate
             pip install -r docs-requirements.txt
+            pip install hirundo
         - name: Sphinx multi-version build
           run: |
             source .venv/bin/activate

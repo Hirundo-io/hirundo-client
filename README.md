@@ -29,12 +29,20 @@ ruff check
 ruff format
 ```
 
-### Update `requirements.txt` files
+### Change packages
+
+#### Update `requirements.txt` files
 
 ```bash
 uv pip compile pyproject.toml
 uv pip compile --extra dev -o dev-requirements.txt -c requirements.txt pyproject.toml
 uv pip compile --extra docs -o docs-requirements.txt -c requirements.txt pyproject.toml
+```
+
+#### Sync installed packages
+
+```bash
+uv pip sync dev-requirements.txt
 ```
 
 ### Build process
