@@ -21,7 +21,7 @@ jobs:
   push_to_testpypi:
     name: Upload release to test PyPI
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.test == true && github.event.inputs.version != '0.1.x' && contains(github.event.inputs.version, 'b') }}
+    if: ${{ github.event.inputs.test == 'true' && github.event.inputs.version != '0.1.x' && contains(github.event.inputs.version, 'b') }}
     environment:
       name: testpypi
       url: https://test.pypi.org/p/hirundo
@@ -69,7 +69,7 @@ jobs:
           path: version.txt
   push_to_pypi:
     name: Upload release to PyPI
-    if: ${{ github.event.inputs.test == false && github.event.inputs.version != '0.1.x' && !contains(github.event.inputs.version, 'b') }}
+    if: ${{ github.event.inputs.test == 'false' && github.event.inputs.version != '0.1.x' && !contains(github.event.inputs.version, 'b') }}
     runs-on: ubuntu-latest
     environment:
       name: pypi
