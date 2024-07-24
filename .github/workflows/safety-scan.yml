@@ -1,7 +1,7 @@
 name: Safety scan
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, assigned]
   push:
     branches:
       - "main"
