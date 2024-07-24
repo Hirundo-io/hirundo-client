@@ -84,7 +84,8 @@ jobs:
       name: pypi
       url: https://pypi.org/p/hirundo
     permissions:
-      contents: read
+      contents: write  # Used to push branch with release
+      pull-requests: write  # Used to create and merge PR with release
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v4
