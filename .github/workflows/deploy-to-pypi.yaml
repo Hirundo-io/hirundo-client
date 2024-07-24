@@ -49,8 +49,8 @@ jobs:
           git config user.name "GitHub Actions [release-bot]"
           git config user.email "devs@hirundo.io"
           git checkout -b release-${{ github.event.inputs.version }}
-          gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }} release" --body "${{ github.event.inputs.message }}"
           bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
+          gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }} release" --body "${{ github.event.inputs.message }}"
           gh pr merge --auto --delete-branch --squash "release-${{ github.event.inputs.version }}"
           git checkout ${{ github.event.ref }}
           git pull origin ${{ github.event.ref }}
@@ -105,8 +105,8 @@ jobs:
           git config user.name "GitHub Actions [release-bot]"
           git config user.email "devs@hirundo.io"
           git checkout -b release-${{ github.event.inputs.version }}
-          gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }} release" --body "${{ github.event.inputs.message }}"
           bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
+          gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }} release" --body "${{ github.event.inputs.message }}"
           gh pr merge --auto --delete-branch --squash "release-${{ github.event.inputs.version }}"
           git checkout ${{ github.event.ref }}
           git pull origin ${{ github.event.ref }}
