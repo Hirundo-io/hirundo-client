@@ -16,6 +16,10 @@ on:
         required: true
         type: boolean
         default: true
+  pull_request:
+    types: [synchronize]
+    paths:
+      - .github/workflows/create-release.yaml
 
 jobs:
   create_release_pr:
