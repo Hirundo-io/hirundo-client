@@ -22,7 +22,7 @@ def iter_sse_retrying(
 
     # `stamina` will apply jitter and exponential backoff on top of
     # the `retry` reconnection delay sent by the server.
-    @retry(on=httpx.ReadError)
+    @retry(on=(httpx.ReadError, httpx.RemoteProtocolError))
     def _iter_sse():
         nonlocal last_event_id, reconnection_delay
 
@@ -60,7 +60,7 @@ async def aiter_sse_retrying(
 
     # `stamina` will apply jitter and exponential backoff on top of
     # the `retry` reconnection delay sent by the server.
-    @retry(on=httpx.ReadError)
+    @retry(on=(httpx.ReadError, httpx.RemoteProtocolError))
     async def _iter_sse() -> AsyncGenerator[ServerSentEvent, None]:
         nonlocal last_event_id, reconnection_delay
 
