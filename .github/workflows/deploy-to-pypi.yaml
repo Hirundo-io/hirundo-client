@@ -52,6 +52,7 @@ jobs:
           bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
           git push -u origin release-${{ github.event.inputs.version }}
           gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }} release" --body "${{ github.event.inputs.message }}"
+          gh pr checks release-${{ github.event.inputs.version }} --watch --required
           gh pr merge --auto --delete-branch --squash "release-${{ github.event.inputs.version }}"
           git checkout ${{ github.event.ref }}
           git pull origin ${{ github.event.ref }}
@@ -110,6 +111,7 @@ jobs:
           bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
           git push -u origin release-${{ github.event.inputs.version }}
           gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }} release" --body "${{ github.event.inputs.message }}"
+          gh pr checks release-${{ github.event.inputs.version }} --watch --required
           gh pr merge --auto --delete-branch --squash "release-${{ github.event.inputs.version }}"
           git checkout ${{ github.event.ref }}
           git pull origin ${{ github.event.ref }}
