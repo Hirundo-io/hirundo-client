@@ -26,7 +26,8 @@ jobs:
       name: testpypi
       url: https://test.pypi.org/p/hirundo
     permissions:
-      contents: write
+      contents: write  # Used to push branch with release
+      pull-requests: write  # Used to create and merge PR with release
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +46,12 @@ jobs:
           pip install bumpver
           git config user.name "GitHub Actions [release-bot]"
           git config user.email "devs@hirundo.io"
+          git checkout -b release-${{ github.event.inputs.version }}
+          gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }} release" --body "${{ github.event.inputs.message }}"
           bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
+          gh pr merge --auto --delete-branch --squash "release-${{ github.event.inputs.version }}"
+          git checkout main
+          git pull origin main
           git tag -a v${{ github.event.inputs.version }} -m "${{ github.event.inputs.message }}"
           git push origin v${{ github.event.inputs.version }}
       - name: Install dependencies & build package
@@ -94,7 +100,12 @@ jobs:
           pip install bumpver
           git config user.name "GitHub Actions [release-bot]"
           git config user.email "devs@hirundo.io"
+          git checkout -b release-${{ github.event.inputs.version }}
+          gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }} release" --body "${{ github.event.inputs.message }}"
           bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
+          gh pr merge --auto --delete-branch --squash "release-${{ github.event.inputs.version }}"
+          git checkout main
+          git pull origin main
           git tag -a v${{ github.event.inputs.version }} -m "${{ github.event.inputs.message }}"
           git push origin v${{ github.event.inputs.version }}
       - name: Install dependencies & build package
