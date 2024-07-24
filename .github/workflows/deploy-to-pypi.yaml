@@ -50,6 +50,7 @@ jobs:
           git config user.email "devs@hirundo.io"
           git checkout -b release-${{ github.event.inputs.version }}
           bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
+          git push -u origin release-${{ github.event.inputs.version }}
           gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }} release" --body "${{ github.event.inputs.message }}"
           gh pr merge --auto --delete-branch --squash "release-${{ github.event.inputs.version }}"
           git checkout ${{ github.event.ref }}
@@ -106,6 +107,7 @@ jobs:
           git config user.email "devs@hirundo.io"
           git checkout -b release-${{ github.event.inputs.version }}
           bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
+          git push -u origin release-${{ github.event.inputs.version }}
           gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }} release" --body "${{ github.event.inputs.message }}"
           gh pr merge --auto --delete-branch --squash "release-${{ github.event.inputs.version }}"
           git checkout ${{ github.event.ref }}
