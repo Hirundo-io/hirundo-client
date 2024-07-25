@@ -1,16 +1,15 @@
 name: Push new release of the package to PyPI
 
 on:
-  pull_request:
+  pull_request_target:
     types: [closed]
-    branches:
-      - main
-      - release-*
+    paths:
+      - 'hirundo/__init__.py'
 
 jobs:
   push_to_pypi:
     name: Upload release to PyPI
-    if: github.event.pull_request.merged == true
+    if: ${{ github.event.pull_request.merged == true && (contains(github.event.pull_request.labels, 'release') || contains(github.event.pull_request.labels, 'test')) }}
     runs-on: ubuntu-latest
     environment:
       name: testpypi
