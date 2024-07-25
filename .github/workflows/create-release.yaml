@@ -45,7 +45,7 @@ jobs:
           source .venv/bin/activate
           pip install bumpver
           git config user.name "GitHub Actions [release-bot]"
-          git config user.email "devs@hirundo.io"
+          git config user.email "github-actions@hirundo.io"
           git checkout -b release-${{ github.event.inputs.version }}
           bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
           git push -u origin release-${{ github.event.inputs.version }}

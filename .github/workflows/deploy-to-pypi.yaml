@@ -32,6 +32,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          git config user.name "GitHub Actions [release-bot]"
+          git config user.email "github-actions@hirundo.io"
           git pull origin ${{ github.event.pull_request.base.ref }}
           git tag -a ${{ github.event.pull_request.title }} -m "${{ github.event.pull_request.body }}"
           git push origin ${{ github.event.pull_request.title }}
