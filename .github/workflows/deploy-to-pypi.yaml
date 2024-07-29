@@ -1,7 +1,7 @@
 name: Push new release of the package to PyPI
 
 on:
-  pull_request_target:
+  pull_request:
     types: [closed]
     paths:
       - 'hirundo/__init__.py'
