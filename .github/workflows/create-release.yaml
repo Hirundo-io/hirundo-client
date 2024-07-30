@@ -1,0 +1,54 @@
+name: Release new version of package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release. Must be a valid version number; x is forbidden'
+        required: true
+        default: '0.1.x'
+      message:
+        description: 'Message to attach to the release'
+        required: false
+        default: "Release notes \n"
+      test:
+        description: 'Release beta release to test PyPI'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  create_release_pr:
+    name: Create release PR
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/hirundo
+    permissions:
+      contents: write  # Used to push branch with release
+      pull-requests: write  # Used to create and merge PR with release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.ref }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+          cache: 'pip'
+      - name: Bump version with `bumpver` then push tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -m pip install --upgrade pip
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install bumpver
+          git config user.name "GitHub Actions [release-bot]"
+          git config user.email "github-actions@hirundo.io"
+          git checkout -b release-${{ github.event.inputs.version }}
+          bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
+          git push -u origin release-${{ github.event.inputs.version }}
+          gh pr create -a ${{ github.event.sender }} --title "v${{ github.event.inputs.version }}" \
+            --body "${{ github.event.inputs.message }}" \
+            --label "${{ github.event.inputs.test && 'test' || 'release' }}"

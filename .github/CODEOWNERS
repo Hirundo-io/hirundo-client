@@ -1,0 +1,4 @@
+* @mishana @benglewis @shmuelyo
+pyproject.toml
+hirundo/__init__.py
+#  ⬆️ Allow changes to versions, but nothing else without CODEOWNERS
