@@ -22,6 +22,12 @@ def iter_sse_retrying(
 
     # `stamina` will apply jitter and exponential backoff on top of
     # the `retry` reconnection delay sent by the server.
+    # httpx.ReadError is thrown when there is a network error.
+    #   Some network errors may be temporary, hence the retries.
+    # httpx.RemoteProtocolError is thrown when the server closes the connection.
+    #  This may happen when the server is overloaded and closes the connection or
+    #  when Kubernetes restarts / replaces a pod.
+    #  Likewise, this will likely be temporary, hence the retries.
     @retry(on=(httpx.ReadError, httpx.RemoteProtocolError))
     def _iter_sse():
         nonlocal last_event_id, reconnection_delay
@@ -60,6 +66,12 @@ async def aiter_sse_retrying(
 
     # `stamina` will apply jitter and exponential backoff on top of
     # the `retry` reconnection delay sent by the server.
+    # httpx.ReadError is thrown when there is a network error.
+    #   Some network errors may be temporary, hence the retries.
+    # httpx.RemoteProtocolError is thrown when the server closes the connection.
+    #  This may happen when the server is overloaded and closes the connection or
+    #  when Kubernetes restarts / replaces a pod.
+    #  Likewise, this will likely be temporary, hence the retries.
     @retry(on=(httpx.ReadError, httpx.RemoteProtocolError))
     async def _iter_sse() -> AsyncGenerator[ServerSentEvent, None]:
         nonlocal last_event_id, reconnection_delay
