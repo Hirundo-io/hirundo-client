@@ -7,6 +7,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, assigned]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pytest_sanity:
     runs-on: ${{ matrix.os }}
