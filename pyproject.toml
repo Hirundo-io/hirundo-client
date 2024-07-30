@@ -75,7 +75,7 @@ docs = [
 ]
 
 [tool.bumpver]
-current_version = "0.1.0"
+current_version = "0.1.3b1"
 version_pattern = "MAJOR.MINOR.PATCH[PYTAGNUM]"
 
 [tool.bumpver.file_patterns]
@@ -84,6 +84,10 @@ version_pattern = "MAJOR.MINOR.PATCH[PYTAGNUM]"
 ]
 "hirundo/__init__.py" = [
     '^__version__ = "{version}"$',
+]
+"docs/_templates/github-pages-redirect.html" = [
+    """<meta http-equiv="refresh" content="0; url=./v{version}/index.html" />""",
+    """<link rel="canonical" href="https://hirundo-io.github.io/hirundo/v{version}/index.html" />$"""
 ]
 
 [tool.ruff]
