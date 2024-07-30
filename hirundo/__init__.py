@@ -32,4 +32,4 @@ __all__ = [
     "StorageIntegration",
 ]
 
-__version__ = "0.1.3b2"
+__version__ = "0.1.3"
