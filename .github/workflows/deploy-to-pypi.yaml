@@ -9,7 +9,7 @@ on:
 jobs:
   push_to_pypi:
     name: Upload release to PyPI
-    if: ${{ github.event.pull_request.merged == true && (contains(github.event.pull_request.labels, 'release') || contains(github.event.pull_request.labels, 'test')) }}
+    if: ${{ github.event.pull_request.merged == true && (contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'test')) }}
     runs-on: ubuntu-latest
     environment:
       name: testpypi
