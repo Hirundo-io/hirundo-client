@@ -12,8 +12,8 @@ jobs:
     if: ${{ github.event.pull_request.merged == true && (contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'test')) }}
     runs-on: ubuntu-latest
     environment:
-      name: testpypi
-      url: https://test.pypi.org/p/hirundo
+      name: ${{ contains(github.event.pull_request.labels.*.name, 'release') && 'pypi' || 'testpypi' }}
+      url: ${{ contains(github.event.pull_request.labels.*.name, 'release') && 'https://pypi.org/p/hirundo' || 'https://test.pypi.org/p/hirundo' }}
     permissions:
       contents: write  # Used to push tag with release
       pull-requests: read  # Used to create and merge PR with release
