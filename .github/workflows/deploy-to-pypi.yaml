@@ -9,7 +9,7 @@ on:
 jobs:
   push_to_pypi:
     name: Upload release to PyPI
-    if: ${{ github.event.pull_request.merged == true && (contains(github.event.pull_request.labels, 'release') || contains(github.event.pull_request.labels, 'test')) }}
+    if: ${{ github.event.pull_request.merged == true && (contains(github.event.pull_request.labels.*.name, 'release') || contains(github.event.pull_request.labels.*.name, 'test')) }}
     runs-on: ubuntu-latest
     environment:
       name: testpypi
@@ -46,9 +46,9 @@ jobs:
           python -m build
       - name: Publish package distributions to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        if: ${{ contains(github.event.pull_request.labels, 'test') }}
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'test') }}
         with:
           repository-url: https://test.pypi.org/legacy/
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        if: ${{ contains(github.event.pull_request.labels, 'release') }}
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'release') }}
