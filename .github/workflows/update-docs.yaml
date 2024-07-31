@@ -28,7 +28,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0  # Fetch all history for all tags and branches
     - uses: actions/setup-python@v3
       with:
@@ -39,7 +38,7 @@ jobs:
         python -m venv .venv
         source .venv/bin/activate
         pip install -r docs-requirements.txt
-        export VERSION_TAG=${{ github.ref }}
+        export VERSION_TAG=${{ github.event.pull_request.title }}
         export VERSION=$(sed -e 's/^v//' <<< $VERSION_TAG)
         pip install hirundo@${VERSION}
     - name: Sphinx multi-version build
