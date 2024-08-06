@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-")
 test_dataset = OptimizationDataset(
-    name=f"HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
+    name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(

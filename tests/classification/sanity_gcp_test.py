@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-")
 test_dataset = OptimizationDataset(
-    name=f"GCP sanity dataset{unique_id}",
+    name=f"TEST-GCP sanity dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
