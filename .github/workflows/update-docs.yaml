@@ -40,7 +40,7 @@ jobs:
         pip install -r docs-requirements.txt
         export VERSION_TAG=${{ github.event.pull_request.title }}
         export VERSION=$(sed -e 's/^v//' <<< $VERSION_TAG)
-        pip install hirundo@${VERSION}
+        pip install "hirundo==${VERSION}"
     - name: Sphinx multi-version build
       run: |
         source .venv/bin/activate
