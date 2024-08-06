@@ -286,7 +286,7 @@ class OptimizationDataset(BaseModel):
                 data = last_event["data"]
                 OptimizationDataset._read_csv_to_df(data)
                 yield data
-        if not last_event or data["state"] == "PENDING":
+        if not last_event or last_event["data"]["state"] == "PENDING":
             OptimizationDataset.check_run_by_id(run_id, retry + 1)
 
     def check_run(self) -> Generator[dict, None, None]:
