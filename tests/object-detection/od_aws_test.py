@@ -55,7 +55,7 @@ test_dataset = OptimizationDataset(
 def test_dataset_optimization():
     cleanup(test_dataset)
     full_run = dataset_optimization_sync_test(test_dataset, "RUN_AWS_OD_OPTIMIZATION")
-    if full_run:
+    if full_run is not None:
         pass
         # TODO: Add add assertion for result
     else:

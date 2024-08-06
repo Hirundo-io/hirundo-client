@@ -59,7 +59,7 @@ def test_dataset_optimization():
     full_run = dataset_optimization_sync_test(
         test_dataset, sanity=True, alternative_env="RUN_OD_AWS_SANITY_OPTIMIZATION"
     )
-    if full_run:
+    if full_run is not None:
         pass
         # TODO: Add add assertion for result
     else:

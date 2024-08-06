@@ -58,7 +58,7 @@ def test_dataset_optimization():
         sanity=True,
         alternative_env="RUN_CLASSIFICATION_GCP_SANITY_OPTIMIZATION",
     )
-    if full_run:
+    if full_run is not None:
         pass
         # TODO: Add add assertion for result
     else:
