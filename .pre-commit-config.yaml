@@ -19,7 +19,7 @@ repos:
     - id: pip-compile
       name: compile requirements.txt
       entry: uv
-      args: ["pip", "compile"]
+      args: ["pip", "compile", "-o", "requirements.txt"]
       language: python
       always_run: false
       files: pyproject.toml$
