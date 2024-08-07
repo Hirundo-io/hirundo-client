@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-")
 test_dataset = OptimizationDataset(
-    name=f"AWS cifar10 classification dataset{unique_id}",
+    name=f"TEST-AWS cifar10 classification dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
@@ -51,7 +51,7 @@ def test_dataset_optimization():
     full_run = dataset_optimization_sync_test(
         test_dataset, "RUN_CLASSIFICATION_AWS_OPTIMIZATION"
     )
-    if full_run:
+    if full_run is not None:
         pass
         # TODO: Add add assertion for result
     else:

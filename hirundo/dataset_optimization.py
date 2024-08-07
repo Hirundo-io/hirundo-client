@@ -1,9 +1,11 @@
 import json
 import logging
 from collections.abc import AsyncGenerator, Generator
+from io import StringIO
 from typing import Union
 
 import httpx
+import pandas as pd
 import requests
 from pydantic import BaseModel, Field, model_validator
 
@@ -235,6 +237,13 @@ class OptimizationDataset(BaseModel):
         self.run_id = None
 
     @staticmethod
+    def _read_csv_to_df(data: dict):
+        if data["state"] == "SUCCESS":
+            data["result"] = pd.read_csv(StringIO(data["result"]))
+        else:
+            pass
+
+    @staticmethod
     def check_run_by_id(run_id: str, retry=0) -> Generator[dict, None, None]:
         """
         Check the status of a run given its ID
@@ -272,7 +281,11 @@ class OptimizationDataset(BaseModel):
                     sse.retry,
                 )
                 last_event = json.loads(sse.data)
-                yield last_event["data"]
+                if not last_event:
+                    continue
+                data = last_event["data"]
+                OptimizationDataset._read_csv_to_df(data)
+                yield data
         if not last_event or last_event["data"]["state"] == "PENDING":
             OptimizationDataset.check_run_by_id(run_id, retry + 1)
 
