@@ -6,6 +6,10 @@ This repo contains the source code for the Hirundo client library
 
 To learn about how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the Google Colab examples.
 
+## PyPy:
+
+If you are using this package with PyPy. You should also separately install Cython (`pip install cython`), since it is needed to install `pandas` which is used to output DataFrames with results.
+
 ## Development:
 
 ### Install dev dependencies
