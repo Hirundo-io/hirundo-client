@@ -30,9 +30,13 @@ Optimizing a classification dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Currently ``hirundo`` requires a CSV file with the following columns (all columns are required):
-   - ``frame_idx``: The index of the frame within the dataset. Used to indicate label suspects
    - ``image_path``: The location of the image within the dataset ``root``
    - ``label``: The label of the image, i.e. which the class that was annotated for this image
+
+And outputs a CSV with the same columns and:
+   - ``suspect_level``: mislabel suspect level
+   - ``suggested_label``: suggested label
+   - ``suggested_conf``: suggested label confidence
 
 Optimizing an object detection (OD) dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -42,6 +46,11 @@ Currently ``hirundo`` requires a CSV file with the following columns (all column
    - ``bbox_id``: The index of the bounding box within the dataset. Used to indicate label suspects
    - ``label``: The label of the image, i.e. which the class that was annotated for this image
    - ``x1``, ``y1``, ``x2``, ``y2``: The bounding box coordinates of the object within the image
+
+And outputs a CSV with the same columns and:
+   - ``suspect_level``: object mislabel suspect level
+   - ``suggested_label``: suggested object label
+   - ``suggested_conf``: suggested object label confidence
 
 .. toctree::
    :maxdepth: 2
