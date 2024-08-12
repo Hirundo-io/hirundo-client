@@ -9,7 +9,7 @@ from pydantic_core import Url
 
 from hirundo._constraints import S3BucketUrl, StorageIntegrationName
 from hirundo._env import API_HOST
-from hirundo._headers import auth_headers, json_headers
+from hirundo._headers import get_auth_headers, json_headers
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.git import GitRepo
 
@@ -196,7 +196,7 @@ class StorageIntegration(BaseModel):
         storage_integrations = requests.get(
             f"{API_HOST}/storage-integration/",
             params={"storage_integration_organization_id": organization_id},
-            headers=auth_headers,
+            headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
         storage_integrations.raise_for_status()
@@ -212,7 +212,7 @@ class StorageIntegration(BaseModel):
         """
         storage_integration = requests.delete(
             f"{API_HOST}/storage-integration/{storage_integration_id}",
-            headers=auth_headers,
+            headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         storage_integration.raise_for_status()
@@ -236,7 +236,7 @@ class StorageIntegration(BaseModel):
             json=self.model_dump(),
             headers={
                 **json_headers,
-                **auth_headers,
+                **get_auth_headers(),
             },
             timeout=MODIFY_TIMEOUT,
         )

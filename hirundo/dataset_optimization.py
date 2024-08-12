@@ -10,7 +10,7 @@ import requests
 from pydantic import BaseModel, Field, model_validator
 
 from hirundo._env import API_HOST
-from hirundo._headers import auth_headers, json_headers
+from hirundo._headers import get_auth_headers, json_headers
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.enum import DatasetMetadataType, LabellingType
@@ -98,7 +98,7 @@ class OptimizationDataset(BaseModel):
         response = requests.get(
             f"{API_HOST}/dataset-optimization/dataset/",
             params={"dataset_organization_id": organization_id},
-            headers=auth_headers,
+            headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
         response.raise_for_status()
@@ -114,7 +114,7 @@ class OptimizationDataset(BaseModel):
         """
         response = requests.delete(
             f"{API_HOST}/dataset-optimization/dataset/{dataset_id}",
-            headers=auth_headers,
+            headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         response.raise_for_status()
@@ -167,7 +167,7 @@ class OptimizationDataset(BaseModel):
             },
             headers={
                 **json_headers,
-                **auth_headers,
+                **get_auth_headers(),
             },
             timeout=MODIFY_TIMEOUT,
         )
@@ -191,7 +191,7 @@ class OptimizationDataset(BaseModel):
         """
         run_response = requests.post(
             f"{API_HOST}/dataset-optimization/run/{dataset_id}",
-            headers=auth_headers,
+            headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         run_response.raise_for_status()
@@ -269,7 +269,7 @@ class OptimizationDataset(BaseModel):
                 client,
                 "GET",
                 f"{API_HOST}/dataset-optimization/run/{run_id}",
-                headers=auth_headers,
+                headers=get_auth_headers(),
             ):
                 if sse.event == "ping":
                     continue
@@ -334,7 +334,7 @@ class OptimizationDataset(BaseModel):
                 client,
                 "GET",
                 f"{API_HOST}/dataset-optimization/run/{run_id}",
-                headers=auth_headers,
+                headers=get_auth_headers(),
             )
             async for sse in async_iterator:
                 if sse.event == "ping":
@@ -382,7 +382,7 @@ class OptimizationDataset(BaseModel):
             raise ValueError("No run has been started")
         response = requests.delete(
             f"{API_HOST}/dataset-optimization/run/{run_id}",
-            headers=auth_headers,
+            headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         response.raise_for_status()

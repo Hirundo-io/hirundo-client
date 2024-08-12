@@ -1,9 +1,13 @@
-from hirundo._env import API_KEY
+from hirundo._env import API_KEY, check_api_key
 
 json_headers = {
     "Content-Type": "application/json",
     "Accept": "application/json",
 }
-auth_headers = {
-    "Authorization": f"Bearer {API_KEY}",
-}
+
+
+def get_auth_headers():
+    check_api_key()
+    return {
+        "Authorization": f"Bearer {API_KEY}",
+    }

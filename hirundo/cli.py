@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 from typing import Annotated
@@ -14,8 +15,17 @@ hirundo_epilog = (
     else "Made with ❤️ by Hirundo. Visit https://www.hirundo.io for more information."
 )
 
+
+def set_cli():
+    os.environ["CLI"] = "True"
+
+
 app = typer.Typer(
-    name="hirundo", no_args_is_help=True, rich_markup_mode="rich", epilog=hirundo_epilog
+    name="hirundo",
+    no_args_is_help=True,
+    rich_markup_mode="rich",
+    epilog=hirundo_epilog,
+    callback=set_cli,
 )
 
 
