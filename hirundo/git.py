@@ -8,7 +8,7 @@ from pydantic import BaseModel, field_validator
 from pydantic_core import Url
 
 from hirundo._env import API_HOST
-from hirundo._headers import auth_headers, json_headers
+from hirundo._headers import get_auth_headers, json_headers
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 
 logger = logging.getLogger(__name__)
@@ -108,7 +108,7 @@ class GitRepo(BaseModel):
             json=self.model_dump(),
             headers={
                 **json_headers,
-                **auth_headers,
+                **get_auth_headers(),
             },
             timeout=MODIFY_TIMEOUT,
         )
@@ -125,7 +125,7 @@ class GitRepo(BaseModel):
         git_repos = requests.get(
             f"{API_HOST}/git-repo/",
             headers={
-                **auth_headers,
+                **get_auth_headers(),
             },
             timeout=READ_TIMEOUT,
         )
@@ -143,7 +143,7 @@ class GitRepo(BaseModel):
         git_repo = requests.delete(
             f"{API_HOST}/git-repo/{git_repo_id}",
             headers={
-                **auth_headers,
+                **get_auth_headers(),
             },
             timeout=MODIFY_TIMEOUT,
         )
