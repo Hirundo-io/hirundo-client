@@ -1,4 +1,3 @@
-import logging
 import re
 from typing import Annotated, Union
 
@@ -10,8 +9,9 @@ from pydantic_core import Url
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
+from hirundo.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class GitPlainAuthBase(BaseModel):

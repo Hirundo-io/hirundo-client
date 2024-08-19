@@ -1,10 +1,10 @@
-import logging
 import os
 from typing import Union
 
 from hirundo import GitRepo, OptimizationDataset, StorageIntegration
+from hirundo.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def cleanup(test_dataset: OptimizationDataset):
@@ -90,24 +90,9 @@ def dataset_optimization_sync_test(
     ):
         run_id = test_dataset.run_optimization()
         logger.info("Sync: Started dataset optimization run with run ID %s", run_id)
-        events_generator = test_dataset.check_run()
         logger.info("Sync: Checking run progress")
-        last_event = {}
-        while True:
-            try:
-                last_event = next(events_generator)
-                assert last_event is not None
-                logger.info("Sync: Run event %s", last_event)
-                if last_event["state"] == "AWAITING MANUAL APPROVAL":
-                    raise StopIteration("Currently we require manual approval")
-            except StopIteration:
-                break
-        state = last_event["state"]
-        result = last_event["result"]
+        result = test_dataset.check_run(stop_on_manual_approval=True)
         logger.info("Sync: Results %s", result)
-        assert (
-            state == "SUCCESS" or state == "AWAITING MANUAL APPROVAL"
-        ), f"Optimization failed with state {state}"
         return result
     else:
         test_dataset.create()

@@ -221,6 +221,10 @@ toml==0.10.2
     # via bumpver
 tomli==2.0.1
     # via pytest
+tqdm==4.66.5
+    # via
+    #   -c requirements.txt
+    #   hirundo (pyproject.toml)
 twine==5.1.1
     # via
     #   -c requirements.txt

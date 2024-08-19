@@ -1,5 +1,4 @@
 import json
-import logging
 from collections.abc import AsyncGenerator, Generator
 from io import StringIO
 from typing import Union
@@ -8,15 +7,18 @@ import httpx
 import pandas as pd
 import requests
 from pydantic import BaseModel, Field, model_validator
+from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
 
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.enum import DatasetMetadataType, LabellingType
+from hirundo.logger import get_logger
 from hirundo.storage import StorageIntegration, StorageLink
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class HirundoError(Exception):
@@ -118,6 +120,7 @@ class OptimizationDataset(BaseModel):
             timeout=MODIFY_TIMEOUT,
         )
         response.raise_for_status()
+        logger.info("Deleted dataset with ID: %s", dataset_id)
 
     def delete(self, storage_integration=True) -> None:
         """
@@ -175,6 +178,7 @@ class OptimizationDataset(BaseModel):
         self.dataset_id = dataset_response.json()["id"]
         if not self.dataset_id:
             raise HirundoError("Failed to create the dataset")
+        logger.info("Created dataset with ID: %s", self.dataset_id)
         return self.dataset_id
 
     @staticmethod
@@ -210,6 +214,7 @@ class OptimizationDataset(BaseModel):
                 self.dataset_id = self.create()
             run_id = self.launch_optimization_run(self.dataset_id)
             self.run_id = run_id
+            logger.info("Started the run with ID: %s", run_id)
             return run_id
         except requests.HTTPError as error:
             try:
@@ -244,23 +249,7 @@ class OptimizationDataset(BaseModel):
             pass
 
     @staticmethod
-    def check_run_by_id(run_id: str, retry=0) -> Generator[dict, None, None]:
-        """
-        Check the status of a run given its ID
-
-        This generator will produce values to show progress of the run.
-
-        Args:
-            run_id: The `run_id` produced by a `run_optimization` call
-            retry: A number used to track the number of retries to limit re-checks. *Do not* provide this value manually.
-
-        Yields:
-            Each event will be a dict, where:
-            - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
-            - `"result"` is a string describing the progress as a percentage for a PENDING state,
-              or the error for a FAILURE state or the results for a SUCCESS state
-
-        """
+    def _check_run_by_id(run_id: str, retry=0) -> Generator[dict, None, None]:
         if retry > MAX_RETRIES:
             raise HirundoError("Max retries reached")
         last_event = None
@@ -287,23 +276,74 @@ class OptimizationDataset(BaseModel):
                 OptimizationDataset._read_csv_to_df(data)
                 yield data
         if not last_event or last_event["data"]["state"] == "PENDING":
-            OptimizationDataset.check_run_by_id(run_id, retry + 1)
+            OptimizationDataset._check_run_by_id(run_id, retry + 1)
 
-    def check_run(self) -> Generator[dict, None, None]:
+    def check_run_by_id(
+        self, run_id: str, stop_on_manual_approval: bool = False
+    ) -> pd.DataFrame:
+        """
+        Check the status of a run given its ID
+
+        Args:
+            run_id: The `run_id` produced by a `run_optimization` call
+            stop_on_manual_approval: If True, the function will return an empty DataFrame if the run is awaiting manual approval
+
+        Returns:
+            A pandas DataFrame with the results of the optimization run
+
+        Raises:
+            HirundoError: If the maximum number of retries is reached or if the run fails
+        """
+        logger.debug("Checking run with ID: %s", run_id)
+        with logging_redirect_tqdm():
+            t = tqdm(total=100)
+            for iteration in self._check_run_by_id(run_id):
+                if iteration["state"] == "SUCCESS":
+                    t.set_description("Optimization run completed successfully")
+                    t.update(100)
+                    t.close()
+                    return iteration["result"]
+                elif iteration["state"] == "PENDING":
+                    t.set_description("Optimization run queued and not yet started")
+                    t.update(0)
+                elif iteration["state"] == "STARTED":
+                    t.set_description("Optimization run in progress")
+                    t.update(0)
+                elif iteration["state"] is None:
+                    if (
+                        iteration["result"]
+                        and iteration["result"]["result"]
+                        and isinstance(iteration["result"]["result"], str)
+                    ):
+                        t.update(
+                            int(iteration["result"]["result"].removesuffix("% done"))
+                        )
+                        logger.debug("Checking run with ID: %s", run_id)
+                elif iteration["state"] == "AWAITING MANUAL APPROVAL":
+                    t.set_description("Awaiting manual approval")
+                    t.update(100)
+                    if stop_on_manual_approval:
+                        t.close()
+                        return pd.DataFrame()
+                elif iteration["state"] == "FAILURE":
+                    t.set_description("Optimization run failed")
+                    t.close()
+                    raise HirundoError(
+                        f"Optimization run failed with error: {iteration['result']}"
+                    )
+        raise HirundoError("Optimization run failed with an unknown error")
+
+    def check_run(self, stop_on_manual_approval: bool = False) -> pd.DataFrame:
         """
         Check the status of the current active instance's run.
 
-        This generator will produce values to show progress of the run.
-
-        Yields:
-            Each event will be a dict, where:
-            - `"state"` is PENDING, STARTED, RETRY, FAILURE or SUCCESS
-            - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
+        Returns:
+            A pandas DataFrame with the results of the optimization run
 
         """
         if not self.run_id:
             raise ValueError("No run has been started")
-        return self.check_run_by_id(self.run_id)
+        return self.check_run_by_id(self.run_id, stop_on_manual_approval)
 
     @staticmethod
     async def acheck_run_by_id(run_id: str, retry=0) -> AsyncGenerator[dict, None]:
@@ -324,6 +364,7 @@ class OptimizationDataset(BaseModel):
             - `"result"` is a string describing the progress as a percentage for a PENDING state, or the error for a FAILURE state or the results for a SUCCESS state
 
         """
+        logger.debug("Checking run with ID: %s", run_id)
         if retry > MAX_RETRIES:
             raise HirundoError("Max retries reached")
         last_event = None
@@ -380,6 +421,7 @@ class OptimizationDataset(BaseModel):
         """
         if not run_id:
             raise ValueError("No run has been started")
+        logger.info("Cancelling run with ID: %s", run_id)
         response = requests.delete(
             f"{API_HOST}/dataset-optimization/run/{run_id}",
             headers=get_auth_headers(),
