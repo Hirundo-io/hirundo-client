@@ -296,32 +296,45 @@ class OptimizationDataset(BaseModel):
         """
         logger.debug("Checking run with ID: %s", run_id)
         with logging_redirect_tqdm():
-            t = tqdm(total=100)
+            t = tqdm(total=100.0)
             for iteration in self._check_run_by_id(run_id):
                 if iteration["state"] == "SUCCESS":
                     t.set_description("Optimization run completed successfully")
-                    t.update(100)
+                    t.n = 100.0
+                    t.refresh()
                     t.close()
                     return iteration["result"]
                 elif iteration["state"] == "PENDING":
                     t.set_description("Optimization run queued and not yet started")
-                    t.update(0)
+                    t.n = 0.0
+                    t.refresh()
                 elif iteration["state"] == "STARTED":
-                    t.set_description("Optimization run in progress")
-                    t.update(0)
+                    t.set_description(
+                        "Optimization run in progress. Downloading dataset"
+                    )
+                    t.n = 0.0
+                    t.refresh()
                 elif iteration["state"] is None:
                     if (
                         iteration["result"]
                         and iteration["result"]["result"]
                         and isinstance(iteration["result"]["result"], str)
                     ):
-                        t.update(
-                            int(iteration["result"]["result"].removesuffix("% done"))
+                        current_progress_percentage = float(
+                            iteration["result"]["result"].removesuffix("% done")
                         )
-                        logger.debug("Checking run with ID: %s", run_id)
+                        desc = (
+                            "Optimization run completed. Uploading results"
+                            if current_progress_percentage == 100.0
+                            else "Optimization run in progress"
+                        )
+                        t.set_description(desc)
+                        t.n = current_progress_percentage
+                        t.refresh()
                 elif iteration["state"] == "AWAITING MANUAL APPROVAL":
                     t.set_description("Awaiting manual approval")
-                    t.update(100)
+                    t.n = 100.0
+                    t.refresh()
                     if stop_on_manual_approval:
                         t.close()
                         return pd.DataFrame()
