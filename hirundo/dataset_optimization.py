@@ -317,6 +317,7 @@ class OptimizationDataset(BaseModel):
                 elif iteration["state"] is None:
                     if (
                         iteration["result"]
+                        and isinstance(iteration["result"], dict)
                         and iteration["result"]["result"]
                         and isinstance(iteration["result"]["result"], str)
                     ):
