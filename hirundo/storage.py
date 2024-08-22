@@ -12,6 +12,9 @@ from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.git import GitRepo
+from hirundo.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class StorageS3(BaseModel):
@@ -216,6 +219,7 @@ class StorageIntegration(BaseModel):
             timeout=MODIFY_TIMEOUT,
         )
         storage_integration.raise_for_status()
+        logger.info("Deleted storage integration with ID: %s", storage_integration_id)
 
     def delete(self) -> None:
         """
@@ -243,6 +247,7 @@ class StorageIntegration(BaseModel):
         storage_integration.raise_for_status()
         storage_integration_id = storage_integration.json()["id"]
         self.id = storage_integration_id
+        logger.info("Created storage integration with ID: %s", storage_integration_id)
         return storage_integration_id
 
 

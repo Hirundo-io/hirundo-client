@@ -102,6 +102,8 @@ stamina==24.2.0
     # via hirundo (pyproject.toml)
 tenacity==8.5.0
     # via stamina
+tqdm==4.66.5
+    # via hirundo (pyproject.toml)
 twine==5.1.1
     # via hirundo (pyproject.toml)
 typer==0.12.3
