@@ -1,7 +1,9 @@
 import json
+import typing
 from collections.abc import AsyncGenerator, Generator
+from enum import Enum
 from io import StringIO
-from typing import Union
+from typing import Union, overload
 
 import httpx
 import pandas as pd
@@ -30,6 +32,14 @@ class HirundoError(Exception):
 
 
 MAX_RETRIES = 200  # Max 200 retries for HTTP SSE connection
+
+
+class RunStatus(Enum):
+    STARTED = "STARTED"
+    PENDING = "PENDING"
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
+    AWAITING_MANUAL_APPROVAL = "AWAITING MANUAL APPROVAL"
 
 
 class OptimizationDataset(BaseModel):
@@ -243,7 +253,7 @@ class OptimizationDataset(BaseModel):
 
     @staticmethod
     def _read_csv_to_df(data: dict):
-        if data["state"] == "SUCCESS":
+        if data["state"] == RunStatus.SUCCESS.value:
             data["result"] = pd.read_csv(StringIO(data["result"]))
         else:
             pass
@@ -275,18 +285,36 @@ class OptimizationDataset(BaseModel):
                 data = last_event["data"]
                 OptimizationDataset._read_csv_to_df(data)
                 yield data
-        if not last_event or last_event["data"]["state"] == "PENDING":
+        if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:
             OptimizationDataset._check_run_by_id(run_id, retry + 1)
+
+    @overload
+    def check_run_by_id(
+        self, run_id: str, stop_on_manual_approval: typing.Literal[True]
+    ) -> typing.Union[pd.DataFrame, None]:
+        ...
+
+    @overload
+    def check_run_by_id(
+        self, run_id: str, stop_on_manual_approval: typing.Literal[False] = False
+    ) -> pd.DataFrame:
+        ...
+
+    @overload
+    def check_run_by_id(
+        self, run_id: str, stop_on_manual_approval: bool
+    ) -> typing.Union[pd.DataFrame, None]:
+        ...
 
     def check_run_by_id(
         self, run_id: str, stop_on_manual_approval: bool = False
-    ) -> pd.DataFrame:
+    ) -> typing.Union[pd.DataFrame, None]:
         """
         Check the status of a run given its ID
 
         Args:
             run_id: The `run_id` produced by a `run_optimization` call
-            stop_on_manual_approval: If True, the function will return an empty DataFrame if the run is awaiting manual approval
+            stop_on_manual_approval: If True, the function will return `None` if the run is awaiting manual approval
 
         Returns:
             A pandas DataFrame with the results of the optimization run
@@ -298,17 +326,17 @@ class OptimizationDataset(BaseModel):
         with logging_redirect_tqdm():
             t = tqdm(total=100.0)
             for iteration in self._check_run_by_id(run_id):
-                if iteration["state"] == "SUCCESS":
+                if iteration["state"] == RunStatus.SUCCESS.value:
                     t.set_description("Optimization run completed successfully")
                     t.n = 100.0
                     t.refresh()
                     t.close()
                     return iteration["result"]
-                elif iteration["state"] == "PENDING":
+                elif iteration["state"] == RunStatus.PENDING.value:
                     t.set_description("Optimization run queued and not yet started")
                     t.n = 0.0
                     t.refresh()
-                elif iteration["state"] == "STARTED":
+                elif iteration["state"] == RunStatus.STARTED.value:
                     t.set_description(
                         "Optimization run in progress. Downloading dataset"
                     )
@@ -332,14 +360,14 @@ class OptimizationDataset(BaseModel):
                         t.set_description(desc)
                         t.n = current_progress_percentage
                         t.refresh()
-                elif iteration["state"] == "AWAITING MANUAL APPROVAL":
+                elif iteration["state"] == RunStatus.AWAITING_MANUAL_APPROVAL.value:
                     t.set_description("Awaiting manual approval")
                     t.n = 100.0
                     t.refresh()
                     if stop_on_manual_approval:
                         t.close()
-                        return pd.DataFrame()
-                elif iteration["state"] == "FAILURE":
+                        return None
+                elif iteration["state"] == RunStatus.FAILURE.value:
                     t.set_description("Optimization run failed")
                     t.close()
                     raise HirundoError(
@@ -347,7 +375,21 @@ class OptimizationDataset(BaseModel):
                     )
         raise HirundoError("Optimization run failed with an unknown error")
 
-    def check_run(self, stop_on_manual_approval: bool = False) -> pd.DataFrame:
+    @overload
+    def check_run(
+        self, stop_on_manual_approval: typing.Literal[True]
+    ) -> typing.Union[pd.DataFrame, None]:
+        ...
+
+    @overload
+    def check_run(
+        self, stop_on_manual_approval: typing.Literal[False] = False
+    ) -> pd.DataFrame:
+        ...
+
+    def check_run(
+        self, stop_on_manual_approval: bool = False
+    ) -> typing.Union[pd.DataFrame, None]:
         """
         Check the status of the current active instance's run.
 
@@ -403,7 +445,7 @@ class OptimizationDataset(BaseModel):
                 )
                 last_event = json.loads(sse.data)
                 yield last_event["data"]
-        if not last_event or last_event["data"]["state"] == "PENDING":
+        if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:
             OptimizationDataset.acheck_run_by_id(run_id, retry + 1)
 
     async def acheck_run(self) -> AsyncGenerator[dict, None]:

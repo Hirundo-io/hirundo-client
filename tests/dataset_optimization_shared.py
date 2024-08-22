@@ -2,6 +2,7 @@ import os
 from typing import Union
 
 from hirundo import GitRepo, OptimizationDataset, StorageIntegration
+from hirundo.dataset_optimization import RunStatus
 from hirundo.logger import get_logger
 
 logger = get_logger(__name__)
@@ -111,7 +112,7 @@ async def dataset_optimization_async_test(test_dataset: OptimizationDataset, env
         async for last_event in events_generator:
             assert last_event is not None
             logger.info("Async: Run event %s", last_event)
-            if last_event["state"] == "AWAITING_MANUAL_APPROVAL":
+            if last_event["state"] == RunStatus.AWAITING_MANUAL_APPROVAL:
                 # Currently we require manual approval
                 break
         logger.info("Async: Results %s", last_event["result"])
