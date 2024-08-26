@@ -72,6 +72,10 @@ class StorageTypes(str, Enum):
     GCP = "GCP"
     # AZURE = "Azure"  TODO: Azure storage integration is coming soon
     GIT = "Git"
+    LOCAL = "Local"
+    """
+    Local storage integration is only supported for on-premises installations.
+    """
 
 
 class StorageIntegration(BaseModel):
@@ -87,7 +91,7 @@ class StorageIntegration(BaseModel):
     """
     A name to identify the `StorageIntegration` in the Hirundo system.
     """
-    type: StorageTypes = pydantic.Field(
+    type: typing.Optional[StorageTypes] = pydantic.Field(
         examples=[
             StorageTypes.S3,
             StorageTypes.GCP,
@@ -249,6 +253,30 @@ class StorageIntegration(BaseModel):
         self.id = storage_integration_id
         logger.info("Created storage integration with ID: %s", storage_integration_id)
         return storage_integration_id
+
+    @model_validator(mode="after")
+    def validate_storage_type(self):
+        if [self.s3, self.gcp, self.git].count(None) > 1:
+            raise ValueError("Exactly one of S3, GCP, or Git must be provided")
+        if self.type == StorageTypes.S3 and self.s3 is None:
+            raise ValueError("S3 storage details must be provided")
+        elif self.type == StorageTypes.GCP and self.gcp is None:
+            raise ValueError("GCP storage details must be provided")
+        elif self.type == StorageTypes.GIT and self.git is None:
+            raise ValueError("Git storage details must be provided")
+        if not self.type and not any([self.s3, self.gcp, self.git]):
+            raise ValueError("Storage type must be provided")
+        elif not self.type:
+            self.type = (
+                StorageTypes.S3
+                if self.s3 is not None
+                else StorageTypes.GCP
+                if self.gcp is not None
+                else StorageTypes.GIT
+                if self.git is not None
+                else StorageTypes.LOCAL
+            )
+        return self
 
 
 class StorageLink(BaseModel):
