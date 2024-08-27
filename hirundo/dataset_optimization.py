@@ -288,26 +288,30 @@ class OptimizationDataset(BaseModel):
         if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:
             OptimizationDataset._check_run_by_id(run_id, retry + 1)
 
+    @staticmethod
     @overload
     def check_run_by_id(
-        self, run_id: str, stop_on_manual_approval: typing.Literal[True]
+        run_id: str, stop_on_manual_approval: typing.Literal[True]
     ) -> typing.Union[pd.DataFrame, None]:
         ...
 
+    @staticmethod
     @overload
     def check_run_by_id(
-        self, run_id: str, stop_on_manual_approval: typing.Literal[False] = False
+        run_id: str, stop_on_manual_approval: typing.Literal[False] = False
     ) -> pd.DataFrame:
         ...
 
+    @staticmethod
     @overload
     def check_run_by_id(
-        self, run_id: str, stop_on_manual_approval: bool
+        run_id: str, stop_on_manual_approval: bool
     ) -> typing.Union[pd.DataFrame, None]:
         ...
 
+    @staticmethod
     def check_run_by_id(
-        self, run_id: str, stop_on_manual_approval: bool = False
+        run_id: str, stop_on_manual_approval: bool = False
     ) -> typing.Union[pd.DataFrame, None]:
         """
         Check the status of a run given its ID
@@ -325,7 +329,7 @@ class OptimizationDataset(BaseModel):
         logger.debug("Checking run with ID: %s", run_id)
         with logging_redirect_tqdm():
             t = tqdm(total=100.0)
-            for iteration in self._check_run_by_id(run_id):
+            for iteration in OptimizationDataset._check_run_by_id(run_id):
                 if iteration["state"] == RunStatus.SUCCESS.value:
                     t.set_description("Optimization run completed successfully")
                     t.n = 100.0
