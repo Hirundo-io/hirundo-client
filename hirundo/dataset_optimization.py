@@ -6,6 +6,7 @@ from io import StringIO
 from typing import Union, overload
 
 import httpx
+import numpy as np
 import pandas as pd
 import requests
 from pydantic import BaseModel, Field, model_validator
@@ -40,6 +41,26 @@ class RunStatus(Enum):
     SUCCESS = "SUCCESS"
     FAILURE = "FAILURE"
     AWAITING_MANUAL_APPROVAL = "AWAITING MANUAL APPROVAL"
+
+
+CUSTOMER_INTERCHANGE_DTYPES = {
+    "image_path": str,
+    "label_path": str,
+    "segments_mask_path": str,
+    "segment_id": np.int32,
+    "label": str,
+    "bbox_id": str,
+    "x1": np.int32,
+    "y1": np.int32,
+    "x2": np.int32,
+    "y2": np.int32,
+    "suspect_level": np.float32,  # If exists, must be one of the values in the enum below
+    "suggested_label": str,
+    "suggested_label_conf": np.float32,
+    "status": str,
+    # ⬆️ If exists, must be one of the following:
+    # NO_LABELS/MISSING_IMAGE/INVALID_IMAGE/INVALID_BBOX/INVALID_BBOX_SIZE/INVALID_SEG/INVALID_SEG_SIZE
+}
 
 
 class OptimizationDataset(BaseModel):
@@ -254,7 +275,9 @@ class OptimizationDataset(BaseModel):
     @staticmethod
     def _read_csv_to_df(data: dict):
         if data["state"] == RunStatus.SUCCESS.value:
-            data["result"] = pd.read_csv(StringIO(data["result"]))
+            data["result"] = pd.read_csv(
+                StringIO(data["result"]), dtype=CUSTOMER_INTERCHANGE_DTYPES
+            )
         else:
             pass
 
