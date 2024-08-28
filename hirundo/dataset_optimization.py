@@ -9,6 +9,7 @@ import httpx
 import numpy as np
 import pandas as pd
 import requests
+from pandas._typing import DtypeArg
 from pydantic import BaseModel, Field, model_validator
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
@@ -43,7 +44,7 @@ class RunStatus(Enum):
     AWAITING_MANUAL_APPROVAL = "AWAITING MANUAL APPROVAL"
 
 
-CUSTOMER_INTERCHANGE_DTYPES = {
+CUSTOMER_INTERCHANGE_DTYPES: DtypeArg = {
     "image_path": str,
     "label_path": str,
     "segments_mask_path": str,
