@@ -257,7 +257,7 @@ class StorageIntegration(BaseModel):
     @model_validator(mode="after")
     def validate_storage_type(self):
         if self.type != StorageTypes.LOCAL and (
-            [self.s3, self.gcp, self.git].count(None) == 2
+            [self.s3, self.gcp, self.git].count(None) != 2
         ):
             raise ValueError("Exactly one of S3, GCP, or Git must be provided")
         if self.type == StorageTypes.S3 and self.s3 is None:
