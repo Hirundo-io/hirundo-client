@@ -316,7 +316,7 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Union[pd.DataFrame, None]:
+    ) -> typing.Optional[pd.DataFrame]:
         ...
 
     @staticmethod
@@ -330,13 +330,13 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool
-    ) -> typing.Union[pd.DataFrame, None]:
+    ) -> typing.Optional[pd.DataFrame]:
         ...
 
     @staticmethod
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool = False
-    ) -> typing.Union[pd.DataFrame, None]:
+    ) -> typing.Optional[pd.DataFrame]:
         """
         Check the status of a run given its ID
 
