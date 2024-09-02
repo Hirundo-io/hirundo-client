@@ -15,10 +15,10 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "pypy3.9", "pypy3.10"]
     steps:
       - uses: actions/checkout@v3
-      - uses: chartboost/ruff-action@main
+      - uses: chartboost/ruff-action@v1
         with:
           version: 0.6.3
-      - uses: chartboost/ruff-action@main
+      - uses: chartboost/ruff-action@v1
         with:
           version: 0.6.3
           args: "format --check"
