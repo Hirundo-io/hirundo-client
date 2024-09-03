@@ -274,10 +274,32 @@ class OptimizationDataset(BaseModel):
         self.run_id = None
 
     @staticmethod
+    def _clean_df_index(df: "pd.DataFrame") -> "pd.DataFrame":
+        """
+        Clean the index of a dataframe in case it has unnamed columns.
+
+        Args:
+            df (DataFrame): Dataframe to clean
+
+        Returns:
+            DataFrame: Cleaned dataframe
+        """
+        index_cols = sorted(
+            [col for col in df.columns if col.startswith("Unnamed")], reverse=True
+        )
+        if len(index_cols) > 0:
+            df.set_index(index_cols.pop(), inplace=True)
+            df.rename_axis(index=None, columns=None, inplace=True)
+            if len(index_cols) > 0:
+                df.drop(columns=index_cols, inplace=True)
+
+        return df
+
+    @staticmethod
     def _read_csv_to_df(data: dict):
         if data["state"] == RunStatus.SUCCESS.value:
-            data["result"] = pd.read_csv(
-                StringIO(data["result"]), dtype=CUSTOMER_INTERCHANGE_DTYPES
+            data["result"] = OptimizationDataset._clean_df_index(
+                pd.read_csv(StringIO(data["result"]), dtype=CUSTOMER_INTERCHANGE_DTYPES)
             )
         else:
             pass
@@ -316,7 +338,7 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Union[pd.DataFrame, None]:
+    ) -> typing.Optional[pd.DataFrame]:
         ...
 
     @staticmethod
@@ -330,13 +352,13 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool
-    ) -> typing.Union[pd.DataFrame, None]:
+    ) -> typing.Optional[pd.DataFrame]:
         ...
 
     @staticmethod
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool = False
-    ) -> typing.Union[pd.DataFrame, None]:
+    ) -> typing.Optional[pd.DataFrame]:
         """
         Check the status of a run given its ID
 
