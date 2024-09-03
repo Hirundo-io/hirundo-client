@@ -1,11 +1,14 @@
+import os
 import re
 import sys
+import typing
+from pathlib import Path
 from typing import Annotated
 from urllib.parse import urlparse
 
 import typer
 
-from hirundo._env import API_HOST
+from hirundo._env import API_HOST, EnvLocation
 
 docs = "sphinx" in sys.modules
 hirundo_epilog = (
@@ -23,7 +26,9 @@ app = typer.Typer(
 )
 
 
-def upsert_env(var_name: str, var_value: str):
+def _upsert_env(
+    dotenv_filepath: typing.Union[str, Path], var_name: str, var_value: str
+):
     """
     Change an environment variable in the .env file.
     If the variable does not exist, it will be added.
@@ -32,16 +37,28 @@ def upsert_env(var_name: str, var_value: str):
         var_name: The name of the environment variable to change.
         var_value: The new value of the environment variable.
     """
-    dotenv = "./.env"
     regex = re.compile(rf"^{var_name}=.*$")
-    with open(dotenv) as f:
-        lines = f.readlines()
+    lines = []
+    if os.path.exists(dotenv_filepath):
+        with open(dotenv_filepath) as f:
+            lines = f.readlines()
 
-    with open(dotenv, "w") as f:
+    with open(dotenv_filepath, "w") as f:
         f.writelines(line for line in lines if not regex.search(line) and line != "\n")
 
-    with open(dotenv, "a") as f:
+    with open(dotenv_filepath, "a") as f:
         f.writelines(f"\n{var_name}={var_value}")
+
+
+def upsert_env(var_name: str, var_value: str):
+    if os.path.exists(EnvLocation.DOTENV.value):
+        # If a `.env` file exists, re-use it
+        _upsert_env(EnvLocation.DOTENV.value, var_name, var_value)
+        return EnvLocation.DOTENV.name
+    else:
+        # Create a `.hirundo.conf` file with environment variables in the home directory
+        _upsert_env(EnvLocation.HOME.value, var_name, var_value)
+        return EnvLocation.HOME.name
 
 
 def fix_api_host(api_host: str):
@@ -72,8 +89,15 @@ def setup_api_key(
     Setup the API key for the Hirundo client library.
     Values are saved to a .env file in the current directory for use by the library in requests.
     """
-    upsert_env("API_KEY", api_key)
-    print("API key saved to .env for future use. Please do not share the .env file")
+    saved_to = upsert_env("API_KEY", api_key)
+    if saved_to == EnvLocation.HOME.name:
+        print(
+            "API key saved to ~/.hirundo.conf for future use. Please do not share the ~/.hirundo.conf file since it contains your secret API key."
+        )
+    elif saved_to == EnvLocation.DOTENV.name:
+        print(
+            "API key saved to local .env file for future use. Please do not share the .env file since it contains your secret API key."
+        )
 
 
 @app.command("change-remote", epilog=hirundo_epilog)
@@ -94,8 +118,13 @@ def change_api_remote(
     """
     api_host = fix_api_host(api_host)
 
-    upsert_env("API_HOST", api_host)
-    print("API host saved to .env for future use. Please do not share this file")
+    saved_to = upsert_env("API_HOST", api_host)
+    if saved_to == EnvLocation.HOME.name:
+        print(
+            "API host saved to ~/.hirundo.conf for future use. Please do not share the ~/.hirundo.conf file"
+        )
+    elif saved_to == EnvLocation.DOTENV.name:
+        print("API host saved to .env for future use. Please do not share this file")
 
 
 @app.command("setup", epilog=hirundo_epilog)
@@ -123,11 +152,37 @@ def setup(
     Setup the Hirundo client library.
     """
     api_host = fix_api_host(api_host)
-    upsert_env("API_HOST", api_host)
-    upsert_env("API_KEY", api_key)
-    print(
-        "API host and API key saved to .env for future use. Please do not share this file"
-    )
+    api_host_saved_to = upsert_env("API_HOST", api_host)
+    api_key_saved_to = upsert_env("API_KEY", api_key)
+    if api_host_saved_to != api_key_saved_to:
+        print(
+            "API host and API key saved to different locations. This should not happen. Please report this issue."
+        )
+        if api_host_saved_to == EnvLocation.HOME.name:
+            print(
+                "API host saved to ~/.hirundo.conf for future use. Please do not share the ~/.hirundo.conf file"
+            )
+        elif api_host_saved_to == EnvLocation.DOTENV.name:
+            print(
+                "API host saved to .env for future use. Please do not share this file"
+            )
+        if api_key_saved_to == EnvLocation.HOME.name:
+            print(
+                "API key saved to ~/.hirundo.conf for future use. Please do not share the ~/.hirundo.conf file since it contains your secret API key."
+            )
+        elif api_key_saved_to == EnvLocation.DOTENV.name:
+            print(
+                "API key saved to local .env file for future use. Please do not share the .env file since it contains your secret API key."
+            )
+        return
+    if api_host_saved_to == EnvLocation.HOME.name:
+        print(
+            "API host and API key saved to ~/.hirundo.conf for future use. Please do not share the ~/.hirundo.conf file since it contains your secret API key."
+        )
+    elif api_host_saved_to == EnvLocation.DOTENV.name:
+        print(
+            "API host and API key saved to .env for future use. Please do not share this file since it contains your secret API key."
+        )
 
 
 typer_click_object = typer.main.get_command(app)
