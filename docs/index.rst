@@ -48,7 +48,7 @@ Currently ``hirundo`` requires a CSV file with the following columns (all column
    - ``image_path``: The location of the image within the dataset ``root``
    - ``bbox_id``: The index of the bounding box within the dataset. Used to indicate label suspects
    - ``label``: The label of the image, i.e. which the class that was annotated for this image
-   - ``x1``, ``y1``, ``x2``, ``y2``: The bounding box coordinates of the object within the image
+   - ``xmin``, ``ymin``, ``xmax``, ``ymax``: The bounding box coordinates of the object within the image
 
 And outputs a CSV with the same columns and:
    - ``suspect_level``: object mislabel suspect level
