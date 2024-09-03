@@ -158,21 +158,25 @@ def setup(
         print(
             "API host and API key saved to different locations. This should not happen. Please report this issue."
         )
-        if api_host_saved_to == EnvLocation.HOME.name:
+        if (
+            api_host_saved_to == EnvLocation.HOME.name
+            and api_key_saved_to == EnvLocation.DOTENV.name
+        ):
             print(
                 "API host saved to ~/.hirundo.conf for future use. Please do not share the ~/.hirundo.conf file"
             )
-        elif api_host_saved_to == EnvLocation.DOTENV.name:
+            print(
+                "API key saved to local .env file for future use. Please do not share the .env file since it contains your secret API key."
+            )
+        elif (
+            api_host_saved_to == EnvLocation.DOTENV.name
+            and api_key_saved_to == EnvLocation.HOME.name
+        ):
             print(
                 "API host saved to .env for future use. Please do not share this file"
             )
-        if api_key_saved_to == EnvLocation.HOME.name:
             print(
                 "API key saved to ~/.hirundo.conf for future use. Please do not share the ~/.hirundo.conf file since it contains your secret API key."
-            )
-        elif api_key_saved_to == EnvLocation.DOTENV.name:
-            print(
-                "API key saved to local .env file for future use. Please do not share the .env file since it contains your secret API key."
             )
         return
     if api_host_saved_to == EnvLocation.HOME.name:
