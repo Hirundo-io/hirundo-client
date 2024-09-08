@@ -9,11 +9,15 @@ from hirundo import (
     StorageS3,
     StorageTypes,
 )
-from tests.dataset_optimization_shared import cleanup, dataset_optimization_sync_test
+from tests.dataset_optimization_shared import (
+    cleanup,
+    dataset_optimization_sync_test,
+    get_unique_id,
+)
 
 logger = logging.getLogger(__name__)
 
-unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-")
+unique_id = get_unique_id()
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS cifar10 classification dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
@@ -47,7 +51,7 @@ test_dataset = OptimizationDataset(
 
 
 def test_dataset_optimization():
-    cleanup(test_dataset)
+    cleanup(test_dataset, unique_id)
     full_run = dataset_optimization_sync_test(
         test_dataset, "RUN_CLASSIFICATION_AWS_OPTIMIZATION"
     )
@@ -56,4 +60,4 @@ def test_dataset_optimization():
         # TODO: Add add assertion for result
     else:
         logger.info("Full dataset optimization was not run!")
-    cleanup(test_dataset)
+    cleanup(test_dataset, unique_id)

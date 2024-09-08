@@ -1,5 +1,4 @@
 import logging
-import os
 
 from hirundo import (
     GitRepo,
@@ -13,11 +12,12 @@ from hirundo import (
 from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_sync_test,
+    get_unique_id,
 )
 
 logger = logging.getLogger(__name__)
 
-unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-")
+unique_id = get_unique_id()
 test_dataset = OptimizationDataset(
     name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,
@@ -55,11 +55,11 @@ test_dataset = OptimizationDataset(
 
 
 def test_dataset_optimization():
-    cleanup(test_dataset)
+    cleanup(test_dataset, unique_id)
     full_run = dataset_optimization_sync_test(test_dataset, "RUN_OD_GIT_OPTIMIZATION")
     if full_run is not None:
         pass
         # TODO: Add add assertion for result
     else:
         logger.info("Full dataset optimization was not run!")
-    cleanup(test_dataset)
+    cleanup(test_dataset, unique_id)

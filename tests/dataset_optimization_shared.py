@@ -1,4 +1,5 @@
 import os
+import typing
 from typing import Union
 
 from hirundo import GitRepo, OptimizationDataset, StorageIntegration
@@ -8,7 +9,43 @@ from hirundo.logger import get_logger
 logger = get_logger(__name__)
 
 
-def cleanup(test_dataset: OptimizationDataset):
+def get_unique_id():
+    return os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-")
+
+
+def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
+    if unique_id:
+        conflicting_git_repo_ids = [
+            git_repo["id"]
+            for git_repo in GitRepo.list()
+            if unique_id in git_repo["name"]
+        ]
+        for conflicting_git_repo_id in conflicting_git_repo_ids:
+            try:
+                GitRepo.delete_by_id(conflicting_git_repo_id)
+            except Exception as e:
+                logger.warning(
+                    "Failed to delete git repo with ID %s and exception %s",
+                    conflicting_git_repo_id,
+                    e,
+                )
+        conflicting_storage_integration_ids = [
+            storage_integration["id"]
+            for storage_integration in StorageIntegration.list()
+            if unique_id in storage_integration["name"]
+        ]
+        for conflicting_storage_integration_id in conflicting_storage_integration_ids:
+            try:
+                StorageIntegration.delete_by_id(conflicting_storage_integration_id)
+            except Exception as e:
+                logger.warning(
+                    "Failed to delete storage integration with ID %s and exception %s",
+                    conflicting_storage_integration_id,
+                    e,
+                )
+
+
+def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
     datasets = OptimizationDataset.list()
     dataset_ids = [
         dataset["id"] for dataset in datasets if dataset["name"] == test_dataset.name
@@ -75,6 +112,7 @@ def cleanup(test_dataset: OptimizationDataset):
                 e,
             )
     # ⬆️ Delete all datasets and storage integrations from the server for the given user's default organization
+    cleanup_conflict_by_unique_id(unique_id)
     test_dataset.clean_ids()
     # ⬆️ Reset `dataset_id`, `storage_integration_id`, and `run_id` values on `test_dataset` to default value of `None`
     # This prevents errors due to ID links to deleted datasets, storage integrations and runs
