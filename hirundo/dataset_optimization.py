@@ -40,6 +40,33 @@ class RunStatus(Enum):
     SUCCESS = "SUCCESS"
     FAILURE = "FAILURE"
     AWAITING_MANUAL_APPROVAL = "AWAITING MANUAL APPROVAL"
+    RETRYING = "RETRYING"
+
+
+STATUS_TO_TEXT_MAP = {
+    RunStatus.STARTED.value: "Optimization run in progress. Downloading dataset",
+    RunStatus.PENDING.value: "Optimization run queued and not yet started",
+    RunStatus.SUCCESS.value: "Optimization run completed successfully",
+    RunStatus.FAILURE.value: "Optimization run failed",
+    RunStatus.AWAITING_MANUAL_APPROVAL.value: "Awaiting manual approval",
+    RunStatus.RETRYING.value: "Optimization run failed. Retrying",
+}
+STATUS_TO_PROGRESS_MAP = {
+    RunStatus.STARTED.value: 0.0,
+    RunStatus.PENDING.value: 0.0,
+    RunStatus.SUCCESS.value: 100.0,
+    RunStatus.FAILURE.value: 100.0,
+    RunStatus.AWAITING_MANUAL_APPROVAL.value: 100.0,
+    RunStatus.RETRYING.value: 0.0,
+}
+STATUS_TO_CLOSE_MAP = {
+    RunStatus.STARTED.value: False,
+    RunStatus.PENDING.value: False,
+    RunStatus.SUCCESS.value: True,
+    RunStatus.FAILURE.value: True,
+    RunStatus.AWAITING_MANUAL_APPROVAL.value: False,
+    RunStatus.RETRYING.value: False,
+}
 
 
 class OptimizationDataset(BaseModel):
@@ -354,22 +381,23 @@ class OptimizationDataset(BaseModel):
         with logging_redirect_tqdm():
             t = tqdm(total=100.0)
             for iteration in OptimizationDataset._check_run_by_id(run_id):
-                if iteration["state"] == RunStatus.SUCCESS.value:
-                    t.set_description("Optimization run completed successfully")
-                    t.n = 100.0
+                if iteration["state"] in STATUS_TO_PROGRESS_MAP:
+                    t.set_description(STATUS_TO_TEXT_MAP[iteration["state"]])
+                    t.n = STATUS_TO_PROGRESS_MAP[iteration["state"]]
                     t.refresh()
-                    t.close()
-                    return iteration["result"]
-                elif iteration["state"] == RunStatus.PENDING.value:
-                    t.set_description("Optimization run queued and not yet started")
-                    t.n = 0.0
-                    t.refresh()
-                elif iteration["state"] == RunStatus.STARTED.value:
-                    t.set_description(
-                        "Optimization run in progress. Downloading dataset"
-                    )
-                    t.n = 0.0
-                    t.refresh()
+                    if iteration["state"] == RunStatus.FAILURE.value:
+                        raise HirundoError(
+                            f"Optimization run failed with error: {iteration['result']}"
+                        )
+                    elif STATUS_TO_CLOSE_MAP[iteration["state"]]:
+                        t.close()
+                        return iteration["result"]
+                    elif (
+                        iteration["state"] == RunStatus.AWAITING_MANUAL_APPROVAL.value
+                        and stop_on_manual_approval
+                    ):
+                        t.close()
+                        return None
                 elif iteration["state"] is None:
                     if (
                         iteration["result"]
@@ -388,19 +416,6 @@ class OptimizationDataset(BaseModel):
                         t.set_description(desc)
                         t.n = current_progress_percentage
                         t.refresh()
-                elif iteration["state"] == RunStatus.AWAITING_MANUAL_APPROVAL.value:
-                    t.set_description("Awaiting manual approval")
-                    t.n = 100.0
-                    t.refresh()
-                    if stop_on_manual_approval:
-                        t.close()
-                        return None
-                elif iteration["state"] == RunStatus.FAILURE.value:
-                    t.set_description("Optimization run failed")
-                    t.close()
-                    raise HirundoError(
-                        f"Optimization run failed with error: {iteration['result']}"
-                    )
         raise HirundoError("Optimization run failed with an unknown error")
 
     @overload
