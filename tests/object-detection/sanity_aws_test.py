@@ -55,8 +55,14 @@ test_dataset = OptimizationDataset(
 )
 
 
-def test_dataset_optimization():
+@pytest.fixture(autouse=True)
+def cleanup_tests():
     cleanup(test_dataset, unique_id)
+    yield
+    cleanup(test_dataset, unique_id)
+
+
+def test_dataset_optimization():
     full_run = dataset_optimization_sync_test(
         test_dataset, sanity=True, alternative_env="RUN_OD_AWS_SANITY_OPTIMIZATION"
     )
@@ -65,13 +71,10 @@ def test_dataset_optimization():
         # TODO: Add add assertion for result
     else:
         logger.info("Full dataset optimization was not run!")
-    cleanup(test_dataset, unique_id)
 
 
 @pytest.mark.asyncio
 async def test_async_dataset_optimization():
-    cleanup(test_dataset, unique_id)
     await dataset_optimization_async_test(
         test_dataset, "RUN_AWS_OD_SANITY_OPTIMIZATION"
     )
-    cleanup(test_dataset, unique_id)
