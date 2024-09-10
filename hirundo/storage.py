@@ -10,6 +10,7 @@ from pydantic_core import Url
 from hirundo._constraints import S3BucketUrl, StorageIntegrationName
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
+from hirundo._http import raise_for_status_with_reason
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.git import GitRepo
 from hirundo.logger import get_logger
@@ -206,7 +207,7 @@ class StorageIntegration(BaseModel):
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
-        storage_integrations.raise_for_status()
+        raise_for_status_with_reason(storage_integrations)
         return storage_integrations.json()
 
     @staticmethod
@@ -222,7 +223,7 @@ class StorageIntegration(BaseModel):
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
-        storage_integration.raise_for_status()
+        raise_for_status_with_reason(storage_integration)
         logger.info("Deleted storage integration with ID: %s", storage_integration_id)
 
     def delete(self) -> None:
@@ -248,7 +249,7 @@ class StorageIntegration(BaseModel):
             },
             timeout=MODIFY_TIMEOUT,
         )
-        storage_integration.raise_for_status()
+        raise_for_status_with_reason(storage_integration)
         storage_integration_id = storage_integration.json()["id"]
         self.id = storage_integration_id
         logger.info("Created storage integration with ID: %s", storage_integration_id)

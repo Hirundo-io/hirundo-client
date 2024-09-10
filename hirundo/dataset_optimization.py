@@ -16,6 +16,7 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
+from hirundo._http import raise_for_status_with_reason
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.enum import DatasetMetadataType, LabellingType
@@ -135,7 +136,7 @@ class OptimizationDataset(BaseModel):
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
-        response.raise_for_status()
+        raise_for_status_with_reason(response)
         return response.json()
 
     @staticmethod
@@ -151,7 +152,7 @@ class OptimizationDataset(BaseModel):
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
-        response.raise_for_status()
+        raise_for_status_with_reason(response)
         logger.info("Deleted dataset with ID: %s", dataset_id)
 
     def delete(self, storage_integration=True) -> None:
@@ -206,7 +207,7 @@ class OptimizationDataset(BaseModel):
             },
             timeout=MODIFY_TIMEOUT,
         )
-        dataset_response.raise_for_status()
+        raise_for_status_with_reason(dataset_response)
         self.dataset_id = dataset_response.json()["id"]
         if not self.dataset_id:
             raise HirundoError("Failed to create the dataset")
@@ -230,7 +231,7 @@ class OptimizationDataset(BaseModel):
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
-        run_response.raise_for_status()
+        raise_for_status_with_reason(run_response)
         return run_response.json()["run_id"]
 
     def run_optimization(self) -> str:
@@ -533,7 +534,7 @@ class OptimizationDataset(BaseModel):
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
-        response.raise_for_status()
+        raise_for_status_with_reason(response)
 
     def cancel(self) -> None:
         """
