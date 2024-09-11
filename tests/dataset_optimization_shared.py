@@ -14,35 +14,34 @@ def get_unique_id():
 
 
 def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
-    if unique_id:
-        conflicting_git_repo_ids = [
-            git_repo["id"]
-            for git_repo in GitRepo.list()
-            if unique_id in git_repo["name"]
-        ]
-        for conflicting_git_repo_id in conflicting_git_repo_ids:
-            try:
-                GitRepo.delete_by_id(conflicting_git_repo_id)
-            except Exception as e:
-                logger.warning(
-                    "Failed to delete git repo with ID %s and exception %s",
-                    conflicting_git_repo_id,
-                    e,
-                )
-        conflicting_storage_integration_ids = [
-            storage_integration["id"]
-            for storage_integration in StorageIntegration.list()
-            if unique_id in storage_integration["name"]
-        ]
-        for conflicting_storage_integration_id in conflicting_storage_integration_ids:
-            try:
-                StorageIntegration.delete_by_id(conflicting_storage_integration_id)
-            except Exception as e:
-                logger.warning(
-                    "Failed to delete storage integration with ID %s and exception %s",
-                    conflicting_storage_integration_id,
-                    e,
-                )
+    if not unique_id:
+        return
+    conflicting_git_repo_ids = [
+        git_repo["id"] for git_repo in GitRepo.list() if unique_id in git_repo["name"]
+    ]
+    for conflicting_git_repo_id in conflicting_git_repo_ids:
+        try:
+            GitRepo.delete_by_id(conflicting_git_repo_id)
+        except Exception as e:
+            logger.warning(
+                "Failed to delete git repo with ID %s and exception %s",
+                conflicting_git_repo_id,
+                e,
+            )
+    conflicting_storage_integration_ids = [
+        storage_integration["id"]
+        for storage_integration in StorageIntegration.list()
+        if unique_id in storage_integration["name"]
+    ]
+    for conflicting_storage_integration_id in conflicting_storage_integration_ids:
+        try:
+            StorageIntegration.delete_by_id(conflicting_storage_integration_id)
+        except Exception as e:
+            logger.warning(
+                "Failed to delete storage integration with ID %s and exception %s",
+                conflicting_storage_integration_id,
+                e,
+            )
 
 
 def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
