@@ -42,6 +42,17 @@ class RunStatus(Enum):
     AWAITING_MANUAL_APPROVAL = "AWAITING MANUAL APPROVAL"
 
 
+class DatasetOptimizationResults(BaseModel):
+    suspects: pd.DataFrame
+    """
+    A pandas DataFrame containing the results of the optimization run
+    """
+    warnings_and_errors: pd.DataFrame
+    """
+    A pandas DataFrame containing the warnings and errors of the optimization run
+    """
+
+
 class OptimizationDataset(BaseModel):
     name: str
     """
@@ -274,10 +285,13 @@ class OptimizationDataset(BaseModel):
         return df
 
     @staticmethod
-    def _read_csv_to_df(data: dict):
+    def _read_csvs_to_df(data: dict):
         if data["state"] == RunStatus.SUCCESS.value:
-            data["result"] = OptimizationDataset._clean_df_index(
-                pd.read_csv(StringIO(data["result"]))
+            data["result"]["suspects"] = OptimizationDataset._clean_df_index(
+                pd.read_csv(StringIO(data["result"]["suspects"]))
+            )
+            data["result"]["warnings_and_errors"] = OptimizationDataset._clean_df_index(
+                pd.read_csv(StringIO(data["result"]["warnings_and_errors"]))
             )
         else:
             pass
@@ -307,7 +321,7 @@ class OptimizationDataset(BaseModel):
                 if not last_event:
                     continue
                 data = last_event["data"]
-                OptimizationDataset._read_csv_to_df(data)
+                OptimizationDataset._read_csvs_to_df(data)
                 yield data
         if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:
             OptimizationDataset._check_run_by_id(run_id, retry + 1)
@@ -316,27 +330,27 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Optional[pd.DataFrame]:
+    ) -> typing.Optional[DatasetOptimizationResults]:
         ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> pd.DataFrame:
+    ) -> DatasetOptimizationResults:
         ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool
-    ) -> typing.Optional[pd.DataFrame]:
+    ) -> typing.Optional[DatasetOptimizationResults]:
         ...
 
     @staticmethod
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool = False
-    ) -> typing.Optional[pd.DataFrame]:
+    ) -> typing.Optional[DatasetOptimizationResults]:
         """
         Check the status of a run given its ID
 
@@ -345,7 +359,7 @@ class OptimizationDataset(BaseModel):
             stop_on_manual_approval: If True, the function will return `None` if the run is awaiting manual approval
 
         Returns:
-            A pandas DataFrame with the results of the optimization run
+            A DatasetOptimizationResults object with the results of the optimization run
 
         Raises:
             HirundoError: If the maximum number of retries is reached or if the run fails
@@ -359,7 +373,10 @@ class OptimizationDataset(BaseModel):
                     t.n = 100.0
                     t.refresh()
                     t.close()
-                    return iteration["result"]
+                    return DatasetOptimizationResults(
+                        suspects=iteration["result"]["suspects"],
+                        warnings_and_errors=iteration["result"]["warnings_and_errors"],
+                    )
                 elif iteration["state"] == RunStatus.PENDING.value:
                     t.set_description("Optimization run queued and not yet started")
                     t.n = 0.0
@@ -406,18 +423,18 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Union[pd.DataFrame, None]:
+    ) -> typing.Optional[DatasetOptimizationResults]:
         ...
 
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> pd.DataFrame:
+    ) -> DatasetOptimizationResults:
         ...
 
     def check_run(
         self, stop_on_manual_approval: bool = False
-    ) -> typing.Union[pd.DataFrame, None]:
+    ) -> typing.Optional[DatasetOptimizationResults]:
         """
         Check the status of the current active instance's run.
 
