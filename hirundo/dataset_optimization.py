@@ -59,14 +59,6 @@ STATUS_TO_PROGRESS_MAP = {
     RunStatus.AWAITING_MANUAL_APPROVAL.value: 100.0,
     RunStatus.RETRYING.value: 0.0,
 }
-STATUS_TO_CLOSE_MAP = {
-    RunStatus.STARTED.value: False,
-    RunStatus.PENDING.value: False,
-    RunStatus.SUCCESS.value: True,
-    RunStatus.FAILURE.value: True,
-    RunStatus.AWAITING_MANUAL_APPROVAL.value: False,
-    RunStatus.RETRYING.value: False,
-}
 
 
 class OptimizationDataset(BaseModel):
@@ -389,7 +381,7 @@ class OptimizationDataset(BaseModel):
                         raise HirundoError(
                             f"Optimization run failed with error: {iteration['result']}"
                         )
-                    elif STATUS_TO_CLOSE_MAP[iteration["state"]]:
+                    elif iteration["state"] == RunStatus.SUCCESS.value:
                         t.close()
                         return iteration["result"]
                     elif (
