@@ -1,0 +1,6 @@
+.venv
+.ruff_cache
+*.egg-info
+build
+logs
+source

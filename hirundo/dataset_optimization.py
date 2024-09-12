@@ -6,14 +6,17 @@ from io import StringIO
 from typing import Union, overload
 
 import httpx
+import numpy as np
 import pandas as pd
 import requests
+from pandas._typing import DtypeArg
 from pydantic import BaseModel, Field, model_validator
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
+from hirundo._http import raise_for_status_with_reason
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.enum import DatasetMetadataType, LabellingType
@@ -58,6 +61,26 @@ STATUS_TO_PROGRESS_MAP = {
     RunStatus.FAILURE.value: 100.0,
     RunStatus.AWAITING_MANUAL_APPROVAL.value: 100.0,
     RunStatus.RETRYING.value: 0.0,
+}
+
+
+CUSTOMER_INTERCHANGE_DTYPES: DtypeArg = {
+    "image_path": str,
+    "label_path": str,
+    "segments_mask_path": str,
+    "segment_id": np.int32,
+    "label": str,
+    "bbox_id": str,
+    "xmin": np.int32,
+    "ymin": np.int32,
+    "xmax": np.int32,
+    "ymax": np.int32,
+    "suspect_level": np.float32,  # If exists, must be one of the values in the enum below
+    "suggested_label": str,
+    "suggested_label_conf": np.float32,
+    "status": str,
+    # ⬆️ If exists, must be one of the following:
+    # NO_LABELS/MISSING_IMAGE/INVALID_IMAGE/INVALID_BBOX/INVALID_BBOX_SIZE/INVALID_SEG/INVALID_SEG_SIZE
 }
 
 
@@ -132,7 +155,7 @@ class OptimizationDataset(BaseModel):
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
-        response.raise_for_status()
+        raise_for_status_with_reason(response)
         return response.json()
 
     @staticmethod
@@ -148,7 +171,7 @@ class OptimizationDataset(BaseModel):
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
-        response.raise_for_status()
+        raise_for_status_with_reason(response)
         logger.info("Deleted dataset with ID: %s", dataset_id)
 
     def delete(self, storage_integration=True) -> None:
@@ -203,7 +226,7 @@ class OptimizationDataset(BaseModel):
             },
             timeout=MODIFY_TIMEOUT,
         )
-        dataset_response.raise_for_status()
+        raise_for_status_with_reason(dataset_response)
         self.dataset_id = dataset_response.json()["id"]
         if not self.dataset_id:
             raise HirundoError("Failed to create the dataset")
@@ -227,7 +250,7 @@ class OptimizationDataset(BaseModel):
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
-        run_response.raise_for_status()
+        raise_for_status_with_reason(run_response)
         return run_response.json()["run_id"]
 
     def run_optimization(self) -> str:
@@ -296,7 +319,7 @@ class OptimizationDataset(BaseModel):
     def _read_csv_to_df(data: dict):
         if data["state"] == RunStatus.SUCCESS.value:
             data["result"] = OptimizationDataset._clean_df_index(
-                pd.read_csv(StringIO(data["result"]))
+                pd.read_csv(StringIO(data["result"]), dtype=CUSTOMER_INTERCHANGE_DTYPES)
             )
         else:
             pass
@@ -513,7 +536,7 @@ class OptimizationDataset(BaseModel):
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
-        response.raise_for_status()
+        raise_for_status_with_reason(response)
 
     def cancel(self) -> None:
         """

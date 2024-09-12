@@ -8,6 +8,7 @@ from pydantic_core import Url
 
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
+from hirundo._http import raise_for_status_with_reason
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.logger import get_logger
 
@@ -112,7 +113,7 @@ class GitRepo(BaseModel):
             },
             timeout=MODIFY_TIMEOUT,
         )
-        git_repo.raise_for_status()
+        raise_for_status_with_reason(git_repo)
         git_repo_id = git_repo.json()["id"]
         self.id = git_repo_id
         return git_repo_id
@@ -129,7 +130,7 @@ class GitRepo(BaseModel):
             },
             timeout=READ_TIMEOUT,
         )
-        git_repos.raise_for_status()
+        raise_for_status_with_reason(git_repos)
         return git_repos.json()
 
     @staticmethod
@@ -147,7 +148,7 @@ class GitRepo(BaseModel):
             },
             timeout=MODIFY_TIMEOUT,
         )
-        git_repo.raise_for_status()
+        raise_for_status_with_reason(git_repo)
 
     def delete(self):
         """
