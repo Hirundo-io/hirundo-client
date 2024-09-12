@@ -62,6 +62,9 @@ STATUS_TO_PROGRESS_MAP = {
 
 
 class DatasetOptimizationResults(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
     suspects: pd.DataFrame
     """
     A pandas DataFrame containing the results of the optimization run
