@@ -335,22 +335,19 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Optional[pd.DataFrame]:
-        ...
+    ) -> typing.Optional[pd.DataFrame]: ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> pd.DataFrame:
-        ...
+    ) -> pd.DataFrame: ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool
-    ) -> typing.Optional[pd.DataFrame]:
-        ...
+    ) -> typing.Optional[pd.DataFrame]: ...
 
     @staticmethod
     def check_run_by_id(
@@ -413,14 +410,12 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Union[pd.DataFrame, None]:
-        ...
+    ) -> typing.Union[pd.DataFrame, None]: ...
 
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> pd.DataFrame:
-        ...
+    ) -> pd.DataFrame: ...
 
     def check_run(
         self, stop_on_manual_approval: bool = False
