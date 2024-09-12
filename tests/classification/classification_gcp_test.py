@@ -53,7 +53,7 @@ def test_dataset_optimization():
         test_dataset, "RUN_CLASSIFICATION_GCP_OPTIMIZATION"
     )
     if full_run is not None:
-        assert full_run.warnings_and_errors == 0
+        assert full_run.warnings_and_errors.size == 0
         # TODO: Add more assertions for results
     else:
         logger.info("Full dataset optimization was not run!")

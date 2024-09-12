@@ -62,8 +62,7 @@ STATUS_TO_PROGRESS_MAP = {
 
 
 class DatasetOptimizationResults(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
     suspects: pd.DataFrame
     """
