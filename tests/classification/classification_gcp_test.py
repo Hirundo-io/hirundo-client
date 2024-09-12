@@ -2,6 +2,7 @@ import json
 import logging
 import os
 
+import pytest
 from hirundo import (
     LabellingType,
     OptimizationDataset,
@@ -14,11 +15,12 @@ from tests.classification.cifar100_classes import cifar100_classes
 from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_sync_test,
+    get_unique_id,
 )
 
 logger = logging.getLogger(__name__)
 
-unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-")
+unique_id = get_unique_id()
 test_dataset = OptimizationDataset(
     name=f"TEST-GCP cifar 100 classification dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
@@ -39,8 +41,14 @@ test_dataset = OptimizationDataset(
 )
 
 
+@pytest.fixture(autouse=True)
+def cleanup_tests():
+    cleanup(test_dataset, unique_id)
+    yield
+    cleanup(test_dataset, unique_id)
+
+
 def test_dataset_optimization():
-    cleanup(test_dataset)
     full_run = dataset_optimization_sync_test(
         test_dataset, "RUN_CLASSIFICATION_GCP_OPTIMIZATION"
     )
@@ -49,4 +57,3 @@ def test_dataset_optimization():
         # TODO: Add more assertions for results
     else:
         logger.info("Full dataset optimization was not run!")
-    cleanup(test_dataset)

@@ -14,11 +14,12 @@ from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_async_test,
     dataset_optimization_sync_test,
+    get_unique_id,
 )
 
 logger = logging.getLogger(__name__)
 
-unique_id = os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-")
+unique_id = get_unique_id()
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS-BDD-100k-subset-1000-OD-dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,
@@ -54,8 +55,14 @@ test_dataset = OptimizationDataset(
 )
 
 
+@pytest.fixture(autouse=True)
+def cleanup_tests():
+    cleanup(test_dataset, unique_id)
+    yield
+    cleanup(test_dataset, unique_id)
+
+
 def test_dataset_optimization():
-    cleanup(test_dataset)
     full_run = dataset_optimization_sync_test(
         test_dataset, sanity=True, alternative_env="RUN_OD_AWS_SANITY_OPTIMIZATION"
     )
@@ -65,13 +72,10 @@ def test_dataset_optimization():
         # TODO: Add more assertions for results
     else:
         logger.info("Full dataset optimization was not run!")
-    cleanup(test_dataset)
 
 
 @pytest.mark.asyncio
 async def test_async_dataset_optimization():
-    cleanup(test_dataset)
     await dataset_optimization_async_test(
         test_dataset, "RUN_AWS_OD_SANITY_OPTIMIZATION"
     )
-    cleanup(test_dataset)
