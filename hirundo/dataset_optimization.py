@@ -392,6 +392,7 @@ class OptimizationDataset(BaseModel):
                 if iteration["state"] in STATUS_TO_PROGRESS_MAP:
                     t.set_description(STATUS_TO_TEXT_MAP[iteration["state"]])
                     t.n = STATUS_TO_PROGRESS_MAP[iteration["state"]]
+                    logger.debug("Setting progress to %s", t.n)
                     t.refresh()
                     if iteration["state"] == RunStatus.FAILURE.value:
                         raise HirundoError(
@@ -428,6 +429,7 @@ class OptimizationDataset(BaseModel):
                         )
                         t.set_description(desc)
                         t.n = current_progress_percentage
+                        logger.debug("Setting progress to %s", t.n)
                         t.refresh()
         raise HirundoError("Optimization run failed with an unknown error")
 
