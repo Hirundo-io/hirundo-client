@@ -29,9 +29,9 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
                 e,
             )
     conflicting_storage_integration_ids = [
-        storage_integration["id"]
+        storage_integration.id
         for storage_integration in StorageIntegration.list()
-        if unique_id in storage_integration["name"]
+        if unique_id in storage_integration.name
     ]
     for conflicting_storage_integration_id in conflicting_storage_integration_ids:
         try:
@@ -47,20 +47,22 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
 def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
     datasets = OptimizationDataset.list()
     dataset_ids = [
-        dataset["id"] for dataset in datasets if dataset["name"] == test_dataset.name
+        dataset.id
+        for dataset in datasets
+        if dataset.name == test_dataset.name and dataset.id
     ]
     storage_integration_ids = [
-        dataset["storage_link"]["storage_integration_id"]
+        dataset.storage_integration_id
         for dataset in datasets
-        if dataset["name"] == test_dataset.name
+        if dataset.name == test_dataset.name
     ]
     running_datasets = {
-        dataset["id"]: dataset["run_id"]
+        dataset.id: dataset.run_id
         for dataset in datasets
         if (
-            dataset["name"] == test_dataset.name
-            and dataset["run_id"] is not None
-            and ("completed" not in dataset or dataset["completed"] is None)
+            dataset.name == test_dataset.name
+            and dataset.run_id is not None
+            and dataset.status == RunStatus.STARTED
         )
     }
     if len(dataset_ids) > 0:
@@ -81,11 +83,12 @@ def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
             )
     storage_integrations = StorageIntegration.list()
     git_repo_ids = [
-        integration["git"]["repo"]["id"]
+        integration.git.repo.id
         for integration in storage_integrations
-        if integration["id"] in storage_integration_ids
-        and integration["git"] is not None
-        and integration["git"]["repo"] is not None
+        if integration.id in storage_integration_ids
+        and integration.git is not None
+        and integration.git.repo is not None
+        and integration.git.repo.id is not None
     ]
     if len(storage_integration_ids) > 0:
         logger.debug(

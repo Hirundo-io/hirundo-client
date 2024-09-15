@@ -8,7 +8,6 @@ from hirundo import (
     OptimizationDataset,
     StorageGCP,
     StorageIntegration,
-    StorageLink,
     StorageTypes,
 )
 from tests.classification.cifar100_classes import cifar100_classes
@@ -24,18 +23,16 @@ unique_id = get_unique_id()
 test_dataset = OptimizationDataset(
     name=f"TEST-GCP cifar 100 classification dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
-    dataset_storage=StorageLink(
-        storage_integration=StorageIntegration(
-            name=f"cifar100bucket{unique_id}",
-            type=StorageTypes.GCP,
-            gcp=StorageGCP(
-                bucket_name="cifar100bucket",
-                project="Hirundo-global",
-                credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
-            ),
+    storage_integration=StorageIntegration(
+        name=f"cifar100bucket{unique_id}",
+        type=StorageTypes.GCP,
+        gcp=StorageGCP(
+            bucket_name="cifar100bucket",
+            project="Hirundo-global",
+            credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
         ),
-        path="/pytorch-cifar/data",
     ),
+    root="/pytorch-cifar/data",
     dataset_metadata_path="cifar100.csv",
     classes=cifar100_classes,
 )

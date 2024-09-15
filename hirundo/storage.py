@@ -81,6 +81,9 @@ class StorageTypes(str, Enum):
 
 class StorageIntegration(BaseModel):
     id: Union[int, None] = None
+    """
+    The ID of the `StorageIntegration` in the Hirundo system.
+    """
 
     organization_id: Union[int, None] = None
     """
@@ -192,7 +195,41 @@ class StorageIntegration(BaseModel):
     """
 
     @staticmethod
-    def list(organization_id: typing.Union[int, None] = None) -> list[dict]:
+    def get_by_id(storage_integration_id: int) -> "StorageIntegration":
+        """
+        Retrieves a `StorageIntegration` instance from the server by its ID
+
+        Args:
+            storage_integration_id: The ID of the `StorageIntegration` to retrieve
+        """
+        storage_integration = requests.get(
+            f"{API_HOST}/storage-integration/{storage_integration_id}",
+            headers=get_auth_headers(),
+            timeout=READ_TIMEOUT,
+        )
+        raise_for_status_with_reason(storage_integration)
+        return StorageIntegration(**storage_integration.json())
+
+    @staticmethod
+    def get_by_name(name: str) -> "StorageIntegration":
+        """
+        Retrieves a `StorageIntegration` instance from the server by its name
+
+        Args:
+            name: The name of the `StorageIntegration` to retrieve
+        """
+        storage_integrations = requests.get(
+            f"{API_HOST}/storage-integration/by-name/{name}",
+            headers=get_auth_headers(),
+            timeout=READ_TIMEOUT,
+        )
+        raise_for_status_with_reason(storage_integrations)
+        return StorageIntegration(**storage_integrations.json()[0])
+
+    @staticmethod
+    def list(
+        organization_id: typing.Optional[int] = None,
+    ) -> list["StorageIntegration"]:
         """
         Lists all the `StorageIntegration`'s created by user's default organization
         Note: The return type is `list[dict]` and not `list[StorageIntegration]`
@@ -208,7 +245,7 @@ class StorageIntegration(BaseModel):
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(storage_integrations)
-        return storage_integrations.json()
+        return [StorageIntegration(**si) for si in storage_integrations.json()]
 
     @staticmethod
     def delete_by_id(storage_integration_id) -> None:
@@ -234,7 +271,7 @@ class StorageIntegration(BaseModel):
             raise ValueError("No StorageIntegration has been created")
         self.delete_by_id(self.id)
 
-    def create(self) -> int:
+    def create(self, replace_if_exists: typing.Optional[bool] = None) -> int:
         """
         Create a `StorageIntegration` instance on the server
         """
@@ -242,7 +279,10 @@ class StorageIntegration(BaseModel):
             self.git.repo_id = self.git.repo.create()
         storage_integration = requests.post(
             f"{API_HOST}/storage-integration/",
-            json=self.model_dump(),
+            json={
+                **self.model_dump(),
+                "replace_if_exists": replace_if_exists,
+            },
             headers={
                 **json_headers,
                 **get_auth_headers(),
@@ -280,17 +320,3 @@ class StorageIntegration(BaseModel):
                 else StorageTypes.LOCAL
             )
         return self
-
-
-class StorageLink(BaseModel):
-    storage_integration: StorageIntegration
-    """
-    The `StorageIntegration` instance to link to.
-    """
-    path: str = "/"
-    """
-    Path for the `root` to link to within the `StorageIntegration` instance,
-    e.g. a prefix path/folder within an S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
-
-    Note: Only files in this path will be retrieved and it will be used as the root for paths in the CSV.
-    """

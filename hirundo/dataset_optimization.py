@@ -21,7 +21,7 @@ from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.enum import DatasetMetadataType, LabellingType
 from hirundo.logger import get_logger
-from hirundo.storage import StorageIntegration, StorageLink
+from hirundo.storage import StorageIntegration
 
 logger = get_logger(__name__)
 
@@ -85,6 +85,10 @@ CUSTOMER_INTERCHANGE_DTYPES: DtypeArg = {
 
 
 class OptimizationDataset(BaseModel):
+    id: Union[int, None] = Field(default=None)
+    """
+    The ID of the dataset created on the server.
+    """
     name: str
     """
     The name of the dataset. Used to identify it amongst the list of datasets
@@ -96,13 +100,23 @@ class OptimizationDataset(BaseModel):
     - `LabellingType.SingleLabelClassification`: Indicates that the dataset is for classification tasks
     - `LabellingType.ObjectDetection`: Indicates that the dataset is for object detection tasks
     """
-    dataset_storage: Union[StorageLink, None]
+    storage_integration_id: Union[int, None] = None
     """
-    The storage link to the dataset. This can be a link to a file or a directory containing the dataset.
-    If `None`, the `dataset_id` field must be set.
+    The ID of the storage integration used to store the dataset and metadata.
+    """
+    storage_integration: Union[StorageIntegration, None] = None
+    """
+    The `StorageIntegration` instance to link to.
+    """
+    root: str = "/"
+    """
+    Path for the `root` to link to within the `StorageIntegration` instance,
+    e.g. a prefix path/folder within an S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
+
+    Note: Only files in this path will be retrieved and it will be used as the root for paths in the CSV.
     """
 
-    classes: list[str]
+    classes: typing.Optional[list[str]] = None
     """
     A full list of possible classes used in classification / object detection.
     It is currently required for clarity and performance.
@@ -110,7 +124,7 @@ class OptimizationDataset(BaseModel):
     dataset_metadata_path: str = "metadata.csv"
     """
     The path to the dataset metadata file within storage integration, e.g. S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
-    Note: This path will be prefixed with the `StorageLink`'s `path`.
+    Note: This path will be prefixed with the `root` path.
     """
     dataset_metadata_type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
     """
@@ -120,27 +134,64 @@ class OptimizationDataset(BaseModel):
     Currently no other formats are supported. Future versions of `hirundo` may support additional formats.
     """
 
-    storage_integration_id: Union[int, None] = Field(default=None, init=False)
-    """
-    The ID of the storage integration used to store the dataset and metadata.
-    """
-    dataset_id: Union[int, None] = Field(default=None, init=False)
-    """
-    The ID of the dataset created on the server.
-    """
-    run_id: Union[str, None] = Field(default=None, init=False)
+    run_id: typing.Optional[str] = Field(default=None, init=False)
     """
     The ID of the Dataset Optimization run created on the server.
     """
 
+    status: typing.Optional[RunStatus] = None
+
     @model_validator(mode="after")
     def validate_dataset(self):
-        if self.dataset_storage is None and self.storage_integration_id is None:
-            raise ValueError("No dataset storage has been provided")
+        if self.storage_integration is None and self.storage_integration_id is None:
+            raise ValueError(
+                "No dataset storage has been provided. Provide on via `storage_integration` or `storage_integration_id`"
+            )
+        elif (
+            self.storage_integration is not None
+            and self.storage_integration_id is not None
+        ):
+            raise ValueError(
+                "Both `storage_integration` and `storage_integration_id` have been provided. Pick one."
+            )
         return self
 
     @staticmethod
-    def list(organization_id: Union[int, None] = None) -> list[dict]:
+    def get_by_id(dataset_id: int) -> "OptimizationDataset":
+        """
+        Get a `OptimizationDataset` instance from the server by its ID
+
+        Args:
+            dataset_id: The ID of the `OptimizationDataset` instance to get
+        """
+        response = requests.get(
+            f"{API_HOST}/dataset-optimization/dataset/{dataset_id}",
+            headers=get_auth_headers(),
+            timeout=READ_TIMEOUT,
+        )
+        raise_for_status_with_reason(response)
+        dataset = response.json()
+        return OptimizationDataset(**dataset)
+
+    @staticmethod
+    def get_by_name(name: str) -> "OptimizationDataset":
+        """
+        Get a `OptimizationDataset` instance from the server by its name
+
+        Args:
+            name: The name of the `OptimizationDataset` instance to get
+        """
+        response = requests.get(
+            f"{API_HOST}/dataset-optimization/dataset/by-name/{name}",
+            headers=get_auth_headers(),
+            timeout=READ_TIMEOUT,
+        )
+        raise_for_status_with_reason(response)
+        dataset = response.json()
+        return OptimizationDataset(**dataset)
+
+    @staticmethod
+    def list(organization_id: Union[int, None] = None) -> list["OptimizationDataset"]:
         """
         Lists all the `OptimizationDataset` instances created by user's default organization
         or the `organization_id` passed
@@ -156,7 +207,7 @@ class OptimizationDataset(BaseModel):
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(response)
-        return response.json()
+        return [OptimizationDataset(**ds) for ds in response.json()]
 
     @staticmethod
     def delete_by_id(dataset_id: int) -> None:
@@ -190,24 +241,24 @@ class OptimizationDataset(BaseModel):
             if not self.storage_integration_id:
                 raise ValueError("No storage integration has been created")
             StorageIntegration.delete_by_id(self.storage_integration_id)
-        if not self.dataset_id:
+        if not self.id:
             raise ValueError("No dataset has been created")
-        self.delete_by_id(self.dataset_id)
+        self.delete_by_id(self.id)
 
-    def create(self) -> int:
+    def create(self, replace_if_exists: typing.Optional[bool] = None) -> int:
         """
         Create a `OptimizationDataset` instance on the server.
         If `storage_integration_id` is not set, it will be created.
         """
-        if not self.dataset_storage:
+        if not self.storage_integration:
             raise ValueError("No dataset storage has been provided")
         if (
-            self.dataset_storage
-            and self.dataset_storage.storage_integration
+            self.storage_integration
+            and self.storage_integration
             and not self.storage_integration_id
         ):
-            self.storage_integration_id = (
-                self.dataset_storage.storage_integration.create()
+            self.storage_integration_id = self.storage_integration.create(
+                replace_if_exists=replace_if_exists,
             )
         model_dict = self.model_dump()
         # ⬆️ Get dict of model fields from Pydantic model instance
@@ -216,7 +267,8 @@ class OptimizationDataset(BaseModel):
             json={
                 "dataset_storage": {
                     "storage_integration_id": self.storage_integration_id,
-                    "path": self.dataset_storage.path,
+                    "root": self.root,
+                    "replace_if_exists": replace_if_exists,
                 },
                 **{k: model_dict[k] for k in model_dict.keys() - {"dataset_storage"}},
             },
@@ -227,11 +279,11 @@ class OptimizationDataset(BaseModel):
             timeout=MODIFY_TIMEOUT,
         )
         raise_for_status_with_reason(dataset_response)
-        self.dataset_id = dataset_response.json()["id"]
-        if not self.dataset_id:
+        self.id = dataset_response.json()["id"]
+        if not self.id:
             raise HirundoError("Failed to create the dataset")
-        logger.info("Created dataset with ID: %s", self.dataset_id)
-        return self.dataset_id
+        logger.info("Created dataset with ID: %s", self.id)
+        return self.id
 
     @staticmethod
     def launch_optimization_run(dataset_id: int) -> str:
@@ -262,9 +314,9 @@ class OptimizationDataset(BaseModel):
             An ID of the run (`run_id`) and stores that `run_id` on the instance
         """
         try:
-            if not self.dataset_id:
-                self.dataset_id = self.create()
-            run_id = self.launch_optimization_run(self.dataset_id)
+            if not self.id:
+                self.id = self.create()
+            run_id = self.launch_optimization_run(self.id)
             self.run_id = run_id
             logger.info("Started the run with ID: %s", run_id)
             return run_id
@@ -290,7 +342,7 @@ class OptimizationDataset(BaseModel):
         Reset `dataset_id`, `storage_integration_id`, and `run_id` values on the instance to default value of `None`
         """
         self.storage_integration_id = None
-        self.dataset_id = None
+        self.id = None
         self.run_id = None
 
     @staticmethod
@@ -358,19 +410,22 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Optional[pd.DataFrame]: ...
+    ) -> typing.Optional[pd.DataFrame]:
+        ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> pd.DataFrame: ...
+    ) -> pd.DataFrame:
+        ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool
-    ) -> typing.Optional[pd.DataFrame]: ...
+    ) -> typing.Optional[pd.DataFrame]:
+        ...
 
     @staticmethod
     def check_run_by_id(
@@ -433,16 +488,18 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Union[pd.DataFrame, None]: ...
+    ) -> typing.Optional[pd.DataFrame]:
+        ...
 
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> pd.DataFrame: ...
+    ) -> pd.DataFrame:
+        ...
 
     def check_run(
         self, stop_on_manual_approval: bool = False
-    ) -> typing.Union[pd.DataFrame, None]:
+    ) -> typing.Optional[pd.DataFrame]:
         """
         Check the status of the current active instance's run.
 

@@ -8,7 +8,6 @@ from hirundo import (
     OptimizationDataset,
     StorageGCP,
     StorageIntegration,
-    StorageLink,
     StorageTypes,
 )
 from tests.dataset_optimization_shared import (
@@ -24,18 +23,16 @@ unique_id = get_unique_id()
 test_dataset = OptimizationDataset(
     name=f"TEST-GCP sanity dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
-    dataset_storage=StorageLink(
-        storage_integration=StorageIntegration(
-            name=f"cifar1bucket{unique_id}",
-            type=StorageTypes.GCP,
-            gcp=StorageGCP(
-                bucket_name="cifar1bucket",
-                project="Hirundo-global",
-                credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
-            ),
+    storage_integration=StorageIntegration(
+        name=f"cifar1bucket{unique_id}",
+        type=StorageTypes.GCP,
+        gcp=StorageGCP(
+            bucket_name="cifar1bucket",
+            project="Hirundo-global",
+            credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
         ),
-        path="/pytorch-cifar/data",
     ),
+    root="/pytorch-cifar/data",
     dataset_metadata_path="cifar1.csv",
     classes=[
         "airplane",
