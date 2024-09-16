@@ -380,22 +380,19 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Optional[DatasetOptimizationResults]:
-        ...
+    ) -> typing.Optional[DatasetOptimizationResults]: ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> DatasetOptimizationResults:
-        ...
+    ) -> DatasetOptimizationResults: ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool
-    ) -> typing.Optional[DatasetOptimizationResults]:
-        ...
+    ) -> typing.Optional[DatasetOptimizationResults]: ...
 
     @staticmethod
     def check_run_by_id(
@@ -465,14 +462,12 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Optional[DatasetOptimizationResults]:
-        ...
+    ) -> typing.Optional[DatasetOptimizationResults]: ...
 
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> DatasetOptimizationResults:
-        ...
+    ) -> DatasetOptimizationResults: ...
 
     def check_run(
         self, stop_on_manual_approval: bool = False
