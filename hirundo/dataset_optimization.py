@@ -115,7 +115,7 @@ class OptimizationDataset(BaseModel):
     If `None`, the `dataset_id` field must be set.
     """
 
-    classes: typing.Optional[list[str]] = Field(default=None, init=False)
+    classes: typing.Optional[list[str]] = None
     """
     A full list of possible classes used in classification / object detection.
     It is currently required for clarity and performance.
