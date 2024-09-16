@@ -3,7 +3,7 @@ import typing
 from collections.abc import AsyncGenerator, Generator
 from enum import Enum
 from io import StringIO
-from typing import Union, overload
+from typing import overload
 
 import httpx
 import numpy as np
@@ -109,13 +109,13 @@ class OptimizationDataset(BaseModel):
     - `LabellingType.SingleLabelClassification`: Indicates that the dataset is for classification tasks
     - `LabellingType.ObjectDetection`: Indicates that the dataset is for object detection tasks
     """
-    dataset_storage: Union[StorageLink, None]
+    dataset_storage: typing.Optional[StorageLink]
     """
     The storage link to the dataset. This can be a link to a file or a directory containing the dataset.
     If `None`, the `dataset_id` field must be set.
     """
 
-    classes: list[str]
+    classes: typing.Optional[list[str]] = None
     """
     A full list of possible classes used in classification / object detection.
     It is currently required for clarity and performance.
@@ -133,15 +133,15 @@ class OptimizationDataset(BaseModel):
     Currently no other formats are supported. Future versions of `hirundo` may support additional formats.
     """
 
-    storage_integration_id: Union[int, None] = Field(default=None, init=False)
+    storage_integration_id: typing.Optional[int] = Field(default=None, init=False)
     """
     The ID of the storage integration used to store the dataset and metadata.
     """
-    dataset_id: Union[int, None] = Field(default=None, init=False)
+    dataset_id: typing.Optional[int] = Field(default=None, init=False)
     """
     The ID of the dataset created on the server.
     """
-    run_id: Union[str, None] = Field(default=None, init=False)
+    run_id: typing.Optional[str] = Field(default=None, init=False)
     """
     The ID of the Dataset Optimization run created on the server.
     """
@@ -153,7 +153,7 @@ class OptimizationDataset(BaseModel):
         return self
 
     @staticmethod
-    def list(organization_id: Union[int, None] = None) -> list[dict]:
+    def list(organization_id: typing.Optional[int] = None) -> list[dict]:
         """
         Lists all the `OptimizationDataset` instances created by user's default organization
         or the `organization_id` passed

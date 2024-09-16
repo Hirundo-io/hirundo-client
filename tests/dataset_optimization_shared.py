@@ -1,6 +1,5 @@
 import os
 import typing
-from typing import Union
 
 from hirundo import GitRepo, OptimizationDataset, StorageIntegration
 from hirundo.dataset_optimization import RunStatus
@@ -119,7 +118,7 @@ def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
 
 def dataset_optimization_sync_test(
     test_dataset: OptimizationDataset,
-    alternative_env: Union[str, None] = None,
+    alternative_env: typing.Optional[str] = None,
     sanity=False,
 ):
     logger.info("Sync: Finished cleanup")
