@@ -1,4 +1,6 @@
-FROM --platform=linux/amd64 python:3.9-alpine
+ARG PLATFORM=linux/amd64
+
+FROM --platform=${PLATFORM} python:3.9-alpine
 
 COPY . .
 
