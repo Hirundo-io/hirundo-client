@@ -1,10 +1,8 @@
 ARG PLATFORM=linux/amd64
 
-FROM --platform=${PLATFORM} python:3.9-alpine
+FROM --platform=${PLATFORM} mcr.microsoft.com/devcontainers/python:3.9
 
 COPY . .
-
-RUN apk add --no-cache gcc python3-dev musl-dev linux-headers
 
 RUN pip install -r requirements.txt && pip install ipykernel
 
