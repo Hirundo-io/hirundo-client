@@ -41,7 +41,7 @@ And outputs two Pandas DataFrames with the dataset columns as well as:
 Suspect DataFrame columns:
    - ``suspect_level``: mislabel suspect level
    - ``suggested_label``: suggested label
-   - ``suggested_conf``: suggested label confidence
+   - ``suggested_label_conf``: suggested label confidence
 
 Errors and warnings DataFrame columns:
    - ``status``: status message (one of ``NO_LABELS`` / ``MISSING_IMAGE`` / ``INVALID_IMAGE``)
@@ -60,7 +60,7 @@ And outputs two Pandas DataFrames with the dataset columns as well as:
 Suspect DataFrame columns:
    - ``suspect_level``: object mislabel suspect level
    - ``suggested_label``: suggested object label
-   - ``suggested_conf``: suggested object label confidence
+   - ``suggested_label_conf``: suggested object label confidence
 
 Errors and warnings DataFrame columns:
    - ``status``: status message (one of ``NO_LABELS`` / ``MISSING_IMAGE`` / ``INVALID_IMAGE`` / ``INVALID_BBOX`` / ``INVALID_BBOX_SIZE``)
