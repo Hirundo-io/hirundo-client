@@ -245,7 +245,7 @@ class OptimizationDataset(BaseModel):
             raise ValueError("No dataset has been created")
         self.delete_by_id(self.id)
 
-    def create(self, replace_if_exists: typing.Optional[bool] = None) -> int:
+    def create(self, replace_if_exists: bool = False) -> int:
         """
         Create a `OptimizationDataset` instance on the server.
         If `storage_integration_id` is not set, it will be created.
@@ -265,11 +265,9 @@ class OptimizationDataset(BaseModel):
         dataset_response = requests.post(
             f"{API_HOST}/dataset-optimization/dataset/",
             json={
-                "dataset_storage": {
-                    "storage_integration_id": self.storage_integration_id,
-                    "root": self.root,
-                    "replace_if_exists": replace_if_exists,
-                },
+                "storage_integration_id": self.storage_integration_id,
+                "root": self.root,
+                "replace_if_exists": replace_if_exists,
                 **{k: model_dict[k] for k in model_dict.keys() - {"dataset_storage"}},
             },
             headers={
@@ -305,7 +303,7 @@ class OptimizationDataset(BaseModel):
         raise_for_status_with_reason(run_response)
         return run_response.json()["run_id"]
 
-    def run_optimization(self) -> str:
+    def run_optimization(self, replace_if_exists: bool = False) -> str:
         """
         If the dataset was not created on the server yet, it is created.
         Run the dataset optimization process on the server using the active `OptimizationDataset` instance
@@ -315,7 +313,7 @@ class OptimizationDataset(BaseModel):
         """
         try:
             if not self.id:
-                self.id = self.create()
+                self.id = self.create(replace_if_exists=replace_if_exists)
             run_id = self.launch_optimization_run(self.id)
             self.run_id = run_id
             logger.info("Started the run with ID: %s", run_id)

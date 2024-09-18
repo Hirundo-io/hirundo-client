@@ -271,7 +271,7 @@ class StorageIntegration(BaseModel):
             raise ValueError("No StorageIntegration has been created")
         self.delete_by_id(self.id)
 
-    def create(self, replace_if_exists: typing.Optional[bool] = None) -> int:
+    def create(self, replace_if_exists: bool = False) -> int:
         """
         Create a `StorageIntegration` instance on the server
         """
