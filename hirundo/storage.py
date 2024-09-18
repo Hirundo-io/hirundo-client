@@ -1,6 +1,5 @@
 import typing
 from enum import Enum
-from typing import Union
 
 import pydantic
 import requests
@@ -19,18 +18,18 @@ logger = get_logger(__name__)
 
 
 class StorageS3(BaseModel):
-    endpoint_url: Union[Url, None] = None
+    endpoint_url: typing.Optional[Url] = None
     bucket_url: S3BucketUrl
     region_name: str
     # ⬆️ We could restrict this, but if we're allowing custom endpoints then the validation may be wrong
-    access_key_id: Union[str, None] = None
-    secret_access_key: Union[str, None] = None
+    access_key_id: typing.Optional[str] = None
+    secret_access_key: typing.Optional[str] = None
 
 
 class StorageGCP(BaseModel):
     bucket_name: str
     project: str
-    credentials_json: Union[dict, None] = None
+    credentials_json: typing.Optional[dict] = None
 
 
 # TODO: Azure storage integration is coming soon
@@ -41,12 +40,12 @@ class StorageGCP(BaseModel):
 
 
 class StorageGit(BaseModel):
-    repo_id: Union[int, None] = None
+    repo_id: typing.Optional[int] = None
     """
     The ID of the Git repository in the Hirundo system.
     Either `repo_id` or `repo` must be provided.
     """
-    repo: Union[GitRepo, None] = None
+    repo: typing.Optional[GitRepo] = None
     """
     The Git repository to link to.
     Either `repo_id` or `repo` must be provided.
@@ -80,12 +79,12 @@ class StorageTypes(str, Enum):
 
 
 class StorageIntegration(BaseModel):
-    id: Union[int, None] = None
+    id: typing.Optional[int] = None
     """
     The ID of the `StorageIntegration` in the Hirundo system.
     """
 
-    organization_id: Union[int, None] = None
+    organization_id: typing.Optional[int] = None
     """
     The ID of the organization that the `StorageIntegration` belongs to.
     If not provided, it will be assigned to your default organization.
@@ -111,7 +110,7 @@ class StorageIntegration(BaseModel):
     - `Azure` (coming soon)
     - `Git`
     """
-    s3: Union[StorageS3, None] = pydantic.Field(
+    s3: typing.Optional[StorageS3] = pydantic.Field(
         default=None,
         examples=[
             {
@@ -129,7 +128,7 @@ class StorageIntegration(BaseModel):
     The Amazon Web Services (AWS) S3 storage integration details.
     Use this if you want to link to an S3 bucket.
     """
-    gcp: Union[StorageGCP, None] = pydantic.Field(
+    gcp: typing.Optional[StorageGCP] = pydantic.Field(
         default=None,
         examples=[
             None,
@@ -159,7 +158,7 @@ class StorageIntegration(BaseModel):
     Use this if you want to link to an GCS bucket.
     """
     azure: None = None
-    # azure: Union[StorageAzure, None] = pydantic.Field(
+    # azure: typing.Optional[StorageAzure] = pydantic.Field(
     #     default=None,
     #     examples=[
     #         None,
@@ -172,7 +171,7 @@ class StorageIntegration(BaseModel):
     #         None,
     #     ],
     # )  TODO: Azure storage integration is coming soon
-    git: Union[StorageGit, None] = pydantic.Field(
+    git: typing.Optional[StorageGit] = pydantic.Field(
         default=None,
         examples=[
             None,

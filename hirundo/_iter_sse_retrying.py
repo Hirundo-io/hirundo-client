@@ -1,7 +1,7 @@
 import asyncio
 import time
+import typing
 from collections.abc import AsyncGenerator, Generator
-from typing import Union
 
 import httpx
 from httpx_sse import ServerSentEvent, aconnect_sse, connect_sse
@@ -13,7 +13,7 @@ def iter_sse_retrying(
     client: httpx.Client,
     method: str,
     url: str,
-    headers: Union[dict[str, str], None] = None,
+    headers: typing.Optional[dict[str, str]] = None,
 ) -> Generator[ServerSentEvent, None, None]:
     if headers is None:
         headers = {}

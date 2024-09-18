@@ -1,5 +1,6 @@
 import re
-from typing import Annotated, Union
+import typing
+from typing import Annotated
 
 import pydantic
 import requests
@@ -31,14 +32,14 @@ class GitSSHAuthBase(BaseModel):
     """
     The SSH key for the Git repository
     """
-    ssh_password: Union[str, None]
+    ssh_password: typing.Optional[str]
     """
     The password for the SSH key for the Git repository.
     """
 
 
 class GitRepo(BaseModel):
-    id: Union[int, None] = None
+    id: typing.Optional[int] = None
     """
     The ID of the Git repository.
     """
@@ -52,20 +53,20 @@ class GitRepo(BaseModel):
     The URL of the Git repository, it should start with `ssh://` or `https://` or be in the form `user@host:path`.
     If it is in the form `user@host:path`, it will be rewritten to `ssh://user@host:path`.
     """
-    organization_id: Union[int, None] = None
+    organization_id: typing.Optional[int] = None
     """
     The ID of the organization that the Git repository belongs to.
     If not provided, it will be assigned to your default organization.
     """
 
-    plain_auth: Union[GitPlainAuthBase, None] = pydantic.Field(
+    plain_auth: typing.Optional[GitPlainAuthBase] = pydantic.Field(
         default=None, examples=[None, {"username": "ben", "password": "password"}]
     )
     """
     The plain authentication details for the Git repository.
     Use this if using a special user with a username and password for authentication.
     """
-    ssh_auth: Union[GitSSHAuthBase, None] = pydantic.Field(
+    ssh_auth: typing.Optional[GitSSHAuthBase] = pydantic.Field(
         default=None,
         examples=[
             {

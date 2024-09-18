@@ -62,7 +62,7 @@ dev = [
     "pytest-asyncio>=0.23.6",
     "uv",
     "pre-commit>=3.7.1",
-    "ruff",
+    "ruff==0.6.5",
     "bumpver",
 ]
 docs = [

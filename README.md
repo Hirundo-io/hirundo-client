@@ -20,7 +20,7 @@ Currently ``hirundo`` requires a CSV file with the following columns (all column
 And outputs a CSV with the same columns and:
    - ``suspect_level``: mislabel suspect level
    - ``suggested_label``: suggested label
-   - ``suggested_conf``: suggested label confidence
+   - ``suggested_label_conf``: suggested label confidence
 
 Optimizing an object detection (OD) dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -34,7 +34,7 @@ Currently ``hirundo`` requires a CSV file with the following columns (all column
 And outputs a CSV with the same columns and:
    - ``suspect_level``: object mislabel suspect level
    - ``suggested_label``: suggested object label
-   - ``suggested_conf``: suggested object label confidence
+   - ``suggested_label_conf``: suggested object label confidence
 
 Note: This Python package must be used alongside a Hirundo server, either the SaaS platform, a custom VPC deployment or an on-premises installation.
 
