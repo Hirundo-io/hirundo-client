@@ -3,7 +3,7 @@ import typing
 from collections.abc import AsyncGenerator, Generator
 from enum import Enum
 from io import StringIO
-from typing import Union, overload
+from typing import overload
 
 import httpx
 import numpy as np
@@ -64,6 +64,19 @@ STATUS_TO_PROGRESS_MAP = {
 }
 
 
+class DatasetOptimizationResults(BaseModel):
+    model_config = {"arbitrary_types_allowed": True}
+
+    suspects: pd.DataFrame
+    """
+    A pandas DataFrame containing the results of the optimization run
+    """
+    warnings_and_errors: pd.DataFrame
+    """
+    A pandas DataFrame containing the warnings and errors of the optimization run
+    """
+
+
 CUSTOMER_INTERCHANGE_DTYPES: DtypeArg = {
     "image_path": str,
     "label_path": str,
@@ -96,13 +109,13 @@ class OptimizationDataset(BaseModel):
     - `LabellingType.SingleLabelClassification`: Indicates that the dataset is for classification tasks
     - `LabellingType.ObjectDetection`: Indicates that the dataset is for object detection tasks
     """
-    dataset_storage: Union[StorageLink, None]
+    dataset_storage: typing.Optional[StorageLink]
     """
     The storage link to the dataset. This can be a link to a file or a directory containing the dataset.
     If `None`, the `dataset_id` field must be set.
     """
 
-    classes: list[str]
+    classes: typing.Optional[list[str]] = None
     """
     A full list of possible classes used in classification / object detection.
     It is currently required for clarity and performance.
@@ -120,15 +133,15 @@ class OptimizationDataset(BaseModel):
     Currently no other formats are supported. Future versions of `hirundo` may support additional formats.
     """
 
-    storage_integration_id: Union[int, None] = Field(default=None, init=False)
+    storage_integration_id: typing.Optional[int] = Field(default=None, init=False)
     """
     The ID of the storage integration used to store the dataset and metadata.
     """
-    dataset_id: Union[int, None] = Field(default=None, init=False)
+    dataset_id: typing.Optional[int] = Field(default=None, init=False)
     """
     The ID of the dataset created on the server.
     """
-    run_id: Union[str, None] = Field(default=None, init=False)
+    run_id: typing.Optional[str] = Field(default=None, init=False)
     """
     The ID of the Dataset Optimization run created on the server.
     """
@@ -140,7 +153,7 @@ class OptimizationDataset(BaseModel):
         return self
 
     @staticmethod
-    def list(organization_id: Union[int, None] = None) -> list[dict]:
+    def list(organization_id: typing.Optional[int] = None) -> list[dict]:
         """
         Lists all the `OptimizationDataset` instances created by user's default organization
         or the `organization_id` passed
@@ -316,10 +329,19 @@ class OptimizationDataset(BaseModel):
         return df
 
     @staticmethod
-    def _read_csv_to_df(data: dict):
+    def _read_csvs_to_df(data: dict):
         if data["state"] == RunStatus.SUCCESS.value:
-            data["result"] = OptimizationDataset._clean_df_index(
-                pd.read_csv(StringIO(data["result"]), dtype=CUSTOMER_INTERCHANGE_DTYPES)
+            data["result"]["suspects"] = OptimizationDataset._clean_df_index(
+                pd.read_csv(
+                    StringIO(data["result"]["suspects"]),
+                    dtype=CUSTOMER_INTERCHANGE_DTYPES,
+                )
+            )
+            data["result"]["warnings_and_errors"] = OptimizationDataset._clean_df_index(
+                pd.read_csv(
+                    StringIO(data["result"]["warnings_and_errors"]),
+                    dtype=CUSTOMER_INTERCHANGE_DTYPES,
+                )
             )
         else:
             pass
@@ -349,7 +371,7 @@ class OptimizationDataset(BaseModel):
                 if not last_event:
                     continue
                 data = last_event["data"]
-                OptimizationDataset._read_csv_to_df(data)
+                OptimizationDataset._read_csvs_to_df(data)
                 yield data
         if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:
             OptimizationDataset._check_run_by_id(run_id, retry + 1)
@@ -358,24 +380,24 @@ class OptimizationDataset(BaseModel):
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Optional[pd.DataFrame]: ...
+    ) -> typing.Optional[DatasetOptimizationResults]: ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> pd.DataFrame: ...
+    ) -> DatasetOptimizationResults: ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool
-    ) -> typing.Optional[pd.DataFrame]: ...
+    ) -> typing.Optional[DatasetOptimizationResults]: ...
 
     @staticmethod
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool = False
-    ) -> typing.Optional[pd.DataFrame]:
+    ) -> typing.Optional[DatasetOptimizationResults]:
         """
         Check the status of a run given its ID
 
@@ -384,7 +406,7 @@ class OptimizationDataset(BaseModel):
             stop_on_manual_approval: If True, the function will return `None` if the run is awaiting manual approval
 
         Returns:
-            A pandas DataFrame with the results of the optimization run
+            A DatasetOptimizationResults object with the results of the optimization run
 
         Raises:
             HirundoError: If the maximum number of retries is reached or if the run fails
@@ -396,6 +418,7 @@ class OptimizationDataset(BaseModel):
                 if iteration["state"] in STATUS_TO_PROGRESS_MAP:
                     t.set_description(STATUS_TO_TEXT_MAP[iteration["state"]])
                     t.n = STATUS_TO_PROGRESS_MAP[iteration["state"]]
+                    logger.debug("Setting progress to %s", t.n)
                     t.refresh()
                     if iteration["state"] == RunStatus.FAILURE.value:
                         raise HirundoError(
@@ -403,7 +426,12 @@ class OptimizationDataset(BaseModel):
                         )
                     elif iteration["state"] == RunStatus.SUCCESS.value:
                         t.close()
-                        return iteration["result"]
+                        return DatasetOptimizationResults(
+                            suspects=iteration["result"]["suspects"],
+                            warnings_and_errors=iteration["result"][
+                                "warnings_and_errors"
+                            ],
+                        )
                     elif (
                         iteration["state"] == RunStatus.AWAITING_MANUAL_APPROVAL.value
                         and stop_on_manual_approval
@@ -427,22 +455,23 @@ class OptimizationDataset(BaseModel):
                         )
                         t.set_description(desc)
                         t.n = current_progress_percentage
+                        logger.debug("Setting progress to %s", t.n)
                         t.refresh()
         raise HirundoError("Optimization run failed with an unknown error")
 
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Union[pd.DataFrame, None]: ...
+    ) -> typing.Optional[DatasetOptimizationResults]: ...
 
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> pd.DataFrame: ...
+    ) -> DatasetOptimizationResults: ...
 
     def check_run(
         self, stop_on_manual_approval: bool = False
-    ) -> typing.Union[pd.DataFrame, None]:
+    ) -> typing.Optional[DatasetOptimizationResults]:
         """
         Check the status of the current active instance's run.
 
