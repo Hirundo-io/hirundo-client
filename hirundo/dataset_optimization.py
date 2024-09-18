@@ -222,7 +222,21 @@ class OptimizationDataset(BaseModel):
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(response)
-        return [OptimizationDataset(**ds) for ds in response.json()]
+        return [
+            OptimizationDataset(
+                id=ds["id"],
+                name=ds["name"],
+                labelling_type=LabellingType(ds["labelling_type"]),
+                storage_integration=StorageIntegration(
+                    **ds["storage_integration"], output=True
+                ),
+                root=ds["root"],
+                classes=ds["classes"],
+                dataset_metadata_path=ds["dataset_metadata_path"],
+                dataset_metadata_type=DatasetMetadataType(ds["dataset_metadata_type"]),
+            )
+            for ds in response.json()
+        ]
 
     @staticmethod
     def delete_by_id(dataset_id: int) -> None:

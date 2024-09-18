@@ -193,6 +193,11 @@ class StorageIntegration(BaseModel):
     Use this if you want to link to a Git repository.
     """
 
+    output: bool = False
+    """
+    Whether the storage integration object is an output.
+    """
+
     @staticmethod
     def get_by_id(storage_integration_id: int) -> "StorageIntegration":
         """
@@ -296,6 +301,8 @@ class StorageIntegration(BaseModel):
 
     @model_validator(mode="after")
     def validate_storage_type(self):
+        if self.output:
+            return self
         if self.type != StorageTypes.LOCAL and (
             [self.s3, self.gcp, self.git].count(None) != 2
         ):
