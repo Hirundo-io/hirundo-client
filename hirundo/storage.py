@@ -215,15 +215,18 @@ class StorageIntegration(BaseModel):
         return StorageIntegration(**storage_integration.json())
 
     @staticmethod
-    def get_by_name(name: str) -> "StorageIntegration":
+    def get_by_name(name: str, storage_type: StorageTypes) -> "StorageIntegration":
         """
         Retrieves a `StorageIntegration` instance from the server by its name
 
         Args:
             name: The name of the `StorageIntegration` to retrieve
+            storage_type: The type of the `StorageIntegration` to retrieve
+
+            Note: The type is required because the name is not unique across different storage types
         """
         storage_integrations = requests.get(
-            f"{API_HOST}/storage-integration/by-name/{name}",
+            f"{API_HOST}/storage-integration/by-name/{name}?storage_type={storage_type}",
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
