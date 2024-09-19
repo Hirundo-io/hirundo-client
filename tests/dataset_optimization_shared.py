@@ -128,14 +128,14 @@ def dataset_optimization_sync_test(
     if (os.getenv("FULL_TEST", "false") == "true" and sanity) or (
         alternative_env and os.getenv(alternative_env, "false") == "true"
     ):
-        run_id = test_dataset.run_optimization()
+        run_id = test_dataset.run_optimization(replace_if_exists=True)
         logger.info("Sync: Started dataset optimization run with run ID %s", run_id)
         logger.info("Sync: Checking run progress")
         result = test_dataset.check_run(stop_on_manual_approval=True)
         logger.info("Sync: Results %s", result)
         return result
     else:
-        test_dataset.create()
+        test_dataset.create(replace_if_exists=True)
         logger.info("Sync: Created dataset %s", test_dataset.name)
         return None
 
@@ -143,7 +143,7 @@ def dataset_optimization_sync_test(
 async def dataset_optimization_async_test(test_dataset: OptimizationDataset, env: str):
     logger.info("Async: Finished cleanup")
     if os.getenv(env, "false") == "true":
-        run_id = test_dataset.run_optimization()
+        run_id = test_dataset.run_optimization(replace_if_exists=True)
         logger.info("Async: Started dataset optimization run with run ID %s", run_id)
         events_generator = test_dataset.acheck_run()
         logger.info("Async: Checking run progress")
@@ -157,6 +157,6 @@ async def dataset_optimization_async_test(test_dataset: OptimizationDataset, env
         logger.info("Async: Results %s", last_event["result"])
         return last_event["result"]
     else:
-        test_dataset.create()
+        test_dataset.create(replace_if_exists=True)
         logger.info("Async: Created dataset %s", test_dataset.name)
         return None
