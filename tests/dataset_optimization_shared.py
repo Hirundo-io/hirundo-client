@@ -30,7 +30,7 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
     conflicting_storage_integration_ids = [
         storage_integration.id
         for storage_integration in StorageIntegration.list()
-        if unique_id in storage_integration.name
+        if unique_id in storage_integration.name and storage_integration.id is not None
     ]
     for conflicting_storage_integration_id in conflicting_storage_integration_ids:
         try:
@@ -54,6 +54,7 @@ def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
         dataset.storage_integration_id
         for dataset in datasets
         if dataset.name == test_dataset.name
+        and dataset.storage_integration_id is not None
     ]
     running_datasets = {
         dataset.id: dataset.run_id
