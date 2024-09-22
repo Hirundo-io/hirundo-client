@@ -18,21 +18,24 @@ from tests.dataset_optimization_shared import (
 logger = logging.getLogger(__name__)
 
 unique_id = get_unique_id()
+s3_bucket = StorageS3(
+    bucket_url="s3://hirundo-open-source-datasets",
+    region_name="il-central-1",
+    access_key_id=os.environ["AWS_ACCESS_KEY"],
+    secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+)
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS-BDD-100k-validation-OD-dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,
     storage_integration=StorageIntegration(
         name=f"AWS-open-source-datasets{unique_id}",
         type=StorageTypes.S3,
-        s3=StorageS3(
-            bucket_url="s3://hirundo-open-source-datasets",
-            region_name="il-central-1",
-            access_key_id=os.environ["AWS_ACCESS_KEY"],
-            secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
-        ),
+        s3=s3_bucket,
     ),
-    root="/bdd100k_val_hirundo.zip/bdd100k",
-    dataset_metadata_path="bdd100k.csv",
+    data_root_url=s3_bucket.get_url(path="/bdd100k_val_hirundo.zip/bdd100k"),
+    metadata_file_url=s3_bucket.get_url(
+        path="/bdd100k_val_hirundo.zip/bdd100k/bdd100k.csv"
+    ),
     classes=[
         "traffic light",
         "traffic sign",

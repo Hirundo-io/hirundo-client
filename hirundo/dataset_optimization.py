@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field, model_validator
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
+from hirundo._constraints import HirundoUrl
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
 from hirundo._http import raise_for_status_with_reason
@@ -121,12 +122,14 @@ class OptimizationDataset(BaseModel):
     """
     The `StorageIntegration` instance to link to.
     """
-    root: str = "/"
+    data_root_url: HirundoUrl
     """
-    Path for the `root` to link to within the `StorageIntegration` instance,
-    e.g. a prefix path/folder within an S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
+    Path for data (e.g. images) within the `StorageIntegration` instance,
+    e.g. `s3://my-bucket-name/my-images-folder`, `gs://my-bucket-name/my-images-folder`,
+    or `ssh://my-username@my-repo-name/my-images-folder`
+    (or `file:///datasets/my-images-folder` if using LOCAL storage type with on-premises installation)
 
-    Note: Only files in this path will be retrieved and it will be used as the root for paths in the CSV.
+    Note: All CSV `image_path` entries in the metadata file should be relative to this folder.
     """
 
     classes: typing.Optional[list[str]] = None
@@ -134,12 +137,14 @@ class OptimizationDataset(BaseModel):
     A full list of possible classes used in classification / object detection.
     It is currently required for clarity and performance.
     """
-    dataset_metadata_path: str = "metadata.csv"
+    metadata_file_url: HirundoUrl
     """
-    The path to the dataset metadata file within storage integration, e.g. S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
-    Note: This path will be prefixed with the `root` path.
+    The URL to access the dataset metadata file.
+    e.g. `s3://my-bucket-name/my-folder/my-metadata.csv`, `gs://my-bucket-name/my-folder/my-metadata.csv`,
+    or `ssh://my-username@my-repo-name/my-folder/my-metadata.csv`
+    (or `file:///datasets/my-folder/my-metadata.csv` if using LOCAL storage type with on-premises installation)
     """
-    dataset_metadata_type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
+    metadata_type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
     """
     The type of dataset metadata file. The dataset metadata file can be one of the following:
     - `DatasetMetadataType.HirundoCSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
@@ -230,10 +235,10 @@ class OptimizationDataset(BaseModel):
                 storage_integration=StorageIntegration(
                     **ds["storage_integration"], output=True
                 ),
-                root=ds["root"],
+                data_root_url=ds["data_root_url"],
                 classes=ds["classes"],
-                dataset_metadata_path=ds["dataset_metadata_path"],
-                dataset_metadata_type=DatasetMetadataType(ds["dataset_metadata_type"]),
+                metadata_file_url=ds["metadata_file_url"],
+                metadata_type=DatasetMetadataType(ds["metadata_type"]),
             )
             for ds in response.json()
         ]
@@ -294,10 +299,10 @@ class OptimizationDataset(BaseModel):
         dataset_response = requests.post(
             f"{API_HOST}/dataset-optimization/dataset/",
             json={
-                "storage_integration_id": self.storage_integration_id,
-                "root": self.root,
-                "replace_if_exists": replace_if_exists,
-                **{k: model_dict[k] for k in model_dict.keys() - {"dataset_storage"}},
+                **{
+                    k: model_dict[k]
+                    for k in model_dict.keys() - {"storage_integration"}
+                },
             },
             headers={
                 **json_headers,

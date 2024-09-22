@@ -18,22 +18,25 @@ from tests.dataset_optimization_shared import (
 logger = logging.getLogger(__name__)
 
 unique_id = get_unique_id()
+git_storage = StorageGit(
+    repo=GitRepo(
+        name=f"BDD-100k-validation-dataset{unique_id}",
+        repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
+    ),
+    branch="main",
+)
 test_dataset = OptimizationDataset(
     name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,
     storage_integration=StorageIntegration(
         name=f"BDD-100k-validation-dataset{unique_id}",
         type=StorageTypes.GIT,
-        git=StorageGit(
-            repo=GitRepo(
-                name=f"BDD-100k-validation-dataset{unique_id}",
-                repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
-            ),
-            branch="main",
-        ),
+        git=git_storage,
     ),
-    root="/BDD100K Val from Hirundo.zip/bdd100k",
-    dataset_metadata_path="bdd100k.csv",
+    data_root_url=git_storage.get_url(path="/BDD100K Val from Hirundo.zip/bdd100k"),
+    metadata_file_url=git_storage.get_url(
+        path="/BDD100K Val from Hirundo.zip/bdd100k/bdd100k.csv"
+    ),
     classes=[
         "traffic light",
         "traffic sign",

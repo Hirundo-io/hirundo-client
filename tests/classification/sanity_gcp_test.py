@@ -20,20 +20,21 @@ from tests.dataset_optimization_shared import (
 logger = logging.getLogger(__name__)
 
 unique_id = get_unique_id()
+gcp_bucket = StorageGCP(
+    bucket_name="cifar1bucket",
+    project="Hirundo-global",
+    credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
+)
 test_dataset = OptimizationDataset(
     name=f"TEST-GCP sanity dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
     storage_integration=StorageIntegration(
         name=f"cifar1bucket{unique_id}",
         type=StorageTypes.GCP,
-        gcp=StorageGCP(
-            bucket_name="cifar1bucket",
-            project="Hirundo-global",
-            credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
-        ),
+        gcp=gcp_bucket,
     ),
-    root="/pytorch-cifar/data",
-    dataset_metadata_path="cifar1.csv",
+    data_root_url=gcp_bucket.get_url(path="/pytorch-cifar/data"),
+    metadata_file_url=gcp_bucket.get_url(path="/pytorch-cifar/data/cifar1.csv"),
     classes=[
         "airplane",
         "automobile",

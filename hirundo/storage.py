@@ -1,5 +1,6 @@
 import typing
 from enum import Enum
+from pathlib import Path
 
 import pydantic
 import requests
@@ -25,18 +26,27 @@ class StorageS3(BaseModel):
     access_key_id: typing.Optional[str] = None
     secret_access_key: typing.Optional[str] = None
 
+    def get_url(self, path: typing.Union[str, Path]):
+        return str(Path(self.bucket_url) / path)
+
 
 class StorageGCP(BaseModel):
     bucket_name: str
     project: str
     credentials_json: typing.Optional[dict] = None
 
+    def get_url(self, path: typing.Union[str, Path]):
+        return str(Path("gs://") / self.bucket_name / path)
+
 
 # TODO: Azure storage integration is coming soon
 # class StorageAzure(BaseModel):
-#     container: str
-#     account_name: str
-#     account_key: str
+#     account_url: HttpUrl
+#     container_name: str
+#     tenant_id: str
+
+#     def get_url(self, path: typing.Union[str, Path]):
+#         return Path(str(self.account_url)) / self.container_name / path
 
 
 class StorageGit(BaseModel):
@@ -60,6 +70,11 @@ class StorageGit(BaseModel):
         if self.repo_id is None and self.repo is None:
             raise ValueError("Either repo_id or repo must be provided")
         return self
+
+    def get_url(self, path: typing.Union[str, Path]):
+        if not self.repo:
+            raise ValueError("Repo must be provided to use `get_url`")
+        return str(Path(self.repo.repository_url) / path)
 
 
 class StorageTypes(str, Enum):

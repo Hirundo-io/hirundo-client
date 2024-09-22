@@ -18,21 +18,22 @@ from tests.dataset_optimization_shared import (
 logger = logging.getLogger(__name__)
 
 unique_id = get_unique_id()
+s3_bucket = StorageS3(
+    bucket_url="s3://cifar10bucket",
+    region_name="us-east-2",
+    access_key_id=os.environ["AWS_ACCESS_KEY"],
+    secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+)
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS cifar10 classification dataset{unique_id}",
     labelling_type=LabellingType.SingleLabelClassification,
     storage_integration=StorageIntegration(
         name=f"cifar10bucket{unique_id}",
         type=StorageTypes.S3,
-        s3=StorageS3(
-            bucket_url="s3://cifar10bucket",
-            region_name="us-east-2",
-            access_key_id=os.environ["AWS_ACCESS_KEY"],
-            secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
-        ),
+        s3=s3_bucket,
     ),
-    root="/pytorch-cifar/data",
-    dataset_metadata_path="cifar10.csv",
+    data_root_url=s3_bucket.get_url(path="/pytorch-cifar/data"),
+    metadata_file_url=s3_bucket.get_url(path="/pytorch-cifar/data/cifar10.csv"),
     classes=[
         "airplane",
         "automobile",
