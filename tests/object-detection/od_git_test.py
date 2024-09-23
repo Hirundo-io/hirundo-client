@@ -9,6 +9,7 @@ from hirundo import (
     StorageIntegration,
     StorageTypes,
 )
+from pydantic_core import Url
 from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_sync_test,
@@ -21,7 +22,9 @@ unique_id = get_unique_id()
 git_storage = StorageGit(
     repo=GitRepo(
         name=f"BDD-100k-validation-dataset{unique_id}",
-        repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
+        repository_url=Url(
+            "https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only"
+        ),
     ),
     branch="main",
 )
