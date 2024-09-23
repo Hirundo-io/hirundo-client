@@ -372,7 +372,7 @@ class ResponseStorageIntegration(BaseModel):
     type: StorageTypes
     organization_name: str
     creator_name: str
-    s3: StorageS3Out
-    gcp: StorageGCPOut
-    # azure: StorageAzureOut
-    git: StorageGitOut
+    s3: typing.Optional[StorageS3Out]
+    gcp: typing.Optional[StorageGCPOut]
+    # azure: typing.Optional[StorageAzureOut]
+    git: typing.Optional[StorageGitOut]

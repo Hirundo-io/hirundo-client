@@ -228,11 +228,12 @@ class OptimizationDataset(BaseModel):
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(response)
+        datasets = response.json()
         return [
             DataOptimizationDatasetOut(
                 **ds,
             )
-            for ds in response.json()
+            for ds in datasets
         ]
 
     @staticmethod
