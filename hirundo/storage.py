@@ -366,7 +366,7 @@ class StorageIntegration(BaseModel):
         return self
 
 
-class ResponseStorageIntegration:
+class ResponseStorageIntegration(BaseModel):
     id: int
     name: StorageIntegrationName
     type: StorageTypes
