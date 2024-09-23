@@ -46,6 +46,7 @@ class RunStatus(Enum):
     FAILURE = "FAILURE"
     AWAITING_MANUAL_APPROVAL = "AWAITING MANUAL APPROVAL"
     RETRYING = "RETRYING"
+    REVOKED = "REVOKED"
 
 
 STATUS_TO_TEXT_MAP = {
@@ -643,7 +644,12 @@ class OptimizationDataset(BaseModel):
 class DataOptimizationDatasetOut(BaseModel):
     id: int
 
+    name: str
+    labelling_type: LabellingType
+
     storage_integration: ResponseStorageIntegration
+
+    data_root_url: HirundoUrl
 
     classes: list[str]
     metadata_file_url: HirundoUrl
@@ -654,3 +660,5 @@ class DataOptimizationDatasetOut(BaseModel):
     creator_id: typing.Optional[int]
     created_at: datetime.datetime
     updated_at: datetime.datetime
+
+    status: RunStatus
