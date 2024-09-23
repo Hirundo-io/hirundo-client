@@ -1,3 +1,4 @@
+import datetime
 import re
 import typing
 
@@ -157,3 +158,13 @@ class GitRepo(BaseModel):
         if not self.id:
             raise ValueError("No GitRepo has been created")
         GitRepo.delete_by_id(self.id)
+
+
+class GitRepoOut(BaseModel):
+    id: int
+
+    name: str
+    repository_url: RepoUrl
+
+    created_at: datetime.datetime
+    updated_at: datetime.datetime

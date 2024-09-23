@@ -12,7 +12,7 @@ from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
-from hirundo.git import GitRepo
+from hirundo.git import GitRepo, GitRepoOut
 from hirundo.logger import get_logger
 
 logger = get_logger(__name__)
@@ -27,7 +27,14 @@ class StorageS3(BaseModel):
     secret_access_key: typing.Optional[str] = None
 
     def get_url(self, path: typing.Union[str, Path]):
-        return f"s3://{Path(self.bucket_url.removeprefix('s3://')) / path}"
+        return f"s3://{self.bucket_url.removeprefix('s3://').removesuffix('/')}/{path}"
+
+
+class StorageS3Out(BaseModel):
+    endpoint_url: typing.Optional[Url] = None
+    bucket_url: S3BucketUrl
+    region_name: str
+    access_key_id: typing.Optional[str] = None
 
 
 class StorageGCP(BaseModel):
@@ -36,8 +43,13 @@ class StorageGCP(BaseModel):
     credentials_json: typing.Optional[dict] = None
 
     def get_url(self, path: typing.Union[str, Path]):
-        gcp_url = f"gs://{Path(self.bucket_name) / path}"
+        gcp_url = f"gs://{self.bucket_name}/{path}"
         return gcp_url
+
+
+class StorageGCPOut(BaseModel):
+    bucket_name: str
+    project: str
 
 
 # TODO: Azure storage integration is coming soon
@@ -45,9 +57,12 @@ class StorageGCP(BaseModel):
 #     account_url: HttpUrl
 #     container_name: str
 #     tenant_id: str
-
+#
 #     def get_url(self, path: typing.Union[str, Path]):
-#         return Path(str(self.account_url)) / self.container_name / path
+#         return f"{str(self.account_url)}/{self.container_nam}/{path}"
+# class StorageAzureOut(BaseModel):
+#     container: str
+#     account_url: str
 
 
 class StorageGit(BaseModel):
@@ -75,8 +90,13 @@ class StorageGit(BaseModel):
     def get_url(self, path: typing.Union[str, Path]):
         if not self.repo:
             raise ValueError("Repo must be provided to use `get_url`")
-        repo_url = Url(self.repo.repository_url)
-        return f"{repo_url.scheme}://{Path(self.repo.repository_url.removeprefix(repo_url.scheme)) / path}"
+        repo_url = self.repo.repository_url
+        return f"{repo_url.scheme}://{str(self.repo.repository_url).removeprefix(repo_url.scheme)}{path}"
+
+
+class StorageGitOut(BaseModel):
+    repo: GitRepoOut
+    branch: str
 
 
 class StorageTypes(str, Enum):
@@ -210,13 +230,8 @@ class StorageIntegration(BaseModel):
     Use this if you want to link to a Git repository.
     """
 
-    output: bool = False
-    """
-    Whether the storage integration object is an output.
-    """
-
     @staticmethod
-    def get_by_id(storage_integration_id: int) -> "StorageIntegration":
+    def get_by_id(storage_integration_id: int) -> "ResponseStorageIntegration":
         """
         Retrieves a `StorageIntegration` instance from the server by its ID
 
@@ -229,10 +244,12 @@ class StorageIntegration(BaseModel):
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(storage_integration)
-        return StorageIntegration(**storage_integration.json())
+        return ResponseStorageIntegration(**storage_integration.json())
 
     @staticmethod
-    def get_by_name(name: str, storage_type: StorageTypes) -> "StorageIntegration":
+    def get_by_name(
+        name: str, storage_type: StorageTypes
+    ) -> "ResponseStorageIntegration":
         """
         Retrieves a `StorageIntegration` instance from the server by its name
 
@@ -248,12 +265,12 @@ class StorageIntegration(BaseModel):
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(storage_integrations)
-        return StorageIntegration(**storage_integrations.json()[0])
+        return ResponseStorageIntegration(**storage_integrations.json()[0])
 
     @staticmethod
     def list(
         organization_id: typing.Optional[int] = None,
-    ) -> list["StorageIntegration"]:
+    ) -> list["ResponseStorageIntegration"]:
         """
         Lists all the `StorageIntegration`'s created by user's default organization
         Note: The return type is `list[dict]` and not `list[StorageIntegration]`
@@ -269,7 +286,7 @@ class StorageIntegration(BaseModel):
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(storage_integrations)
-        return [StorageIntegration(**si) for si in storage_integrations.json()]
+        return [ResponseStorageIntegration(**si) for si in storage_integrations.json()]
 
     @staticmethod
     def delete_by_id(storage_integration_id) -> None:
@@ -321,8 +338,6 @@ class StorageIntegration(BaseModel):
 
     @model_validator(mode="after")
     def validate_storage_type(self):
-        if self.output:
-            return self
         if self.type != StorageTypes.LOCAL and (
             [self.s3, self.gcp, self.git].count(None) != 2
         ):
@@ -346,3 +361,15 @@ class StorageIntegration(BaseModel):
                 else StorageTypes.LOCAL
             )
         return self
+
+
+class ResponseStorageIntegration:
+    id: int
+    name: StorageIntegrationName
+    type: StorageTypes
+    organization_name: str
+    creator_name: str
+    s3: StorageS3Out
+    gcp: StorageGCPOut
+    # azure: StorageAzureOut
+    git: StorageGitOut

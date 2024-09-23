@@ -1,3 +1,4 @@
+import datetime
 import json
 import typing
 from collections.abc import AsyncGenerator, Generator
@@ -22,7 +23,7 @@ from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.enum import DatasetMetadataType, LabellingType
 from hirundo.logger import get_logger
-from hirundo.storage import StorageIntegration
+from hirundo.storage import ResponseStorageIntegration, StorageIntegration
 
 logger = get_logger(__name__)
 
@@ -211,7 +212,7 @@ class OptimizationDataset(BaseModel):
     @staticmethod
     def list(
         organization_id: typing.Optional[int] = None,
-    ) -> list["OptimizationDataset"]:
+    ) -> list["DataOptimizationDatasetOut"]:
         """
         Lists all the `OptimizationDataset` instances created by user's default organization
         or the `organization_id` passed
@@ -228,17 +229,8 @@ class OptimizationDataset(BaseModel):
         )
         raise_for_status_with_reason(response)
         return [
-            OptimizationDataset(
-                id=ds["id"],
-                name=ds["name"],
-                labelling_type=LabellingType(ds["labelling_type"]),
-                storage_integration=StorageIntegration(
-                    **ds["storage_integration"], output=True
-                ),
-                data_root_url=ds["data_root_url"],
-                classes=ds["classes"],
-                metadata_file_url=ds["metadata_file_url"],
-                metadata_type=DatasetMetadataType(ds["metadata_type"]),
+            DataOptimizationDatasetOut(
+                **ds,
             )
             for ds in response.json()
         ]
@@ -645,3 +637,19 @@ class OptimizationDataset(BaseModel):
         if not self.run_id:
             raise ValueError("No run has been started")
         self.cancel_by_id(self.run_id)
+
+
+class DataOptimizationDatasetOut(BaseModel):
+    id: int
+
+    storage_integration: ResponseStorageIntegration
+
+    classes: list[str]
+    metadata_file_url: HirundoUrl
+    metadata_type: DatasetMetadataType
+
+    run_id: typing.Optional[str]
+    organization_id: typing.Optional[int]
+    creator_id: typing.Optional[int]
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
