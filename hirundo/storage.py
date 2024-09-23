@@ -27,7 +27,7 @@ class StorageS3(BaseModel):
     secret_access_key: typing.Optional[str] = None
 
     def get_url(self, path: typing.Union[str, Path]):
-        return str(Path(self.bucket_url) / path)
+        return f"s3://{Path(self.bucket_url.removeprefix('s3://')) / path}"
 
 
 class StorageGCP(BaseModel):
@@ -36,7 +36,8 @@ class StorageGCP(BaseModel):
     credentials_json: typing.Optional[dict] = None
 
     def get_url(self, path: typing.Union[str, Path]):
-        return str(Path("gs://") / self.bucket_name / path)
+        gcp_url = f"gs://{Path(self.bucket_name) / path}"
+        return gcp_url
 
 
 # TODO: Azure storage integration is coming soon
@@ -74,7 +75,8 @@ class StorageGit(BaseModel):
     def get_url(self, path: typing.Union[str, Path]):
         if not self.repo:
             raise ValueError("Repo must be provided to use `get_url`")
-        return str(Path(self.repo.repository_url) / path)
+        repo_url = Url(self.repo.repository_url)
+        return f"{repo_url.scheme}://{Path(self.repo.repository_url.removeprefix(repo_url.scheme)) / path}"
 
 
 class StorageTypes(str, Enum):

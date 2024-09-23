@@ -1,6 +1,7 @@
-from typing import Annotated, Union
+from typing import Annotated
 
-from pydantic import FileUrl, HttpUrl, StringConstraints, UrlConstraints
+from pydantic import StringConstraints, UrlConstraints
+from pydantic_core import Url
 
 S3BucketUrl = Annotated[
     str,
@@ -27,24 +28,26 @@ GCP_MIN_LENGTH = 8
 GCP_MAX_LENGTH = 1023
 GCP_PATTERN = r"gs://[a-zA-Z0-9.-]{3,64}/[a-zA-Z0-9.-/]+"
 
-S3ObjectUrl = Annotated[
-    str,
-    UrlConstraints(),
-    StringConstraints(
-        min_length=S3_MIN_LENGTH,
-        max_length=S3_MAX_LENGTH,
-        pattern=S3_PATTERN,
+RepoUrl = Annotated[
+    Url,
+    UrlConstraints(
+        allowed_schemes=[
+            "ssh",
+            "https",
+            "http",
+        ]
     ),
 ]
-GCPObjectUrl = Annotated[
-    str,
-    UrlConstraints(),
-    StringConstraints(
-        min_length=8,
-        max_length=1023,
-        pattern=GCP_PATTERN,
+HirundoUrl = Annotated[
+    Url,
+    UrlConstraints(
+        allowed_schemes=[
+            "file",
+            "https",
+            "http",
+            "s3",
+            "gs",
+            "ssh",
+        ]
     ),
 ]
-SSHUrl = Annotated[str, UrlConstraints(allowed_schemes=["ssh"])]
-
-HirundoUrl = Union[FileUrl, HttpUrl, S3ObjectUrl, GCPObjectUrl, SSHUrl]

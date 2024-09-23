@@ -1,12 +1,11 @@
 import re
 import typing
-from typing import Annotated
 
 import pydantic
 import requests
 from pydantic import BaseModel, field_validator
-from pydantic_core import Url
 
+from hirundo._constraints import RepoUrl
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
 from hirundo._http import raise_for_status_with_reason
@@ -48,7 +47,7 @@ class GitRepo(BaseModel):
     """
     A name to identify the Git repository in the Hirundo system.
     """
-    repository_url: Annotated[str, Url]
+    repository_url: RepoUrl
     """
     The URL of the Git repository, it should start with `ssh://` or `https://` or be in the form `user@host:path`.
     If it is in the form `user@host:path`, it will be rewritten to `ssh://user@host:path`.
