@@ -86,9 +86,9 @@ class GitRepo(BaseModel):
     @classmethod
     def check_valid_repository_url(cls, repository_url: str):
         # Check if the URL already has a protocol
-        if not re.match(r"^[a-z]+://", repository_url):
+        if not re.match("^[a-z]+://", repository_url):
             # Check if the URL has the `@` and `:` pattern with a non-numeric section before the next slash
-            match = re.match(r"([^@]+@[^:]+):([^0-9/][^/]*)/(.+)", repository_url)
+            match = re.match("([^@]+@[^:]+):([^0-9/][^/]*)/(.+)", repository_url)
             if match:
                 user_host = match.group(1)
                 path = match.group(2) + "/" + match.group(3)
