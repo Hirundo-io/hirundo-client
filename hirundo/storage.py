@@ -27,7 +27,9 @@ class StorageS3(BaseModel):
     secret_access_key: typing.Optional[str] = None
 
     def get_url(self, path: typing.Union[str, Path]):
-        return f"s3://{self.bucket_url.removeprefix('s3://').removesuffix('/')}/{path}"
+        return Url(
+            f"s3://{self.bucket_url.removeprefix('s3://').removesuffix('/')}/{path}"
+        )
 
 
 class StorageS3Out(BaseModel):
@@ -43,8 +45,7 @@ class StorageGCP(BaseModel):
     credentials_json: typing.Optional[dict] = None
 
     def get_url(self, path: typing.Union[str, Path]):
-        gcp_url = f"gs://{self.bucket_name}/{path}"
-        return gcp_url
+        return Url(f"gs://{self.bucket_name}/{path}")
 
 
 class StorageGCPOut(BaseModel):
@@ -91,7 +92,9 @@ class StorageGit(BaseModel):
         if not self.repo:
             raise ValueError("Repo must be provided to use `get_url`")
         repo_url = self.repo.repository_url
-        return f"{repo_url.scheme}://{str(self.repo.repository_url).removeprefix(repo_url.scheme)}{path}"
+        return Url(
+            f"{repo_url.scheme}://{str(self.repo.repository_url).removeprefix(repo_url.scheme)}{path}"
+        )
 
 
 class StorageGitOut(BaseModel):
