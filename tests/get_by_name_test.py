@@ -42,13 +42,15 @@ def test_get_by_name():
     )
 
     assert new_storage_integration is not None
+    assert new_storage_integration.gcp is not None
+    storage_gcp = new_storage_integration.gcp
 
     OptimizationDataset(
         name=OPTIMIZATION_DATASET_NAME,
         labelling_type=LabellingType.SingleLabelClassification,
-        storage_integration=new_storage_integration,
-        root="/pytorch-cifar/data",
-        dataset_metadata_path="cifar1.csv",
+        storage_integration_id=new_storage_integration.id,
+        data_root_url=storage_gcp.get_url("/pytorch-cifar/data"),
+        metadata_file_url=storage_gcp.get_url("/pytorch-cifar/data/cifar1.csv"),
         classes=[
             "airplane",
             "automobile",

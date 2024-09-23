@@ -51,10 +51,10 @@ def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
         if dataset.name == test_dataset.name and dataset.id
     ]
     storage_integration_ids = [
-        dataset.storage_integration_id
+        dataset.storage_integration.id
         for dataset in datasets
         if dataset.name == test_dataset.name
-        and dataset.storage_integration_id is not None
+        and dataset.storage_integration.id is not None
     ]
     running_datasets = {
         dataset.id: dataset.run_id

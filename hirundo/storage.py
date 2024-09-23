@@ -18,13 +18,12 @@ from hirundo.logger import get_logger
 logger = get_logger(__name__)
 
 
-class StorageS3(BaseModel):
+class StorageS3Base(BaseModel):
     endpoint_url: typing.Optional[Url] = None
     bucket_url: S3BucketUrl
     region_name: str
     # ⬆️ We could restrict this, but if we're allowing custom endpoints then the validation may be wrong
     access_key_id: typing.Optional[str] = None
-    secret_access_key: typing.Optional[str] = None
 
     def get_url(self, path: typing.Union[str, Path]):
         return Url(
@@ -32,25 +31,28 @@ class StorageS3(BaseModel):
         )
 
 
-class StorageS3Out(BaseModel):
-    endpoint_url: typing.Optional[Url] = None
-    bucket_url: S3BucketUrl
-    region_name: str
-    access_key_id: typing.Optional[str] = None
+class StorageS3(StorageS3Base):
+    secret_access_key: typing.Optional[str] = None
 
 
-class StorageGCP(BaseModel):
+class StorageS3Out(StorageS3Base):
+    pass
+
+
+class StorageGCPBase(BaseModel):
     bucket_name: str
     project: str
-    credentials_json: typing.Optional[dict] = None
 
     def get_url(self, path: typing.Union[str, Path]):
         return Url(f"gs://{self.bucket_name}/{path}")
 
 
-class StorageGCPOut(BaseModel):
-    bucket_name: str
-    project: str
+class StorageGCP(StorageGCPBase):
+    credentials_json: typing.Optional[dict] = None
+
+
+class StorageGCPOut(StorageGCPBase):
+    pass
 
 
 # TODO: Azure storage integration is coming soon
@@ -64,6 +66,12 @@ class StorageGCPOut(BaseModel):
 # class StorageAzureOut(BaseModel):
 #     container: str
 #     account_url: str
+
+
+def get_git_repo_url(repo_url: Url, path: typing.Union[str, Path]):
+    return Url(
+        f"{repo_url.scheme}://{str(repo_url).removeprefix(repo_url.scheme)}{path}"
+    )
 
 
 class StorageGit(BaseModel):
@@ -92,14 +100,16 @@ class StorageGit(BaseModel):
         if not self.repo:
             raise ValueError("Repo must be provided to use `get_url`")
         repo_url = self.repo.repository_url
-        return Url(
-            f"{repo_url.scheme}://{str(self.repo.repository_url).removeprefix(repo_url.scheme)}{path}"
-        )
+        return get_git_repo_url(repo_url, path)
 
 
 class StorageGitOut(BaseModel):
     repo: GitRepoOut
     branch: str
+
+    def get_url(self, path: typing.Union[str, Path]):
+        repo_url = self.repo.repository_url
+        return get_git_repo_url(repo_url, path)
 
 
 class StorageTypes(str, Enum):
