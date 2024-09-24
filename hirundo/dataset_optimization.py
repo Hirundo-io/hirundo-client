@@ -288,7 +288,7 @@ class OptimizationDataset(BaseModel):
             self.storage_integration_id = self.storage_integration.create(
                 replace_if_exists=replace_if_exists,
             )
-        model_dict = self.model_dump()
+        model_dict = self.model_dump(mode="json")
         # ⬆️ Get dict of model fields from Pydantic model instance
         dataset_response = requests.post(
             f"{API_HOST}/dataset-optimization/dataset/",

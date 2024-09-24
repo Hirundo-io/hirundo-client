@@ -69,9 +69,7 @@ class StorageGCPOut(StorageGCPBase):
 
 
 def get_git_repo_url(repo_url: Url, path: typing.Union[str, Path]):
-    return Url(
-        f"{repo_url.scheme}://{str(repo_url).removeprefix(repo_url.scheme)}{path}"
-    )
+    return Url(f"{repo_url.scheme}{str(repo_url).removeprefix(repo_url.scheme)}{path}")
 
 
 class StorageGit(BaseModel):
@@ -334,7 +332,7 @@ class StorageIntegration(BaseModel):
         storage_integration = requests.post(
             f"{API_HOST}/storage-integration/",
             json={
-                **self.model_dump(),
+                **self.model_dump(mode="json"),
                 "replace_if_exists": replace_if_exists,
             },
             headers={

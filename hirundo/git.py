@@ -84,20 +84,20 @@ class GitRepo(BaseModel):
 
     @field_validator("repository_url", mode="before", check_fields=True)
     @classmethod
-    def check_valid_repository_url(cls, repository_url: str):
+    def check_valid_repository_url(cls, repository_url: RepoUrl):
         # Check if the URL already has a protocol
-        if not re.match("^[a-z]+://", repository_url):
+        if not re.match("^[a-z]+://", str(repository_url)):
             # Check if the URL has the `@` and `:` pattern with a non-numeric section before the next slash
-            match = re.match("([^@]+@[^:]+):([^0-9/][^/]*)/(.+)", repository_url)
+            match = re.match("([^@]+@[^:]+):([^0-9/][^/]*)/(.+)", str(repository_url))
             if match:
                 user_host = match.group(1)
                 path = match.group(2) + "/" + match.group(3)
                 rewritten_url = f"ssh://{user_host}/{path}"
                 logger.info("Modified Git repo to add SSH protocol", rewritten_url)
                 return rewritten_url
-        if not repository_url.startswith("ssh://") and not repository_url.startswith(
-            "https://"
-        ):
+        if not str(repository_url).startswith("ssh://") and not str(
+            repository_url
+        ).startswith("https://"):
             raise ValueError("Repository URL must start with 'ssh://' or 'https://'")
         return repository_url
 
@@ -107,7 +107,7 @@ class GitRepo(BaseModel):
         """
         git_repo = requests.post(
             f"{API_HOST}/git-repo/",
-            json=self.model_dump(),
+            json=self.model_dump(mode="json"),
             headers={
                 **json_headers,
                 **get_auth_headers(),
