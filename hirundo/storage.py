@@ -27,7 +27,7 @@ class StorageS3Base(BaseModel):
 
     def get_url(self, path: typing.Union[str, Path]):
         return Url(
-            f"s3://{self.bucket_url.removeprefix('s3://').removesuffix('/')}/{path}"
+            f"s3://{self.bucket_url.removeprefix('s3://').removesuffix('/')}/{str(path).removeprefix('/')}"
         )
 
 
@@ -44,7 +44,7 @@ class StorageGCPBase(BaseModel):
     project: str
 
     def get_url(self, path: typing.Union[str, Path]):
-        return Url(f"gs://{self.bucket_name}/{path}")
+        return Url(f"gs://{self.bucket_name}/{str(path).removeprefix('/')}")
 
 
 class StorageGCP(StorageGCPBase):
@@ -69,7 +69,9 @@ class StorageGCPOut(StorageGCPBase):
 
 
 def get_git_repo_url(repo_url: Url, path: typing.Union[str, Path]):
-    return Url(f"{repo_url.scheme}{str(repo_url).removeprefix(repo_url.scheme)}{path}")
+    return Url(
+        f"{repo_url.scheme}{str(repo_url).removeprefix(repo_url.scheme)}{str(path).removeprefix('/')}"
+    )
 
 
 class StorageGit(BaseModel):
