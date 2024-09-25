@@ -68,7 +68,9 @@ class StorageGCPOut(StorageGCPBase):
 #     account_url: str
 
 
-def get_git_repo_url(repo_url: Url, path: typing.Union[str, Path]):
+def get_git_repo_url(repo_url: typing.Union[str, Url], path: typing.Union[str, Path]):
+    if not isinstance(repo_url, Url):
+        repo_url = Url(repo_url)
     return Url(
         f"{repo_url.scheme}{str(repo_url).removeprefix(repo_url.scheme)}{str(path).removeprefix('/')}"
     )
