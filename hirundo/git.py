@@ -5,6 +5,7 @@ import typing
 import pydantic
 import requests
 from pydantic import BaseModel, field_validator
+from pydantic_core import Url
 
 from hirundo._constraints import RepoUrl
 from hirundo._env import API_HOST
@@ -48,7 +49,7 @@ class GitRepo(BaseModel):
     """
     A name to identify the Git repository in the Hirundo system.
     """
-    repository_url: RepoUrl
+    repository_url: typing.Union[str, RepoUrl]
     """
     The URL of the Git repository, it should start with `ssh://` or `https://` or be in the form `user@host:path`.
     If it is in the form `user@host:path`, it will be rewritten to `ssh://user@host:path`.
@@ -84,21 +85,30 @@ class GitRepo(BaseModel):
 
     @field_validator("repository_url", mode="before", check_fields=True)
     @classmethod
-    def check_valid_repository_url(cls, repository_url: RepoUrl):
-        # Check if the URL already has a protocol
-        if not re.match("^[a-z]+://", str(repository_url)):
-            # Check if the URL has the `@` and `:` pattern with a non-numeric section before the next slash
-            match = re.match("([^@]+@[^:]+):([^0-9/][^/]*)/(.+)", str(repository_url))
-            if match:
-                user_host = match.group(1)
-                path = match.group(2) + "/" + match.group(3)
-                rewritten_url = f"ssh://{user_host}/{path}"
-                logger.info("Modified Git repo to add SSH protocol", rewritten_url)
-                return rewritten_url
+    def check_valid_repository_url(cls, repository_url: typing.Union[str, RepoUrl]):
+        # Check if the URL has the `@` and `:` pattern with a non-numeric section before the next slash
+        match = re.match("([^@]+@[^:]+):([^0-9/][^/]*)/(.+)", str(repository_url))
+        if match:
+            user_host = match.group(1)
+            path = match.group(2) + "/" + match.group(3)
+            rewritten_url = Url(f"ssh://{user_host}/{path}")
+            # Check if the URL already has a protocol
+            url_scheme = rewritten_url.scheme
+            logger.info(
+                "Modified Git repo to replace %s@%s:%s/%s with %s",
+                url_scheme,
+                match.group(1),
+                match.group(2),
+                match.group(3),
+                rewritten_url,
+            )
+            return rewritten_url
         if not str(repository_url).startswith("ssh://") and not str(
             repository_url
         ).startswith("https://"):
             raise ValueError("Repository URL must start with 'ssh://' or 'https://'")
+        if not isinstance(repository_url, Url):
+            repository_url = Url(repository_url)
         return repository_url
 
     def create(self):
@@ -120,7 +130,7 @@ class GitRepo(BaseModel):
         return git_repo_id
 
     @staticmethod
-    def list():
+    def list() -> list["GitRepoOut"]:
         """
         List all Git repositories in the Hirundo system.
         """
@@ -132,7 +142,13 @@ class GitRepo(BaseModel):
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(git_repos)
-        return git_repos.json()
+        git_repo_json = git_repos.json()
+        return [
+            GitRepoOut(
+                **git_repo,
+            )
+            for git_repo in git_repo_json
+        ]
 
     @staticmethod
     def delete_by_id(git_repo_id: int):
