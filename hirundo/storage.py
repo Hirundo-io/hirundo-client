@@ -272,13 +272,13 @@ class StorageIntegration(BaseModel):
 
             Note: The type is required because the name is not unique across different storage types
         """
-        storage_integrations = requests.get(
+        storage_integration = requests.get(
             f"{API_HOST}/storage-integration/by-name/{name}?storage_type={storage_type}",
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
-        raise_for_status_with_reason(storage_integrations)
-        return ResponseStorageIntegration(**storage_integrations.json()[0])
+        raise_for_status_with_reason(storage_integration)
+        return ResponseStorageIntegration(**storage_integration.json())
 
     @staticmethod
     def list(
