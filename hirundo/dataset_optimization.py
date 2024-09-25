@@ -298,6 +298,7 @@ class OptimizationDataset(BaseModel):
                     k: model_dict[k]
                     for k in model_dict.keys() - {"storage_integration"}
                 },
+                "replace_if_exists": replace_if_exists,
             },
             headers={
                 **json_headers,
