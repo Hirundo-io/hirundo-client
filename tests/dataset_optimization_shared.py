@@ -16,7 +16,7 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
     if not unique_id:
         return
     conflicting_git_repo_ids = [
-        git_repo["id"] for git_repo in GitRepo.list() if unique_id in git_repo["name"]
+        git_repo.id for git_repo in GitRepo.list() if unique_id in git_repo.name
     ]
     for conflicting_git_repo_id in conflicting_git_repo_ids:
         try:
