@@ -47,6 +47,7 @@ class RunStatus(Enum):
     AWAITING_MANUAL_APPROVAL = "AWAITING MANUAL APPROVAL"
     RETRYING = "RETRYING"
     REVOKED = "REVOKED"
+    REJECTED = "REJECTED"
 
 
 STATUS_TO_TEXT_MAP = {
@@ -56,6 +57,8 @@ STATUS_TO_TEXT_MAP = {
     RunStatus.FAILURE.value: "Optimization run failed",
     RunStatus.AWAITING_MANUAL_APPROVAL.value: "Awaiting manual approval",
     RunStatus.RETRYING.value: "Optimization run failed. Retrying",
+    RunStatus.REVOKED.value: "Optimization run was cancelled",
+    RunStatus.REJECTED.value: "Optimization run was rejected",
 }
 STATUS_TO_PROGRESS_MAP = {
     RunStatus.STARTED.value: 0.0,
@@ -64,6 +67,8 @@ STATUS_TO_PROGRESS_MAP = {
     RunStatus.FAILURE.value: 100.0,
     RunStatus.AWAITING_MANUAL_APPROVAL.value: 100.0,
     RunStatus.RETRYING.value: 0.0,
+    RunStatus.REVOKED.value: 100.0,
+    RunStatus.REJECTED.value: 0.0,
 }
 
 
