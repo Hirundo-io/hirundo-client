@@ -130,6 +130,40 @@ class GitRepo(BaseModel):
         return git_repo_id
 
     @staticmethod
+    def get_by_id(git_repo_id: int) -> "GitRepoOut":
+        """
+        Retrieves a `GitRepo` instance from the server by its ID
+
+        Args:
+            git_repo_id: The ID of the `GitRepo` to retrieve
+        """
+        git_repo = requests.get(
+            f"{API_HOST}/git-repo/{git_repo_id}",
+            headers=get_auth_headers(),
+            timeout=READ_TIMEOUT,
+        )
+        raise_for_status_with_reason(git_repo)
+        return GitRepoOut(**git_repo.json())
+
+    @staticmethod
+    def get_by_name(
+        name: str,
+    ) -> "GitRepoOut":
+        """
+        Retrieves a `GitRepo` instance from the server by its name
+
+        Args:
+            name: The name of the `GitRepo` to retrieve
+        """
+        git_repo = requests.get(
+            f"{API_HOST}/git-repo/by-name/{name}",
+            headers=get_auth_headers(),
+            timeout=READ_TIMEOUT,
+        )
+        raise_for_status_with_reason(git_repo)
+        return GitRepoOut(**git_repo.json())
+
+    @staticmethod
     def list() -> list["GitRepoOut"]:
         """
         List all Git repositories in the Hirundo system.
