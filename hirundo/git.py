@@ -111,13 +111,19 @@ class GitRepo(BaseModel):
             repository_url = Url(repository_url)
         return repository_url
 
-    def create(self):
+    def create(self, replace_if_exists: bool = False) -> int:
         """
         Create a Git repository in the Hirundo system.
+
+        Args:
+            replace_if_exists: If a Git repository with the same name already exists, replace it.
         """
         git_repo = requests.post(
             f"{API_HOST}/git-repo/",
-            json=self.model_dump(mode="json"),
+            json={
+                **self.model_dump(mode="json"),
+                "replace_if_exists": replace_if_exists,
+            },
             headers={
                 **json_headers,
                 **get_auth_headers(),

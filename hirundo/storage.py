@@ -330,9 +330,12 @@ class StorageIntegration(BaseModel):
     def create(self, replace_if_exists: bool = False) -> int:
         """
         Create a `StorageIntegration` instance on the server
+
+        Args:
+            replace_if_exists: If a `StorageIntegration` with the same name and type already exists, replace it.
         """
         if self.git and self.git.repo:
-            self.git.repo_id = self.git.repo.create()
+            self.git.repo_id = self.git.repo.create(replace_if_exists=replace_if_exists)
         storage_integration = requests.post(
             f"{API_HOST}/storage-integration/",
             json={
