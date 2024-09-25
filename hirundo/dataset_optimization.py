@@ -283,13 +283,9 @@ class OptimizationDataset(BaseModel):
         Create a `OptimizationDataset` instance on the server.
         If `storage_integration_id` is not set, it will be created.
         """
-        if not self.storage_integration:
+        if self.storage_integration is None and self.storage_integration_id is None:
             raise ValueError("No dataset storage has been provided")
-        if (
-            self.storage_integration
-            and self.storage_integration
-            and not self.storage_integration_id
-        ):
+        if self.storage_integration and self.storage_integration_id is None:
             self.storage_integration_id = self.storage_integration.create(
                 replace_if_exists=replace_if_exists,
             )
