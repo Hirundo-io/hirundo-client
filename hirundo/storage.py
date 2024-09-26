@@ -275,7 +275,7 @@ class StorageIntegration(BaseModel):
             Note: The type is required because the name is not unique across different storage types
         """
         storage_integration = requests.get(
-            f"{API_HOST}/storage-integration/by-name/{name}?storage_type={storage_type}",
+            f"{API_HOST}/storage-integration/by-name/{name}?storage_type={storage_type.value}",
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
