@@ -487,7 +487,11 @@ class OptimizationDataset(BaseModel):
                     t.n = STATUS_TO_PROGRESS_MAP[iteration["state"]]
                     logger.debug("Setting progress to %s", t.n)
                     t.refresh()
-                    if iteration["state"] == RunStatus.FAILURE.value:
+                    if iteration["state"] in [
+                        RunStatus.FAILURE.value,
+                        RunStatus.REJECTED.value,
+                        RunStatus.REVOKED.value,
+                    ]:
                         raise HirundoError(
                             f"Optimization run failed with error: {iteration['result']}"
                         )
