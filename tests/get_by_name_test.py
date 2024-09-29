@@ -1,5 +1,6 @@
 import json
 import os
+import typing
 
 import pytest
 from hirundo import (
@@ -9,13 +10,15 @@ from hirundo import (
     StorageIntegration,
     StorageTypes,
 )
+from hirundo.git import GitRepo
+from hirundo.storage import StorageGit
 from tests.dataset_optimization_shared import get_unique_id
 
 unique_id = get_unique_id()
 storage_integration_name = f"T-cifar1bucket_get_by_name{unique_id}"
 optimization_dataset_name = f"T-cifar1_get_by_name{unique_id}"
 
-new_storage_integration = None
+new_storage_integration: typing.Optional[StorageIntegration] = None
 new_dataset = None
 
 
@@ -24,11 +27,17 @@ def cleanup_tests():
     yield
     if new_dataset:
         new_dataset.delete()
+    if (
+        new_storage_integration
+        and new_storage_integration.git
+        and new_storage_integration.git.repo
+    ):
+        new_storage_integration.git.repo.delete()
     if new_storage_integration:
         new_storage_integration.delete()
 
 
-def test_get_by_name():
+def test_get_by_name_gcp():
     StorageIntegration(
         name=storage_integration_name,
         type=StorageTypes.GCP,
@@ -53,19 +62,41 @@ def test_get_by_name():
         storage_integration_id=new_storage_integration.id,
         data_root_url=storage_gcp.get_url("/pytorch-cifar/data"),
         metadata_file_url=storage_gcp.get_url("/pytorch-cifar/data/cifar1.csv"),
-        classes=[
-            "airplane",
-            "automobile",
-            "bird",
-            "cat",
-            "deer",
-            "dog",
-            "frog",
-            "horse",
-            "ship",
-            "truck",
-        ],
     ).create(replace_if_exists=True)
 
     dataset = OptimizationDataset.get_by_name(optimization_dataset_name)
     assert dataset is not None
+
+
+def test_get_by_name_git():
+    StorageIntegration(
+        name=f"BDD-100k-validation-dataset{unique_id}",
+        type=StorageTypes.GIT,
+        git=StorageGit(
+            repo=GitRepo(
+                name=storage_integration_name,
+                repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only.git",
+            ),
+            branch="main",
+        ),
+    ).create(replace_if_exists=True)
+    new_storage_integration = StorageIntegration.get_by_name(
+        storage_integration_name, StorageTypes.GIT
+    )
+
+    assert new_storage_integration is not None
+    assert new_storage_integration.git is not None
+    storage_git = new_storage_integration.git
+
+    OptimizationDataset(
+        name=optimization_dataset_name,
+        labelling_type=LabellingType.ObjectDetection,
+        storage_integration_id=new_storage_integration.id,
+        data_root_url=storage_git.get_url(path="/BDD100K Val from Hirundo.zip/bdd100k"),
+        metadata_file_url=storage_git.get_url(
+            path="/BDD100K Val from Hirundo.zip/bdd100k/bdd100k.csv"
+        ),
+    ).create(replace_if_exists=True)
+
+    new_dataset = OptimizationDataset.get_by_name(optimization_dataset_name)
+    assert new_dataset is not None
