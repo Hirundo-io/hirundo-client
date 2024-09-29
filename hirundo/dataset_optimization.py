@@ -657,7 +657,7 @@ class DataOptimizationDatasetOut(BaseModel):
 
     data_root_url: HirundoUrl
 
-    classes: list[str]
+    classes: typing.Optional[list[str]] = None
     metadata_file_url: HirundoUrl
     metadata_type: DatasetMetadataType
 
