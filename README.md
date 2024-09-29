@@ -49,23 +49,21 @@ Classification example:
 ```
 from hirundo.dataset_optimization import OptimizationDataset
 from hirundo.enum import LabellingType
-from hirundo.storage import StorageIntegration, StorageLink, StorageTypes
+from hirundo.storage import StorageIntegration, StorageTypes
 
 test_dataset = OptimizationDataset(
     name="TEST-GCP cifar 100 classification dataset",
     labelling_type=LabellingType.SingleLabelClassification,
-    dataset_storage=StorageLink(
-        storage_integration=StorageIntegration(
-            name="cifar100bucket",
-            type=StorageTypes.GCP,
-            gcp=StorageGCP(
-                bucket_name="cifar100bucket",
-                project="Hirundo-global",
-                credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
-            ),
+    storage_integration=StorageIntegration(
+        name="cifar100bucket",
+        type=StorageTypes.GCP,
+        gcp=StorageGCP(
+            bucket_name="cifar100bucket",
+            project="Hirundo-global",
+            credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
         ),
-        path="/pytorch-cifar/data",
     ),
+    root="/pytorch-cifar/data",
     dataset_metadata_path="cifar100.csv",
     classes=cifar100_classes,
 )
@@ -81,25 +79,23 @@ Object detection example:
 ```
 from hirundo.dataset_optimization import OptimizationDataset
 from hirundo.enum import LabellingType
-from hirundo.storage import StorageIntegration, StorageLink, StorageTypes
+from hirundo.storage import StorageIntegration, StorageTypes
 
 test_dataset = OptimizationDataset(
     name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,
-    dataset_storage=StorageLink(
-        storage_integration=StorageIntegration(
-            name=f"BDD-100k-validation-dataset{unique_id}",
-            type=StorageTypes.GIT,
-            git=StorageGit(
-                repo=GitRepo(
-                    name=f"BDD-100k-validation-dataset{unique_id}",
-                    repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
-                ),
-                branch="main",
+    storage_integration=StorageIntegration(
+        name=f"BDD-100k-validation-dataset{unique_id}",
+        type=StorageTypes.GIT,
+        git=StorageGit(
+            repo=GitRepo(
+                name=f"BDD-100k-validation-dataset{unique_id}",
+                repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
             ),
+            branch="main",
         ),
-        path="/BDD100K Val from Hirundo.zip/bdd100k",
     ),
+    root="/BDD100K Val from Hirundo.zip/bdd100k",
     dataset_metadata_path="bdd100k.csv",
 )
 

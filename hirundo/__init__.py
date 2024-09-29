@@ -12,7 +12,6 @@ from .storage import (
     # StorageAzure,  TODO: Azure storage integration is coming soon
     StorageGit,
     StorageIntegration,
-    StorageLink,
     StorageS3,
     StorageTypes,
 )
@@ -23,7 +22,6 @@ __all__ = [
     "LabellingType",
     "DatasetMetadataType",
     "GitRepo",
-    "StorageLink",
     "StorageTypes",
     "StorageS3",
     "StorageGCP",

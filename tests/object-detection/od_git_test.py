@@ -7,7 +7,6 @@ from hirundo import (
     OptimizationDataset,
     StorageGit,
     StorageIntegration,
-    StorageLink,
     StorageTypes,
 )
 from tests.dataset_optimization_shared import (
@@ -19,24 +18,25 @@ from tests.dataset_optimization_shared import (
 logger = logging.getLogger(__name__)
 
 unique_id = get_unique_id()
+git_storage = StorageGit(
+    repo=GitRepo(
+        name=f"BDD-100k-validation-dataset{unique_id}",
+        repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only.git",
+    ),
+    branch="main",
+)
 test_dataset = OptimizationDataset(
     name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
     labelling_type=LabellingType.ObjectDetection,
-    dataset_storage=StorageLink(
-        storage_integration=StorageIntegration(
-            name=f"BDD-100k-validation-dataset{unique_id}",
-            type=StorageTypes.GIT,
-            git=StorageGit(
-                repo=GitRepo(
-                    name=f"BDD-100k-validation-dataset{unique_id}",
-                    repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
-                ),
-                branch="main",
-            ),
-        ),
-        path="/BDD100K Val from Hirundo.zip/bdd100k",
+    storage_integration=StorageIntegration(
+        name=f"BDD-100k-validation-dataset{unique_id}",
+        type=StorageTypes.GIT,
+        git=git_storage,
     ),
-    dataset_metadata_path="bdd100k.csv",
+    data_root_url=git_storage.get_url(path="/BDD100K Val from Hirundo.zip/bdd100k"),
+    metadata_file_url=git_storage.get_url(
+        path="/BDD100K Val from Hirundo.zip/bdd100k/bdd100k.csv"
+    ),
     classes=[
         "traffic light",
         "traffic sign",

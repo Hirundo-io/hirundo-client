@@ -16,7 +16,7 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
     if not unique_id:
         return
     conflicting_git_repo_ids = [
-        git_repo["id"] for git_repo in GitRepo.list() if unique_id in git_repo["name"]
+        git_repo.id for git_repo in GitRepo.list() if unique_id in git_repo.name
     ]
     for conflicting_git_repo_id in conflicting_git_repo_ids:
         try:
@@ -28,9 +28,9 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
                 e,
             )
     conflicting_storage_integration_ids = [
-        storage_integration["id"]
+        storage_integration.id
         for storage_integration in StorageIntegration.list()
-        if unique_id in storage_integration["name"]
+        if unique_id in storage_integration.name and storage_integration.id is not None
     ]
     for conflicting_storage_integration_id in conflicting_storage_integration_ids:
         try:
@@ -46,20 +46,23 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
 def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
     datasets = OptimizationDataset.list()
     dataset_ids = [
-        dataset["id"] for dataset in datasets if dataset["name"] == test_dataset.name
+        dataset.id
+        for dataset in datasets
+        if dataset.name == test_dataset.name and dataset.id
     ]
     storage_integration_ids = [
-        dataset["storage_link"]["storage_integration_id"]
+        dataset.storage_integration.id
         for dataset in datasets
-        if dataset["name"] == test_dataset.name
+        if dataset.name == test_dataset.name
+        and dataset.storage_integration.id is not None
     ]
     running_datasets = {
-        dataset["id"]: dataset["run_id"]
+        dataset.id: dataset.run_id
         for dataset in datasets
         if (
-            dataset["name"] == test_dataset.name
-            and dataset["run_id"] is not None
-            and ("completed" not in dataset or dataset["completed"] is None)
+            dataset.name == test_dataset.name
+            and dataset.run_id is not None
+            and dataset.status == RunStatus.STARTED
         )
     }
     if len(dataset_ids) > 0:
@@ -80,11 +83,12 @@ def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
             )
     storage_integrations = StorageIntegration.list()
     git_repo_ids = [
-        integration["git"]["repo"]["id"]
+        integration.git.repo.id
         for integration in storage_integrations
-        if integration["id"] in storage_integration_ids
-        and integration["git"] is not None
-        and integration["git"]["repo"] is not None
+        if integration.id in storage_integration_ids
+        and integration.git is not None
+        and integration.git.repo is not None
+        and integration.git.repo.id is not None
     ]
     if len(storage_integration_ids) > 0:
         logger.debug(
@@ -125,14 +129,14 @@ def dataset_optimization_sync_test(
     if (os.getenv("FULL_TEST", "false") == "true" and sanity) or (
         alternative_env and os.getenv(alternative_env, "false") == "true"
     ):
-        run_id = test_dataset.run_optimization()
+        run_id = test_dataset.run_optimization(replace_if_exists=True)
         logger.info("Sync: Started dataset optimization run with run ID %s", run_id)
         logger.info("Sync: Checking run progress")
         result = test_dataset.check_run(stop_on_manual_approval=True)
         logger.info("Sync: Results %s", result)
         return result
     else:
-        test_dataset.create()
+        test_dataset.create(replace_if_exists=True)
         logger.info("Sync: Created dataset %s", test_dataset.name)
         return None
 
@@ -140,7 +144,7 @@ def dataset_optimization_sync_test(
 async def dataset_optimization_async_test(test_dataset: OptimizationDataset, env: str):
     logger.info("Async: Finished cleanup")
     if os.getenv(env, "false") == "true":
-        run_id = test_dataset.run_optimization()
+        run_id = test_dataset.run_optimization(replace_if_exists=True)
         logger.info("Async: Started dataset optimization run with run ID %s", run_id)
         events_generator = test_dataset.acheck_run()
         logger.info("Async: Checking run progress")
@@ -154,6 +158,6 @@ async def dataset_optimization_async_test(test_dataset: OptimizationDataset, env
         logger.info("Async: Results %s", last_event["result"])
         return last_event["result"]
     else:
-        test_dataset.create()
+        test_dataset.create(replace_if_exists=True)
         logger.info("Async: Created dataset %s", test_dataset.name)
         return None
