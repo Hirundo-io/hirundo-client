@@ -370,7 +370,13 @@ class OptimizationDataset(BaseModel):
                 last_event = json.loads(sse.data)
                 if not last_event:
                     continue
-                data = last_event["data"]
+                if "data" in last_event:
+                    data = last_event["data"]
+                else:
+                    if "detail" in last_event:
+                        raise HirundoError(last_event["detail"])
+                    else:
+                        raise HirundoError("Unknown error")
                 OptimizationDataset._read_csvs_to_df(data)
                 yield data
         if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:
