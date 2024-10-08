@@ -108,6 +108,11 @@ class OptimizationDataset(BaseModel):
     Indicates the labelling type of the dataset. The labelling type can be one of the following:
     - `LabellingType.SingleLabelClassification`: Indicates that the dataset is for classification tasks
     - `LabellingType.ObjectDetection`: Indicates that the dataset is for object detection tasks
+    - `LabellingType.SpeechToText`: Indicates that the dataset is for speech-to-text tasks
+    """
+    language: typing.Optional[str] = None
+    """
+    Language of the Speech-to-Text audio dataset. This is required for Speech-to-Text datasets.
     """
     dataset_storage: typing.Optional[StorageLink]
     """
@@ -150,6 +155,13 @@ class OptimizationDataset(BaseModel):
     def validate_dataset(self):
         if self.dataset_storage is None and self.storage_integration_id is None:
             raise ValueError("No dataset storage has been provided")
+        if self.labelling_type == LabellingType.SpeechToText and self.language is None:
+            raise ValueError("Language is required for Speech-to-Text datasets.")
+        elif (
+            self.labelling_type != LabellingType.SpeechToText
+            and self.language is not None
+        ):
+            raise ValueError("Language is only allowed for Speech-to-Text datasets.")
         return self
 
     @staticmethod

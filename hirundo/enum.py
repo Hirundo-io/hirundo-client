@@ -9,6 +9,7 @@ class LabellingType(str, Enum):
 
     SingleLabelClassification = "SingleLabelClassification"
     ObjectDetection = "ObjectDetection"
+    SpeechToText = "SpeechToText"
 
 
 class DatasetMetadataType(str, Enum):
