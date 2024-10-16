@@ -387,6 +387,8 @@ class OptimizationDataset(BaseModel):
                 else:
                     if "detail" in last_event:
                         raise HirundoError(last_event["detail"])
+                    elif "reason" in last_event:
+                        raise HirundoError(last_event["reason"])
                     else:
                         raise HirundoError("Unknown error")
                 OptimizationDataset._read_csvs_to_df(data)
