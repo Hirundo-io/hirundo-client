@@ -4,10 +4,12 @@ import hirundo.logger
 
 logger = hirundo.logger.get_logger(__name__)
 
+MINIMUM_CLIENT_SERVER_ERROR_CODE = 400
+
 
 def raise_for_status_with_reason(response: Response):
     try:
-        if response.status_code >= 400:
+        if response.status_code >= MINIMUM_CLIENT_SERVER_ERROR_CODE:
             response.reason = response.json().get("reason", None)
             if response.reason is None:
                 response.reason = response.json().get("detail", None)
