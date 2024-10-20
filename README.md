@@ -53,7 +53,7 @@ from hirundo.storage import StorageIntegration, StorageLink, StorageTypes
 
 test_dataset = OptimizationDataset(
     name="TEST-GCP cifar 100 classification dataset",
-    labelling_type=LabellingType.SingleLabelClassification,
+    labelling_type=LabellingType.SINGLE_LABEL_CLASSIFICATION,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
             name="cifar100bucket",
@@ -85,7 +85,7 @@ from hirundo.storage import StorageIntegration, StorageLink, StorageTypes
 
 test_dataset = OptimizationDataset(
     name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
-    labelling_type=LabellingType.ObjectDetection,
+    labelling_type=LabellingType.OBJECT_DETECTION,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
             name=f"BDD-100k-validation-dataset{unique_id}",

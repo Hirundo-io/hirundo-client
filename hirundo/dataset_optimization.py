@@ -106,9 +106,9 @@ class OptimizationDataset(BaseModel):
     labelling_type: LabellingType
     """
     Indicates the labelling type of the dataset. The labelling type can be one of the following:
-    - `LabellingType.SingleLabelClassification`: Indicates that the dataset is for classification tasks
-    - `LabellingType.ObjectDetection`: Indicates that the dataset is for object detection tasks
-    - `LabellingType.SpeechToText`: Indicates that the dataset is for speech-to-text tasks
+    - `LabellingType.SINGLE_LABEL_CLASSIFICATION`: Indicates that the dataset is for classification tasks
+    - `LabellingType.OBJECT_DETECTION`: Indicates that the dataset is for object detection tasks
+    - `LabellingType.SPEECH_TO_TEXT`: Indicates that the dataset is for speech-to-text tasks
     """
     language: typing.Optional[str] = None
     """
@@ -130,10 +130,10 @@ class OptimizationDataset(BaseModel):
     The path to the dataset metadata file within storage integration, e.g. S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
     Note: This path will be prefixed with the `StorageLink`'s `path`.
     """
-    dataset_metadata_type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
+    dataset_metadata_type: DatasetMetadataType = DatasetMetadataType.HIRUNDO_CSV
     """
     The type of dataset metadata file. The dataset metadata file can be one of the following:
-    - `DatasetMetadataType.HirundoCSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
+    - `DatasetMetadataType.HIRUNDO_CSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
 
     Currently no other formats are supported. Future versions of `hirundo` may support additional formats.
     """
@@ -155,10 +155,13 @@ class OptimizationDataset(BaseModel):
     def validate_dataset(self):
         if self.dataset_storage is None and self.storage_integration_id is None:
             raise ValueError("No dataset storage has been provided")
-        if self.labelling_type == LabellingType.SpeechToText and self.language is None:
+        if (
+            self.labelling_type == LabellingType.SPEECH_TO_TEXT
+            and self.language is None
+        ):
             raise ValueError("Language is required for Speech-to-Text datasets.")
         elif (
-            self.labelling_type != LabellingType.SpeechToText
+            self.labelling_type != LabellingType.SPEECH_TO_TEXT
             and self.language is not None
         ):
             raise ValueError("Language is only allowed for Speech-to-Text datasets.")
