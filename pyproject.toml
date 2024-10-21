@@ -74,6 +74,7 @@ docs = [
     "autodoc_pydantic>=2.2.0",
     "furo",
     "sphinx-multiversion",
+    "starlette>0.40.0",
 ]
 
 [tool.bumpver]
