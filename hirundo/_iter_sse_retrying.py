@@ -1,11 +1,15 @@
 import asyncio
 import time
 import typing
+import uuid
 from collections.abc import AsyncGenerator, Generator
 
 import httpx
-from httpx_sse import ServerSentEvent, aconnect_sse, connect_sse
+import requests
+from httpx_sse import ServerSentEvent, SSEError, aconnect_sse, connect_sse
 from stamina import retry
+
+from hirundo._timeouts import READ_TIMEOUT
 
 
 # Credit: https://github.com/florimondmanca/httpx-sse/blob/master/README.md#handling-reconnections
@@ -44,13 +48,26 @@ def iter_sse_retrying(
             connect_headers["Last-Event-ID"] = last_event_id
 
         with connect_sse(client, method, url, headers=connect_headers) as event_source:
-            for sse in event_source.iter_sse():
-                last_event_id = sse.id
+            try:
+                for sse in event_source.iter_sse():
+                    last_event_id = sse.id
 
-                if sse.retry is not None:
-                    reconnection_delay = sse.retry / 1000
+                    if sse.retry is not None:
+                        reconnection_delay = sse.retry / 1000
 
-                yield sse
+                    yield sse
+            except SSEError:
+                response = requests.get(
+                    url,
+                    headers=connect_headers,
+                    timeout=READ_TIMEOUT,
+                )
+                yield ServerSentEvent(
+                    event="",
+                    data=response.text,
+                    id=uuid.uuid4().hex,
+                    retry=None,
+                )
 
     return _iter_sse()
 
