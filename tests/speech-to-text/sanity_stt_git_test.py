@@ -56,7 +56,7 @@ def cleanup_tests():
 def test_dataset_optimization():
     full_run = dataset_optimization_sync_test(test_dataset, "RUN_STT_GIT_OPTIMIZATION")
     if full_run is not None:
-        pass
-        # TODO: Add add assertion for result
+        assert full_run.warnings_and_errors.size == 0
+        assert full_run.suspects.size == 125
     else:
         logger.info("Full dataset optimization was not run!")
