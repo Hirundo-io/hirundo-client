@@ -44,6 +44,7 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
 
 
 def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
+    logger.info("Started cleanup")
     datasets = OptimizationDataset.list()
     dataset_ids = [
         dataset["id"] for dataset in datasets if dataset["name"] == test_dataset.name
@@ -114,6 +115,7 @@ def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
     test_dataset.clean_ids()
     # ⬆️ Reset `dataset_id`, `storage_integration_id`, and `run_id` values on `test_dataset` to default value of `None`
     # This prevents errors due to ID links to deleted datasets, storage integrations and runs
+    logger.info("Finished cleanup")
 
 
 def dataset_optimization_sync_test(
