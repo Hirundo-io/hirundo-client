@@ -43,6 +43,17 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
             )
 
 
+def log_cleanup(storage_integration_ids: list[int], git_repo_ids: list[int]):
+    if len(storage_integration_ids) > 0:
+        logger.debug(
+            "Found %s storage integrations, deleting them", len(storage_integration_ids)
+        )
+        logger.debug("Note: If I am not the owner, I will not be able to delete them")
+    if len(git_repo_ids) > 0:
+        logger.debug("Found %s git repos, deleting them", len(git_repo_ids))
+        logger.debug("Note: If I am not the owner, I will not be able to delete them")
+
+
 def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
     logger.info("Started cleanup")
     datasets = OptimizationDataset.list()
@@ -87,11 +98,7 @@ def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
         and integration["git"] is not None
         and integration["git"]["repo"] is not None
     ]
-    if len(storage_integration_ids) > 0:
-        logger.debug(
-            "Found %s storage integrations, deleting them", len(storage_integration_ids)
-        )
-        logger.debug("Note: If I am not the owner, I will not be able to delete them")
+    log_cleanup(storage_integration_ids, git_repo_ids)
     for storage_integration_id in storage_integration_ids:
         try:
             StorageIntegration.delete_by_id(storage_integration_id)
