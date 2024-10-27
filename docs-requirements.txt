@@ -243,8 +243,10 @@ stamina==24.2.0
     # via
     #   -c requirements.txt
     #   hirundo (pyproject.toml)
-starlette==0.40.0
-    # via sphinx-autobuild
+starlette==0.41.2
+    # via
+    #   hirundo (pyproject.toml)
+    #   sphinx-autobuild
 tenacity==8.5.0
     # via
     #   -c requirements.txt
