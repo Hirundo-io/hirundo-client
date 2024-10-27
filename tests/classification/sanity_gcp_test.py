@@ -4,7 +4,7 @@ import os
 
 import pytest
 from hirundo import (
-    LabellingType,
+    LabelingType,
     OptimizationDataset,
     StorageGCP,
     StorageIntegration,
@@ -27,7 +27,7 @@ gcp_bucket = StorageGCP(
 )
 test_dataset = OptimizationDataset(
     name=f"TEST-GCP sanity dataset{unique_id}",
-    labelling_type=LabellingType.SingleLabelClassification,
+    labeling_type=LabelingType.SingleLabelClassification,
     storage_integration=StorageIntegration(
         name=f"cifar1bucket{unique_id}",
         type=StorageTypes.GCP,

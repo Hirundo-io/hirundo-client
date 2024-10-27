@@ -4,7 +4,7 @@ from .dataset_optimization import (
 )
 from .enum import (
     DatasetMetadataType,
-    LabellingType,
+    LabelingType,
 )
 from .git import GitRepo
 from .storage import (
@@ -19,7 +19,7 @@ from .storage import (
 __all__ = [
     "HirundoError",
     "OptimizationDataset",
-    "LabellingType",
+    "LabelingType",
     "DatasetMetadataType",
     "GitRepo",
     "StorageTypes",

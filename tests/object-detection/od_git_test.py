@@ -3,7 +3,7 @@ import logging
 import pytest
 from hirundo import (
     GitRepo,
-    LabellingType,
+    LabelingType,
     OptimizationDataset,
     StorageGit,
     StorageIntegration,
@@ -27,7 +27,7 @@ git_storage = StorageGit(
 )
 test_dataset = OptimizationDataset(
     name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
-    labelling_type=LabellingType.ObjectDetection,
+    labeling_type=LabelingType.ObjectDetection,
     storage_integration=StorageIntegration(
         name=f"BDD-100k-validation-dataset{unique_id}",
         type=StorageTypes.GIT,

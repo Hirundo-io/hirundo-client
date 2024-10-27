@@ -3,7 +3,7 @@ import os
 
 import pytest
 from hirundo import (
-    LabellingType,
+    LabelingType,
     OptimizationDataset,
     StorageIntegration,
     StorageS3,
@@ -26,7 +26,7 @@ s3_bucket = StorageS3(
 )
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS cifar10 classification dataset{unique_id}",
-    labelling_type=LabellingType.SingleLabelClassification,
+    labeling_type=LabelingType.SingleLabelClassification,
     storage_integration=StorageIntegration(
         name=f"cifar10bucket{unique_id}",
         type=StorageTypes.S3,

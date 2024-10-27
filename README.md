@@ -48,12 +48,12 @@ You can install the codebase with a simple `pip install hirundo` to install the 
 Classification example:
 ```
 from hirundo.dataset_optimization import OptimizationDataset
-from hirundo.enum import LabellingType
+from hirundo.enum import LabelingType
 from hirundo.storage import StorageIntegration, StorageTypes
 
 test_dataset = OptimizationDataset(
     name="TEST-GCP cifar 100 classification dataset",
-    labelling_type=LabellingType.SingleLabelClassification,
+    labeling_type=LabelingType.SingleLabelClassification,
     storage_integration=StorageIntegration(
         name="cifar100bucket",
         type=StorageTypes.GCP,
@@ -76,14 +76,14 @@ print(results)
 
 Object detection example:
 
-```
+```python
 from hirundo.dataset_optimization import OptimizationDataset
-from hirundo.enum import LabellingType
+from hirundo.enum import LabelingType
 from hirundo.storage import StorageIntegration, StorageTypes
 
 test_dataset = OptimizationDataset(
     name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
-    labelling_type=LabellingType.ObjectDetection,
+    labeling_type=LabelingType.ObjectDetection,
     storage_integration=StorageIntegration(
         name=f"BDD-100k-validation-dataset{unique_id}",
         type=StorageTypes.GIT,

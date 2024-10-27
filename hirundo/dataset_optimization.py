@@ -21,7 +21,7 @@ from hirundo._headers import get_auth_headers, json_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
-from hirundo.enum import DatasetMetadataType, LabellingType
+from hirundo.enum import DatasetMetadataType, LabelingType
 from hirundo.logger import get_logger
 from hirundo.storage import ResponseStorageIntegration, StorageIntegration
 
@@ -115,11 +115,11 @@ class OptimizationDataset(BaseModel):
     The name of the dataset. Used to identify it amongst the list of datasets
     belonging to your organization in `hirundo`.
     """
-    labelling_type: LabellingType
+    labeling_type: LabelingType
     """
-    Indicates the labelling type of the dataset. The labelling type can be one of the following:
-    - `LabellingType.SingleLabelClassification`: Indicates that the dataset is for classification tasks
-    - `LabellingType.ObjectDetection`: Indicates that the dataset is for object detection tasks
+    Indicates the labeling type of the dataset. The labeling type can be one of the following:
+    - `LabelingType.SingleLabelClassification`: Indicates that the dataset is for classification tasks
+    - `LabelingType.ObjectDetection`: Indicates that the dataset is for object detection tasks
     """
     storage_integration_id: typing.Optional[int] = None
     """
@@ -651,7 +651,7 @@ class DataOptimizationDatasetOut(BaseModel):
     id: int
 
     name: str
-    labelling_type: LabellingType
+    labeling_type: LabelingType
 
     storage_integration: ResponseStorageIntegration
 

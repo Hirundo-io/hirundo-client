@@ -1,9 +1,9 @@
 from enum import Enum
 
 
-class LabellingType(str, Enum):
+class LabelingType(str, Enum):
     """
-    Enum indicate what type of labelling is used for the given dataset.
+    Enum indicate what type of labeling is used for the given dataset.
     Supported types are:
     """
 

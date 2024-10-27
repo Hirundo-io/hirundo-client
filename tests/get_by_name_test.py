@@ -4,7 +4,7 @@ import typing
 
 import pytest
 from hirundo import (
-    LabellingType,
+    LabelingType,
     OptimizationDataset,
     StorageGCP,
     StorageIntegration,
@@ -58,7 +58,7 @@ def test_get_by_name_gcp():
 
     OptimizationDataset(
         name=optimization_dataset_name,
-        labelling_type=LabellingType.SingleLabelClassification,
+        labeling_type=LabelingType.SingleLabelClassification,
         storage_integration_id=new_storage_integration.id,
         data_root_url=storage_gcp.get_url("/pytorch-cifar/data"),
         metadata_file_url=storage_gcp.get_url("/pytorch-cifar/data/cifar1.csv"),
@@ -90,7 +90,7 @@ def test_get_by_name_git():
 
     OptimizationDataset(
         name=optimization_dataset_name,
-        labelling_type=LabellingType.ObjectDetection,
+        labeling_type=LabelingType.ObjectDetection,
         storage_integration_id=new_storage_integration.id,
         data_root_url=storage_git.get_url(path="/BDD100K Val from Hirundo.zip/bdd100k"),
         metadata_file_url=storage_git.get_url(

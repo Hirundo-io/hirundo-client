@@ -3,7 +3,7 @@ import os
 
 import pytest
 from hirundo import (
-    LabellingType,
+    LabelingType,
     OptimizationDataset,
     StorageIntegration,
     StorageS3,
@@ -26,7 +26,7 @@ s3_bucket = StorageS3(
 )
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS-BDD-100k-validation-OD-dataset{unique_id}",
-    labelling_type=LabellingType.ObjectDetection,
+    labeling_type=LabelingType.ObjectDetection,
     storage_integration=StorageIntegration(
         name=f"AWS-open-source-datasets{unique_id}",
         type=StorageTypes.S3,
