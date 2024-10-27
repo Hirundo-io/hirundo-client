@@ -1,6 +1,7 @@
 import datetime
 import json
 import typing
+from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator, Generator
 from enum import Enum
 from io import StringIO
@@ -105,6 +106,66 @@ CUSTOMER_INTERCHANGE_DTYPES: DtypeArg = {
 }
 
 
+class Metadata(BaseModel, ABC):
+    type: DatasetMetadataType
+
+    @property
+    @abstractmethod
+    def metadata_url(self) -> HirundoUrl:
+        raise NotImplementedError()
+
+
+class HirundoCSV(Metadata):
+    """
+    A dataset metadata file in the Hirundo CSV format
+    """
+
+    type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
+    csv_url: HirundoUrl
+    """
+    The URL to access the dataset metadata CSV file.
+    e.g. `s3://my-bucket-name/my-folder/my-metadata.csv`, `gs://my-bucket-name/my-folder/my-metadata.csv`,
+    or `ssh://my-username@my-repo-name/my-folder/my-metadata.csv`
+    (or `file:///datasets/my-folder/my-metadata.csv` if using LOCAL storage type with on-premises installation)
+    """
+
+    @property
+    def metadata_url(self) -> HirundoUrl:
+        return self.csv_url
+
+
+class COCO(Metadata):
+    """
+    A dataset metadata file in the COCO format
+    """
+
+    type: DatasetMetadataType = DatasetMetadataType.COCO
+    json_url: HirundoUrl
+    """
+    The URL to access the dataset metadata JSON file.
+    e.g. `s3://my-bucket-name/my-folder/my-metadata.json`, `gs://my-bucket-name/my-folder/my-metadata.json`,
+    or `ssh://my-username@my-repo-name/my-folder/my-metadata.json`
+    (or `file:///datasets/my-folder/my-metadata.json` if using LOCAL storage type with on-premises installation)
+    """
+    images_path_prefix: typing.Optional[str] = None
+    """
+    The prefix to add to the image paths in the COCO JSON file.
+    """
+
+    @property
+    def metadata_url(self) -> HirundoUrl:
+        return self.json_url
+
+
+LabelingInfo = typing.Union[HirundoCSV, COCO]
+"""
+The dataset labeling info. The dataset labeling info can be one of the following:
+- `DatasetMetadataType.HirundoCSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
+
+Currently no other formats are supported. Future versions of `hirundo` may support additional formats.
+"""
+
+
 class OptimizationDataset(BaseModel):
     id: typing.Optional[int] = Field(default=None)
     """
@@ -144,20 +205,7 @@ class OptimizationDataset(BaseModel):
     A full list of possible classes used in classification / object detection.
     It is currently required for clarity and performance.
     """
-    metadata_file_url: HirundoUrl
-    """
-    The URL to access the dataset metadata file.
-    e.g. `s3://my-bucket-name/my-folder/my-metadata.csv`, `gs://my-bucket-name/my-folder/my-metadata.csv`,
-    or `ssh://my-username@my-repo-name/my-folder/my-metadata.csv`
-    (or `file:///datasets/my-folder/my-metadata.csv` if using LOCAL storage type with on-premises installation)
-    """
-    metadata_type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
-    """
-    The type of dataset metadata file. The dataset metadata file can be one of the following:
-    - `DatasetMetadataType.HirundoCSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
-
-    Currently no other formats are supported. Future versions of `hirundo` may support additional formats.
-    """
+    labeling_info: LabelingInfo
 
     run_id: typing.Optional[str] = Field(default=None, init=False)
     """
@@ -658,8 +706,7 @@ class DataOptimizationDatasetOut(BaseModel):
     data_root_url: HirundoUrl
 
     classes: typing.Optional[list[str]] = None
-    metadata_file_url: HirundoUrl
-    metadata_type: DatasetMetadataType
+    labeling_info: LabelingInfo
 
     run_id: typing.Optional[str]
     organization_id: typing.Optional[int]

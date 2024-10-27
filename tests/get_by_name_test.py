@@ -4,14 +4,15 @@ import typing
 
 import pytest
 from hirundo import (
+    GitRepo,
+    HirundoCSV,
     LabelingType,
     OptimizationDataset,
     StorageGCP,
+    StorageGit,
     StorageIntegration,
     StorageTypes,
 )
-from hirundo.git import GitRepo
-from hirundo.storage import StorageGit
 from tests.dataset_optimization_shared import get_unique_id
 
 unique_id = get_unique_id()
@@ -60,8 +61,10 @@ def test_get_by_name_gcp():
         name=optimization_dataset_name,
         labeling_type=LabelingType.SingleLabelClassification,
         storage_integration_id=new_storage_integration.id,
+        labeling_info=HirundoCSV(
+            csv_url=storage_gcp.get_url("/pytorch-cifar/data/cifar1.csv"),
+        ),
         data_root_url=storage_gcp.get_url("/pytorch-cifar/data"),
-        metadata_file_url=storage_gcp.get_url("/pytorch-cifar/data/cifar1.csv"),
     ).create(replace_if_exists=True)
 
     dataset = OptimizationDataset.get_by_name(optimization_dataset_name)
@@ -92,10 +95,12 @@ def test_get_by_name_git():
         name=optimization_dataset_name,
         labeling_type=LabelingType.ObjectDetection,
         storage_integration_id=new_storage_integration.id,
-        data_root_url=storage_git.get_url(path="/BDD100K Val from Hirundo.zip/bdd100k"),
-        metadata_file_url=storage_git.get_url(
-            path="/BDD100K Val from Hirundo.zip/bdd100k/bdd100k.csv"
+        labeling_info=HirundoCSV(
+            csv_url=storage_git.get_url(
+                path="/BDD100K Val from Hirundo.zip/bdd100k/bdd100k.csv"
+            )
         ),
+        data_root_url=storage_git.get_url(path="/BDD100K Val from Hirundo.zip/bdd100k"),
     ).create(replace_if_exists=True)
 
     new_dataset = OptimizationDataset.get_by_name(optimization_dataset_name)

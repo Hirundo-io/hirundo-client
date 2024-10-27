@@ -3,6 +3,7 @@ import os
 
 import pytest
 from hirundo import (
+    HirundoCSV,
     LabelingType,
     OptimizationDataset,
     StorageIntegration,
@@ -32,10 +33,10 @@ test_dataset = OptimizationDataset(
         type=StorageTypes.S3,
         s3=s3_bucket,
     ),
-    data_root_url=s3_bucket.get_url(path="/bdd100k_val_hirundo.zip/bdd100k"),
-    metadata_file_url=s3_bucket.get_url(
-        path="/bdd100k_val_hirundo.zip/bdd100k/bdd100k.csv"
+    labeling_info=HirundoCSV(
+        csv_url=s3_bucket.get_url(path="/bdd100k_val_hirundo.zip/bdd100k/bdd100k.csv"),
     ),
+    data_root_url=s3_bucket.get_url(path="/bdd100k_val_hirundo.zip/bdd100k"),
     classes=[
         "traffic light",
         "traffic sign",

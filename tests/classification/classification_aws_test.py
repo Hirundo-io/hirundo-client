@@ -3,6 +3,7 @@ import os
 
 import pytest
 from hirundo import (
+    HirundoCSV,
     LabelingType,
     OptimizationDataset,
     StorageIntegration,
@@ -32,8 +33,10 @@ test_dataset = OptimizationDataset(
         type=StorageTypes.S3,
         s3=s3_bucket,
     ),
+    labeling_info=HirundoCSV(
+        csv_url=s3_bucket.get_url(path="/pytorch-cifar/data/cifar10.csv"),
+    ),
     data_root_url=s3_bucket.get_url(path="/pytorch-cifar/data"),
-    metadata_file_url=s3_bucket.get_url(path="/pytorch-cifar/data/cifar10.csv"),
     classes=[
         "airplane",
         "automobile",

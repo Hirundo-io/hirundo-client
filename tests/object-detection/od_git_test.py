@@ -3,6 +3,7 @@ import logging
 import pytest
 from hirundo import (
     GitRepo,
+    HirundoCSV,
     LabelingType,
     OptimizationDataset,
     StorageGit,
@@ -33,10 +34,12 @@ test_dataset = OptimizationDataset(
         type=StorageTypes.GIT,
         git=git_storage,
     ),
-    data_root_url=git_storage.get_url(path="/BDD100K Val from Hirundo.zip/bdd100k"),
-    metadata_file_url=git_storage.get_url(
-        path="/BDD100K Val from Hirundo.zip/bdd100k/bdd100k.csv"
+    labeling_info=HirundoCSV(
+        csv_url=git_storage.get_url(
+            path="/BDD100K Val from Hirundo.zip/bdd100k/bdd100k.csv"
+        ),
     ),
+    data_root_url=git_storage.get_url(path="/BDD100K Val from Hirundo.zip/bdd100k"),
     classes=[
         "traffic light",
         "traffic sign",

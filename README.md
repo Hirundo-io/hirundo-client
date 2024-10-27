@@ -46,25 +46,33 @@ You can install the codebase with a simple `pip install hirundo` to install the 
 ## Usage
 
 Classification example:
-```
-from hirundo.dataset_optimization import OptimizationDataset
-from hirundo.enum import LabelingType
-from hirundo.storage import StorageIntegration, StorageTypes
+```python
+from hirundo import (
+    HirundoCSV,
+    LabelingType,
+    OptimizationDataset,
+    StorageGCP,
+    StorageIntegration,
+    StorageTypes,
+)
 
+gcp_bucket = StorageGCP(
+    bucket_name="cifar100bucket",
+    project="Hirundo-global",
+    credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
+)
 test_dataset = OptimizationDataset(
     name="TEST-GCP cifar 100 classification dataset",
     labeling_type=LabelingType.SingleLabelClassification,
     storage_integration=StorageIntegration(
         name="cifar100bucket",
         type=StorageTypes.GCP,
-        gcp=StorageGCP(
-            bucket_name="cifar100bucket",
-            project="Hirundo-global",
-            credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
-        ),
+        gcp=gcp_bucket,
     ),
-    root="/pytorch-cifar/data",
-    dataset_metadata_path="cifar100.csv",
+    data_root_url=gcp_bucket.get_url(path="/pytorch-cifar/data"),
+    labeling_info=HirundoCSV(
+        csv_url=gcp_bucket.get_url(path="/pytorch-cifar/data/cifar100.csv"),
+    ),
     classes=cifar100_classes,
 )
 
@@ -77,26 +85,52 @@ print(results)
 Object detection example:
 
 ```python
-from hirundo.dataset_optimization import OptimizationDataset
-from hirundo.enum import LabelingType
-from hirundo.storage import StorageIntegration, StorageTypes
+from hirundo import (
+    GitRepo,
+    HirundoCSV,
+    LabelingType,
+    OptimizationDataset,
+    StorageGit,
+    StorageIntegration,
+    StorageTypes,
+)
 
+git_storage = StorageGit(
+    repo=GitRepo(
+        name="BDD-100k-validation-dataset",
+        repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only.git",
+    ),
+    branch="main",
+)
 test_dataset = OptimizationDataset(
-    name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
+    name="TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset",
     labeling_type=LabelingType.ObjectDetection,
     storage_integration=StorageIntegration(
-        name=f"BDD-100k-validation-dataset{unique_id}",
+        name="BDD-100k-validation-dataset",
         type=StorageTypes.GIT,
-        git=StorageGit(
-            repo=GitRepo(
-                name=f"BDD-100k-validation-dataset{unique_id}",
-                repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
-            ),
-            branch="main",
+        git=git_storage,
+    ),
+    data_root_url=git_storage.get_url(path="/BDD100K Val from Hirundo.zip/bdd100k"),
+    labeling_info=HirundoCSV(
+        csv_url=git_storage.get_url(
+            path="/BDD100K Val from Hirundo.zip/bdd100k/bdd100k.csv"
         ),
     ),
-    root="/BDD100K Val from Hirundo.zip/bdd100k",
-    dataset_metadata_path="bdd100k.csv",
+    classes=[
+        "traffic light",
+        "traffic sign",
+        "car",
+        "pedestrian",
+        "bus",
+        "truck",
+        "rider",
+        "bicycle",
+        "motorcycle",
+        "train",
+        "other vehicle",
+        "other person",
+        "trailer",
+    ],
 )
 
 test_dataset.run_optimization()
@@ -108,4 +142,4 @@ Note: Currently we only support the main CPython release 3.9, 3.10 and 3.11. PyP
 
 ## Further documentation
 
-To learn about mroe how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the Google Colab examples.
+To learn about more how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the Google Colab examples.

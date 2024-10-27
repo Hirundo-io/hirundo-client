@@ -18,3 +18,4 @@ class DatasetMetadataType(str, Enum):
     """
 
     HirundoCSV = "HirundoCSV"
+    COCO = "COCO"

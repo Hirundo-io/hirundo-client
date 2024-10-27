@@ -1,4 +1,6 @@
 from .dataset_optimization import (
+    COCO,
+    HirundoCSV,
     HirundoError,
     OptimizationDataset,
 )
@@ -17,6 +19,8 @@ from .storage import (
 )
 
 __all__ = [
+    "COCO",
+    "HirundoCSV",
     "HirundoError",
     "OptimizationDataset",
     "LabelingType",

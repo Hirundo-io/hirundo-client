@@ -4,6 +4,7 @@ import os
 
 import pytest
 from hirundo import (
+    HirundoCSV,
     LabelingType,
     OptimizationDataset,
     StorageGCP,
@@ -34,7 +35,9 @@ test_dataset = OptimizationDataset(
         gcp=gcp_bucket,
     ),
     data_root_url=gcp_bucket.get_url(path="/pytorch-cifar/data"),
-    metadata_file_url=gcp_bucket.get_url(path="/pytorch-cifar/data/cifar100.csv"),
+    labeling_info=HirundoCSV(
+        csv_url=gcp_bucket.get_url(path="/pytorch-cifar/data/cifar100.csv"),
+    ),
     classes=cifar100_classes,
 )
 
