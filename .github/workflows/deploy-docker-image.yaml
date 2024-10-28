@@ -3,7 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     tags:
-      - 'v[0-9.]+\+on-prem'
+      - 'v*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,6 +16,7 @@ permissions:
 
 jobs:
   build-and-push:
+      if: startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '+on-prem')
       runs-on: ubuntu-latest
 
       steps:
