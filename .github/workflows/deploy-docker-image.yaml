@@ -3,7 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     tags:
-      - 'v0.*.0+on-prem'
+      - 'v*+on-prem'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
