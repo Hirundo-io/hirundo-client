@@ -1,7 +1,7 @@
 import os
 import typing
 
-from hirundo import GitRepo, OptimizationDataset, StorageIntegration
+from hirundo import GitRepo, OptimizationDataset, StorageIntegration, StorageTypes
 from hirundo.dataset_optimization import RunStatus
 from hirundo.logger import get_logger
 
@@ -12,37 +12,6 @@ def get_unique_id():
     return (
         os.getenv("UNIQUE_ID", "").replace(".", "-").replace("/", "-").replace("+", "-")
     )
-
-
-def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
-    if not unique_id:
-        return
-    conflicting_git_repo_ids = [
-        git_repo["id"] for git_repo in GitRepo.list() if unique_id in git_repo["name"]
-    ]
-    for conflicting_git_repo_id in conflicting_git_repo_ids:
-        try:
-            GitRepo.delete_by_id(conflicting_git_repo_id)
-        except Exception as e:
-            logger.warning(
-                "Failed to delete git repo with ID %s and exception %s",
-                conflicting_git_repo_id,
-                e,
-            )
-    conflicting_storage_integration_ids = [
-        storage_integration["id"]
-        for storage_integration in StorageIntegration.list()
-        if unique_id in storage_integration["name"]
-    ]
-    for conflicting_storage_integration_id in conflicting_storage_integration_ids:
-        try:
-            StorageIntegration.delete_by_id(conflicting_storage_integration_id)
-        except Exception as e:
-            logger.warning(
-                "Failed to delete storage integration with ID %s and exception %s",
-                conflicting_storage_integration_id,
-                e,
-            )
 
 
 def log_cleanup(storage_integration_ids: list[int], git_repo_ids: list[int]):
@@ -56,7 +25,7 @@ def log_cleanup(storage_integration_ids: list[int], git_repo_ids: list[int]):
         logger.debug("Note: If I am not the owner, I will not be able to delete them")
 
 
-def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
+def cleanup(test_dataset: OptimizationDataset):
     logger.info("Started cleanup")
     datasets = OptimizationDataset.list()
     dataset_ids = [
@@ -77,7 +46,10 @@ def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
         )
     }
     if len(dataset_ids) > 0:
-        logger.debug("Found %s optimization datasets, deleting them", len(dataset_ids))
+        logger.debug(
+            "Found %s optimization datasets with the same name, deleting them",
+            len(dataset_ids),
+        )
         logger.debug("Note: If I am not the owner, I will not be able to delete them")
     for dataset_id in dataset_ids:
         try:
@@ -97,6 +69,7 @@ def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
         integration["git"]["repo"]["id"]
         for integration in storage_integrations
         if integration["id"] in storage_integration_ids
+        and integration["type"] == StorageTypes.GIT
         and integration["git"] is not None
         and integration["git"]["repo"] is not None
     ]
@@ -120,7 +93,6 @@ def cleanup(test_dataset: OptimizationDataset, unique_id: typing.Optional[str]):
                 e,
             )
     # ⬆️ Delete all datasets and storage integrations from the server for the given user's default organization
-    cleanup_conflict_by_unique_id(unique_id)
     test_dataset.clean_ids()
     # ⬆️ Reset `dataset_id`, `storage_integration_id`, and `run_id` values on `test_dataset` to default value of `None`
     # This prevents errors due to ID links to deleted datasets, storage integrations and runs
