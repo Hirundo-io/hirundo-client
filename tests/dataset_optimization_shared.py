@@ -65,11 +65,20 @@ def cleanup(test_dataset: OptimizationDataset):
                 e,
             )
     storage_integrations = StorageIntegration.list()
+    storage_integration_ids = (
+        [
+            storage_integration["id"]
+            for storage_integration in storage_integrations
+            if storage_integration["name"]
+            == test_dataset.dataset_storage.storage_integration.name
+        ]
+        if (test_dataset.dataset_storage)
+        else storage_integration_ids
+    )  # ⬆️ If given a StorageIntegration object, use it's name to find the matching IDs
     git_repo_ids = [
         integration["git"]["repo"]["id"]
         for integration in storage_integrations
-        if integration["id"] in storage_integration_ids
-        and integration["type"] == StorageTypes.GIT
+        if integration["type"] == StorageTypes.GIT
         and integration["git"] is not None
         and integration["git"]["repo"] is not None
     ]
