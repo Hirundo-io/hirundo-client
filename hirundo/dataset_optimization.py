@@ -257,7 +257,7 @@ class OptimizationDataset(BaseModel):
         raise_for_status_with_reason(dataset_response)
         self.dataset_id = dataset_response.json()["id"]
         if not self.dataset_id:
-            raise HirundoError("Failed to create the dataset")
+            raise HirundoError("An error ocurred while trying to create the dataset")
         logger.info("Created dataset with ID: %s", self.dataset_id)
         return self.dataset_id
 
@@ -308,10 +308,10 @@ class OptimizationDataset(BaseModel):
             except Exception:
                 content = error.response.text
             raise HirundoError(
-                f"Failed to start the run. Status code: {error.response.status_code} Content: {content}"
+                f"Unable to start the run. Status code: {error.response.status_code} Content: {content}"
             ) from error
         except Exception as error:
-            raise HirundoError(f"Failed to start the run: {error}") from error
+            raise HirundoError(f"Unable to start the run: {error}") from error
 
     def clean_ids(self):
         """

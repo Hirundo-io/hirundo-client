@@ -60,7 +60,7 @@ def cleanup(test_dataset: OptimizationDataset):
             OptimizationDataset.delete_by_id(dataset_id)
         except Exception as e:
             logger.warning(
-                "Failed to delete optimization dataset with ID %s and exception %s",
+                "Unable to delete optimization dataset with ID %s and exception %s",
                 dataset_id,
                 e,
             )
@@ -88,7 +88,7 @@ def cleanup(test_dataset: OptimizationDataset):
             StorageIntegration.delete_by_id(storage_integration_id)
         except Exception as e:
             logger.warning(
-                "Failed to delete storage integration with ID %s and exception %s",
+                "Unable to delete storage integration with ID %s and exception %s",
                 storage_integration_id,
                 e,
             )
@@ -97,7 +97,7 @@ def cleanup(test_dataset: OptimizationDataset):
             GitRepo.delete_by_id(git_repo_id)
         except Exception as e:
             logger.warning(
-                "Failed to delete git repo with ID %s and exception %s",
+                "Unable to delete git repo with ID %s and exception %s",
                 git_repo_id,
                 e,
             )

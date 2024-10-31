@@ -14,6 +14,6 @@ def raise_for_status_with_reason(response: Response):
             if response.reason is None:
                 response.reason = response.json().get("detail", None)
     except Exception as e:
-        logger.debug("Failed to parse response as JSON: %s", e)
+        logger.debug("Could not parse response as JSON: %s", e)
 
     response.raise_for_status()
