@@ -16,7 +16,9 @@ from hirundo import (
 from tests.dataset_optimization_shared import get_unique_id
 
 unique_id = get_unique_id()
-storage_integration_name = f"T-cifar1bucket_get_by_name{unique_id}"
+gcp_storage_integration_name = f"T-cifar1bucket_get_by_name{unique_id}"
+git_storage_integration_name = f"BDD-100k-validation-dataset_get_by_name{unique_id}"
+git_repository_name = f"BDD-100k-validation-dataset_get_by_name{unique_id}"
 optimization_dataset_name = f"T-cifar1_get_by_name{unique_id}"
 
 new_storage_integration: typing.Optional[StorageIntegration] = None
@@ -40,7 +42,7 @@ def cleanup_tests():
 
 def test_get_by_name_gcp():
     StorageIntegration(
-        name=storage_integration_name,
+        name=gcp_storage_integration_name,
         type=StorageTypes.GCP,
         gcp=StorageGCP(
             bucket_name="cifar1bucket",
@@ -50,7 +52,7 @@ def test_get_by_name_gcp():
     ).create(replace_if_exists=True)
 
     new_storage_integration = StorageIntegration.get_by_name(
-        storage_integration_name, StorageTypes.GCP
+        gcp_storage_integration_name, StorageTypes.GCP
     )
 
     assert new_storage_integration is not None
@@ -73,18 +75,18 @@ def test_get_by_name_gcp():
 
 def test_get_by_name_git():
     StorageIntegration(
-        name=f"BDD-100k-validation-dataset{unique_id}",
+        name=git_storage_integration_name,
         type=StorageTypes.GIT,
         git=StorageGit(
             repo=GitRepo(
-                name=storage_integration_name,
+                name=git_repository_name,
                 repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only.git",
             ),
             branch="main",
         ),
     ).create(replace_if_exists=True)
     new_storage_integration = StorageIntegration.get_by_name(
-        storage_integration_name, StorageTypes.GIT
+        gcp_storage_integration_name, StorageTypes.GIT
     )
 
     assert new_storage_integration is not None
