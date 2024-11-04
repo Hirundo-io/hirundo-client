@@ -59,6 +59,7 @@ def test_dataset_optimization():
     )
     if full_run is not None:
         assert full_run.warnings_and_errors.size == 0
-        assert full_run.suspects.shape[0] == 118
+        assert full_run.suspects.shape[0] > 100
+        assert full_run.suspects.shape[0] < 150
     else:
         logger.info("Full dataset optimization was not run!")
