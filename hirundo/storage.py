@@ -17,6 +17,8 @@ from hirundo.logger import get_logger
 
 logger = get_logger(__name__)
 
+S3_PREFIX = "s3://"
+
 
 class StorageS3Base(BaseModel):
     endpoint_url: typing.Optional[Url] = None
@@ -27,7 +29,7 @@ class StorageS3Base(BaseModel):
 
     def get_url(self, path: typing.Union[str, Path]):
         return Url(
-            f"s3://{self.bucket_url.removeprefix('s3://').removesuffix('/')}/{str(path).removeprefix('/')}"
+            f"{S3_PREFIX}{self.bucket_url.removeprefix(S3_PREFIX).removesuffix('/')}/{str(path).removeprefix('/')}"
         )
 
 
