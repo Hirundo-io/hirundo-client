@@ -86,7 +86,7 @@ def test_get_by_name_git():
         ),
     ).create(replace_if_exists=True)
     new_storage_integration = StorageIntegration.get_by_name(
-        gcp_storage_integration_name, StorageTypes.GIT
+        git_storage_integration_name, StorageTypes.GIT
     )
 
     assert new_storage_integration is not None
