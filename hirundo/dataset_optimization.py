@@ -178,10 +178,10 @@ class OptimizationDataset(BaseModel):
     """
     labeling_type: LabelingType
     """
-    Indicates the labelling type of the dataset. The labelling type can be one of the following:
-    - `LabellingType.SINGLE_LABEL_CLASSIFICATION`: Indicates that the dataset is for classification tasks
-    - `LabellingType.OBJECT_DETECTION`: Indicates that the dataset is for object detection tasks
-    - `LabellingType.SPEECH_TO_TEXT`: Indicates that the dataset is for speech-to-text tasks
+    Indicates the labeling type of the dataset. The labeling type can be one of the following:
+    - `LabelingType.SINGLE_LABEL_CLASSIFICATION`: Indicates that the dataset is for classification tasks
+    - `LabelingType.OBJECT_DETECTION`: Indicates that the dataset is for object detection tasks
+    - `LabelingType.SPEECH_TO_TEXT`: Indicates that the dataset is for speech-to-text tasks
     """
     language: typing.Optional[str] = None
     """
