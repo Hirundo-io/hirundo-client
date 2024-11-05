@@ -7,8 +7,9 @@ class LabellingType(str, Enum):
     Supported types are:
     """
 
-    SingleLabelClassification = "SingleLabelClassification"
-    ObjectDetection = "ObjectDetection"
+    SINGLE_LABEL_CLASSIFICATION = "SingleLabelClassification"
+    OBJECT_DETECTION = "ObjectDetection"
+    SPEECH_TO_TEXT = "SpeechToText"
 
 
 class DatasetMetadataType(str, Enum):
@@ -17,4 +18,4 @@ class DatasetMetadataType(str, Enum):
     Supported types are:
     """
 
-    HirundoCSV = "HirundoCSV"
+    HIRUNDO_CSV = "HirundoCSV"

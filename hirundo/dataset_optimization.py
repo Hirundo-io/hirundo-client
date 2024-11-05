@@ -84,10 +84,10 @@ CUSTOMER_INTERCHANGE_DTYPES: DtypeArg = {
     "segment_id": np.int32,
     "label": str,
     "bbox_id": str,
-    "xmin": np.int32,
-    "ymin": np.int32,
-    "xmax": np.int32,
-    "ymax": np.int32,
+    "xmin": np.float32,
+    "ymin": np.float32,
+    "xmax": np.float32,
+    "ymax": np.float32,
     "suspect_level": np.float32,  # If exists, must be one of the values in the enum below
     "suggested_label": str,
     "suggested_label_conf": np.float32,
@@ -106,8 +106,13 @@ class OptimizationDataset(BaseModel):
     labelling_type: LabellingType
     """
     Indicates the labelling type of the dataset. The labelling type can be one of the following:
-    - `LabellingType.SingleLabelClassification`: Indicates that the dataset is for classification tasks
-    - `LabellingType.ObjectDetection`: Indicates that the dataset is for object detection tasks
+    - `LabellingType.SINGLE_LABEL_CLASSIFICATION`: Indicates that the dataset is for classification tasks
+    - `LabellingType.OBJECT_DETECTION`: Indicates that the dataset is for object detection tasks
+    - `LabellingType.SPEECH_TO_TEXT`: Indicates that the dataset is for speech-to-text tasks
+    """
+    language: typing.Optional[str] = None
+    """
+    Language of the Speech-to-Text audio dataset. This is required for Speech-to-Text datasets.
     """
     dataset_storage: typing.Optional[StorageLink]
     """
@@ -125,10 +130,10 @@ class OptimizationDataset(BaseModel):
     The path to the dataset metadata file within storage integration, e.g. S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
     Note: This path will be prefixed with the `StorageLink`'s `path`.
     """
-    dataset_metadata_type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
+    dataset_metadata_type: DatasetMetadataType = DatasetMetadataType.HIRUNDO_CSV
     """
     The type of dataset metadata file. The dataset metadata file can be one of the following:
-    - `DatasetMetadataType.HirundoCSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
+    - `DatasetMetadataType.HIRUNDO_CSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
 
     Currently no other formats are supported. Future versions of `hirundo` may support additional formats.
     """
@@ -150,6 +155,16 @@ class OptimizationDataset(BaseModel):
     def validate_dataset(self):
         if self.dataset_storage is None and self.storage_integration_id is None:
             raise ValueError("No dataset storage has been provided")
+        if (
+            self.labelling_type == LabellingType.SPEECH_TO_TEXT
+            and self.language is None
+        ):
+            raise ValueError("Language is required for Speech-to-Text datasets.")
+        elif (
+            self.labelling_type != LabellingType.SPEECH_TO_TEXT
+            and self.language is not None
+        ):
+            raise ValueError("Language is only allowed for Speech-to-Text datasets.")
         return self
 
     @staticmethod
@@ -242,7 +257,7 @@ class OptimizationDataset(BaseModel):
         raise_for_status_with_reason(dataset_response)
         self.dataset_id = dataset_response.json()["id"]
         if not self.dataset_id:
-            raise HirundoError("Failed to create the dataset")
+            raise HirundoError("An error ocurred while trying to create the dataset")
         logger.info("Created dataset with ID: %s", self.dataset_id)
         return self.dataset_id
 
@@ -293,10 +308,10 @@ class OptimizationDataset(BaseModel):
             except Exception:
                 content = error.response.text
             raise HirundoError(
-                f"Failed to start the run. Status code: {error.response.status_code} Content: {content}"
+                f"Unable to start the run. Status code: {error.response.status_code} Content: {content}"
             ) from error
         except Exception as error:
-            raise HirundoError(f"Failed to start the run: {error}") from error
+            raise HirundoError(f"Unable to start the run: {error}") from error
 
     def clean_ids(self):
         """
@@ -370,7 +385,15 @@ class OptimizationDataset(BaseModel):
                 last_event = json.loads(sse.data)
                 if not last_event:
                     continue
-                data = last_event["data"]
+                if "data" in last_event:
+                    data = last_event["data"]
+                else:
+                    if "detail" in last_event:
+                        raise HirundoError(last_event["detail"])
+                    elif "reason" in last_event:
+                        raise HirundoError(last_event["reason"])
+                    else:
+                        raise HirundoError("Unknown error")
                 OptimizationDataset._read_csvs_to_df(data)
                 yield data
         if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:
