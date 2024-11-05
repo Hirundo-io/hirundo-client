@@ -63,7 +63,7 @@ gcp_bucket = StorageGCP(
 )
 test_dataset = OptimizationDataset(
     name="TEST-GCP cifar 100 classification dataset",
-    labeling_type=LabelingType.SingleLabelClassification,
+    labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
     storage_integration=StorageIntegration(
         name="cifar100bucket",
         type=StorageTypes.GCP,
@@ -104,7 +104,7 @@ git_storage = StorageGit(
 )
 test_dataset = OptimizationDataset(
     name="TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset",
-    labeling_type=LabelingType.ObjectDetection,
+    labeling_type=LabelingType.OBJECT_DETECTION,
     storage_integration=StorageIntegration(
         name="BDD-100k-validation-dataset",
         type=StorageTypes.GIT,

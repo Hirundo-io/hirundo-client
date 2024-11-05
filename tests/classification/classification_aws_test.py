@@ -27,7 +27,7 @@ s3_bucket = StorageS3(
 )
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS cifar10 classification dataset{unique_id}",
-    labeling_type=LabelingType.SingleLabelClassification,
+    labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
     storage_integration=StorageIntegration(
         name=f"cifar10bucket{unique_id}",
         type=StorageTypes.S3,
@@ -54,9 +54,9 @@ test_dataset = OptimizationDataset(
 
 @pytest.fixture(autouse=True)
 def cleanup_tests():
-    cleanup(test_dataset, unique_id)
+    cleanup(test_dataset)
     yield
-    cleanup(test_dataset, unique_id)
+    cleanup(test_dataset)
 
 
 def test_dataset_optimization():

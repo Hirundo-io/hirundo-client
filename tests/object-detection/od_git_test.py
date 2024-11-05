@@ -22,13 +22,13 @@ unique_id = get_unique_id()
 git_storage = StorageGit(
     repo=GitRepo(
         name=f"BDD-100k-validation-dataset{unique_id}",
-        repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only.git",
+        repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
     ),
     branch="main",
 )
 test_dataset = OptimizationDataset(
     name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
-    labeling_type=LabelingType.ObjectDetection,
+    labeling_type=LabelingType.OBJECT_DETECTION,
     storage_integration=StorageIntegration(
         name=f"BDD-100k-validation-dataset{unique_id}",
         type=StorageTypes.GIT,
@@ -60,9 +60,9 @@ test_dataset = OptimizationDataset(
 
 @pytest.fixture(autouse=True)
 def cleanup_tests():
-    cleanup(test_dataset, unique_id)
+    cleanup(test_dataset)
     yield
-    cleanup(test_dataset, unique_id)
+    cleanup(test_dataset)
 
 
 def test_dataset_optimization():

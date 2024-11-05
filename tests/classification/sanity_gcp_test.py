@@ -28,7 +28,7 @@ gcp_bucket = StorageGCP(
 )
 test_dataset = OptimizationDataset(
     name=f"TEST-GCP sanity dataset{unique_id}",
-    labeling_type=LabelingType.SingleLabelClassification,
+    labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
     storage_integration=StorageIntegration(
         name=f"cifar1bucket{unique_id}",
         type=StorageTypes.GCP,
@@ -55,9 +55,9 @@ test_dataset = OptimizationDataset(
 
 @pytest.fixture(autouse=True)
 def cleanup_tests():
-    cleanup(test_dataset, unique_id)
+    cleanup(test_dataset)
     yield
-    cleanup(test_dataset, unique_id)
+    cleanup(test_dataset)
 
 
 def test_dataset_optimization():

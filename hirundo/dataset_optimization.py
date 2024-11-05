@@ -93,10 +93,10 @@ CUSTOMER_INTERCHANGE_DTYPES: DtypeArg = {
     "segment_id": np.int32,
     "label": str,
     "bbox_id": str,
-    "xmin": np.int32,
-    "ymin": np.int32,
-    "xmax": np.int32,
-    "ymax": np.int32,
+    "xmin": np.float32,
+    "ymin": np.float32,
+    "xmax": np.float32,
+    "ymax": np.float32,
     "suspect_level": np.float32,  # If exists, must be one of the values in the enum below
     "suggested_label": str,
     "suggested_label_conf": np.float32,
@@ -120,7 +120,7 @@ class HirundoCSV(Metadata):
     A dataset metadata file in the Hirundo CSV format
     """
 
-    type: DatasetMetadataType = DatasetMetadataType.HirundoCSV
+    type: DatasetMetadataType = DatasetMetadataType.HIRUNDO_CSV
     csv_url: HirundoUrl
     """
     The URL to access the dataset metadata CSV file.
@@ -178,9 +178,14 @@ class OptimizationDataset(BaseModel):
     """
     labeling_type: LabelingType
     """
-    Indicates the labeling type of the dataset. The labeling type can be one of the following:
-    - `LabelingType.SingleLabelClassification`: Indicates that the dataset is for classification tasks
-    - `LabelingType.ObjectDetection`: Indicates that the dataset is for object detection tasks
+    Indicates the labelling type of the dataset. The labelling type can be one of the following:
+    - `LabellingType.SINGLE_LABEL_CLASSIFICATION`: Indicates that the dataset is for classification tasks
+    - `LabellingType.OBJECT_DETECTION`: Indicates that the dataset is for object detection tasks
+    - `LabellingType.SPEECH_TO_TEXT`: Indicates that the dataset is for speech-to-text tasks
+    """
+    language: typing.Optional[str] = None
+    """
+    Language of the Speech-to-Text audio dataset. This is required for Speech-to-Text datasets.
     """
     storage_integration_id: typing.Optional[int] = None
     """
@@ -227,6 +232,13 @@ class OptimizationDataset(BaseModel):
             raise ValueError(
                 "Both `storage_integration` and `storage_integration_id` have been provided. Pick one."
             )
+        if self.labeling_type == LabelingType.SPEECH_TO_TEXT and self.language is None:
+            raise ValueError("Language is required for Speech-to-Text datasets.")
+        elif (
+            self.labeling_type != LabelingType.SPEECH_TO_TEXT
+            and self.language is not None
+        ):
+            raise ValueError("Language is only allowed for Speech-to-Text datasets.")
         return self
 
     @staticmethod
@@ -357,7 +369,7 @@ class OptimizationDataset(BaseModel):
         raise_for_status_with_reason(dataset_response)
         self.id = dataset_response.json()["id"]
         if not self.id:
-            raise HirundoError("Failed to create the dataset")
+            raise HirundoError("An error ocurred while trying to create the dataset")
         logger.info("Created dataset with ID: %s", self.id)
         return self.id
 
@@ -408,10 +420,10 @@ class OptimizationDataset(BaseModel):
             except Exception:
                 content = error.response.text
             raise HirundoError(
-                f"Failed to start the run. Status code: {error.response.status_code} Content: {content}"
+                f"Unable to start the run. Status code: {error.response.status_code} Content: {content}"
             ) from error
         except Exception as error:
-            raise HirundoError(f"Failed to start the run: {error}") from error
+            raise HirundoError(f"Unable to start the run: {error}") from error
 
     def clean_ids(self):
         """
@@ -485,7 +497,15 @@ class OptimizationDataset(BaseModel):
                 last_event = json.loads(sse.data)
                 if not last_event:
                     continue
-                data = last_event["data"]
+                if "data" in last_event:
+                    data = last_event["data"]
+                else:
+                    if "detail" in last_event:
+                        raise HirundoError(last_event["detail"])
+                    elif "reason" in last_event:
+                        raise HirundoError(last_event["reason"])
+                    else:
+                        raise HirundoError("Unknown error")
                 OptimizationDataset._read_csvs_to_df(data)
                 yield data
         if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:

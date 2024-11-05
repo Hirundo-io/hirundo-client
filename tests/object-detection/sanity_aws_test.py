@@ -28,7 +28,7 @@ s3_bucket = StorageS3(
 )
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS-BDD-100k-subset-1000-OD-dataset{unique_id}",
-    labeling_type=LabelingType.ObjectDetection,
+    labeling_type=LabelingType.OBJECT_DETECTION,
     storage_integration=StorageIntegration(
         name=f"AWS-open-source-datasets-sanity{unique_id}",
         type=StorageTypes.S3,
@@ -60,9 +60,9 @@ test_dataset = OptimizationDataset(
 
 @pytest.fixture(autouse=True)
 def cleanup_tests():
-    cleanup(test_dataset, unique_id)
+    cleanup(test_dataset)
     yield
-    cleanup(test_dataset, unique_id)
+    cleanup(test_dataset)
 
 
 def test_dataset_optimization():
@@ -70,9 +70,9 @@ def test_dataset_optimization():
         test_dataset, sanity=True, alternative_env="RUN_OD_AWS_SANITY_OPTIMIZATION"
     )
     if full_run is not None:
-        assert full_run.warnings_and_errors.size != 0
+        assert full_run.warnings_and_errors.size == 0
         logger.info("Warnings and errors count: %s", full_run.warnings_and_errors.size)
-        assert full_run.suspects.size == 12810
+        assert full_run.suspects.shape[0] == 1_250
         # TODO: Add more assertions for results
     else:
         logger.info("Full dataset optimization was not run!")
