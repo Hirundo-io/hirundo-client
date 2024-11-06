@@ -62,7 +62,7 @@ def test_get_by_name_gcp():
 
     OptimizationDataset(
         name=gcp_optimization_dataset_name,
-        labeling_type=LabelingType.SingleLabelClassification,
+        labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
         storage_integration_id=new_storage_integration.id,
         labeling_info=HirundoCSV(
             csv_url=storage_gcp.get_url("/pytorch-cifar/data/cifar1.csv"),
