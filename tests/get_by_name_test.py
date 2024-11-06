@@ -96,7 +96,7 @@ def test_get_by_name_git():
 
     OptimizationDataset(
         name=git_optimization_dataset_name,
-        labeling_type=LabelingType.ObjectDetection,
+        labeling_type=LabelingType.OBJECT_DETECTION,
         storage_integration_id=new_storage_integration.id,
         labeling_info=HirundoCSV(
             csv_url=storage_git.get_url(
