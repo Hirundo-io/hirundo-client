@@ -336,7 +336,7 @@ class OptimizationDataset(BaseModel):
             organization_id: The ID of the organization to list the datasets for.
         """
         response = requests.get(
-            f"{API_HOST}/dataset-optimization/run/list/",
+            f"{API_HOST}/dataset-optimization/run/list",
             params={"dataset_organization_id": organization_id},
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
