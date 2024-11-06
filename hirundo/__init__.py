@@ -3,6 +3,8 @@ from .dataset_optimization import (
     HirundoCSV,
     HirundoError,
     OptimizationDataset,
+    RunArgs,
+    VisionRunArgs,
 )
 from .enum import (
     DatasetMetadataType,
@@ -23,6 +25,8 @@ __all__ = [
     "HirundoCSV",
     "HirundoError",
     "OptimizationDataset",
+    "RunArgs",
+    "VisionRunArgs",
     "LabelingType",
     "DatasetMetadataType",
     "GitRepo",

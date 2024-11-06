@@ -1,7 +1,13 @@
 import os
 import typing
 
-from hirundo import GitRepo, OptimizationDataset, StorageIntegration, StorageTypes
+from hirundo import (
+    GitRepo,
+    OptimizationDataset,
+    RunArgs,
+    StorageIntegration,
+    StorageTypes,
+)
 from hirundo.dataset_optimization import RunStatus
 from hirundo.logger import get_logger
 
@@ -143,12 +149,15 @@ def dataset_optimization_sync_test(
     test_dataset: OptimizationDataset,
     alternative_env: typing.Optional[str] = None,
     sanity=False,
+    run_args: typing.Optional[RunArgs] = None,
 ):
     logger.info("Sync: Finished cleanup")
     if (os.getenv("FULL_TEST", "false") == "true" and sanity) or (
         alternative_env and os.getenv(alternative_env, "false") == "true"
     ):
-        run_id = test_dataset.run_optimization(replace_if_exists=True)
+        run_id = test_dataset.run_optimization(
+            replace_if_exists=True, run_args=run_args
+        )
         logger.info("Sync: Started dataset optimization run with run ID %s", run_id)
         logger.info("Sync: Checking run progress")
         result = test_dataset.check_run(stop_on_manual_approval=True)
@@ -160,10 +169,16 @@ def dataset_optimization_sync_test(
         return None
 
 
-async def dataset_optimization_async_test(test_dataset: OptimizationDataset, env: str):
+async def dataset_optimization_async_test(
+    test_dataset: OptimizationDataset,
+    env: str,
+    run_args: typing.Optional[RunArgs] = None,
+):
     logger.info("Async: Finished cleanup")
     if os.getenv(env, "false") == "true":
-        run_id = test_dataset.run_optimization(replace_if_exists=True)
+        run_id = test_dataset.run_optimization(
+            replace_if_exists=True, run_args=run_args
+        )
         logger.info("Async: Started dataset optimization run with run ID %s", run_id)
         events_generator = test_dataset.acheck_run()
         logger.info("Async: Checking run progress")

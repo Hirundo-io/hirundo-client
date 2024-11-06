@@ -166,6 +166,32 @@ Currently no other formats are supported. Future versions of `hirundo` may suppo
 """
 
 
+class VisionRunArgs(BaseModel):
+    upsample: bool = False
+    """
+    Whether to upsample the dataset to attempt to balance the classes.
+    """
+    min_abs_bbox_size: int = 0
+    """
+    Minimum absolute size (in pixels) of a bounding box to keep it in the dataset for optimization.
+    """
+    min_abs_bbox_area: int = 0
+    """
+    Minimum absolute area (in pixels) of a bounding box to keep it in the dataset for optimization.
+    """
+    min_rel_bbox_size: float = 0.0
+    """
+    Minimum relative size (as a fraction of the image size) of a bounding box to keep it in the dataset for optimization.
+    """
+    min_rel_bbox_area: float = 0.0
+    """
+    Minimum relative area (as a fraction of the image area) of a bounding box to keep it in the dataset for optimization.
+    """
+
+
+RunArgs = typing.Union[VisionRunArgs]
+
+
 class OptimizationDataset(BaseModel):
     id: typing.Optional[int] = Field(default=None)
     """
@@ -374,7 +400,9 @@ class OptimizationDataset(BaseModel):
         return self.id
 
     @staticmethod
-    def launch_optimization_run(dataset_id: int) -> str:
+    def launch_optimization_run(
+        dataset_id: int, run_args: typing.Optional[RunArgs] = None
+    ) -> str:
         """
         Run the dataset optimization process on the server using the dataset with the given ID
         i.e. `dataset_id`.
@@ -387,13 +415,16 @@ class OptimizationDataset(BaseModel):
         """
         run_response = requests.post(
             f"{API_HOST}/dataset-optimization/run/{dataset_id}",
+            json=run_args.model_dump(mode="json") if run_args else None,
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         raise_for_status_with_reason(run_response)
         return run_response.json()["run_id"]
 
-    def run_optimization(self, replace_if_exists: bool = False) -> str:
+    def run_optimization(
+        self, replace_if_exists: bool = False, run_args: typing.Optional[RunArgs] = None
+    ) -> str:
         """
         If the dataset was not created on the server yet, it is created.
         Run the dataset optimization process on the server using the active `OptimizationDataset` instance
@@ -404,7 +435,21 @@ class OptimizationDataset(BaseModel):
         try:
             if not self.id:
                 self.id = self.create(replace_if_exists=replace_if_exists)
-            run_id = self.launch_optimization_run(self.id)
+            if run_args is not None:
+                if self.labeling_type == LabelingType.SPEECH_TO_TEXT:
+                    raise Exception("Speech to text cannot have `run_args` set")
+                if self.labeling_type != LabelingType.OBJECT_DETECTION and any(
+                    (
+                        run_args.min_abs_bbox_size != 0,
+                        run_args.min_abs_bbox_area != 0,
+                        run_args.min_rel_bbox_size != 0,
+                        run_args.min_rel_bbox_area != 0,
+                    )
+                ):
+                    raise Exception(
+                        f"Cannot set `min_abs_bbox_area` for labeling type {self.labeling_type}"
+                    )
+            run_id = self.launch_optimization_run(self.id, run_args)
             self.run_id = run_id
             logger.info("Started the run with ID: %s", run_id)
             return run_id
