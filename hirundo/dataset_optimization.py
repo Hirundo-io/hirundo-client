@@ -801,7 +801,7 @@ class DataOptimizationDatasetOut(BaseModel):
     updated_at: datetime.datetime
 
 
-class DataOptimizationRunOut(DataOptimizationDatasetOut):
+class DataOptimizationRunOut(BaseModel):
     id: int
     name: str
     run_id: str
