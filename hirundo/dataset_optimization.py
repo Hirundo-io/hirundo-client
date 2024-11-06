@@ -147,10 +147,6 @@ class COCO(Metadata):
     or `ssh://my-username@my-repo-name/my-folder/my-metadata.json`
     (or `file:///datasets/my-folder/my-metadata.json` if using LOCAL storage type with on-premises installation)
     """
-    images_path_prefix: typing.Optional[str] = None
-    """
-    The prefix to add to the image paths in the COCO JSON file.
-    """
 
     @property
     def metadata_url(self) -> HirundoUrl:
