@@ -64,7 +64,7 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
 
 def cleanup(test_dataset: OptimizationDataset):
     logger.info("Started cleanup")
-    datasets = OptimizationDataset.list()
+    datasets = OptimizationDataset.list_datasets()
     dataset_ids = [
         dataset.id
         for dataset in datasets
@@ -76,13 +76,14 @@ def cleanup(test_dataset: OptimizationDataset):
         if dataset.name == test_dataset.name
         and dataset.storage_integration.id is not None
     ]
+    runs = OptimizationDataset.list_runs()
     running_datasets = {
-        dataset.id: dataset.run_id
-        for dataset in datasets
+        run.id: run.run_id
+        for run in runs
         if (
-            dataset.name == test_dataset.name
-            and dataset.run_id is not None
-            and dataset.status == RunStatus.STARTED
+            run.name == test_dataset.name
+            and run.run_id is not None
+            and run.status == RunStatus.STARTED
         )
     }
     if len(dataset_ids) > 0:

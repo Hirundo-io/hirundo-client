@@ -298,13 +298,12 @@ class OptimizationDataset(BaseModel):
         return OptimizationDataset(**dataset)
 
     @staticmethod
-    def list(
+    def list_datasets(
         organization_id: typing.Optional[int] = None,
     ) -> list["DataOptimizationDatasetOut"]:
         """
-        Lists all the `OptimizationDataset` instances created by user's default organization
+        Lists all the optimization datasets created by user's default organization
         or the `organization_id` passed
-        Note: The return type is `list[dict]` and not `list[OptimizationDataset]`
 
         Args:
             organization_id: The ID of the organization to list the datasets for.
@@ -322,6 +321,33 @@ class OptimizationDataset(BaseModel):
                 **ds,
             )
             for ds in datasets
+        ]
+
+    @staticmethod
+    def list_runs(
+        organization_id: typing.Optional[int] = None,
+    ) -> list["DataOptimizationRunOut"]:
+        """
+        Lists all the `OptimizationDataset` instances created by user's default organization
+        or the `organization_id` passed
+        Note: The return type is `list[dict]` and not `list[OptimizationDataset]`
+
+        Args:
+            organization_id: The ID of the organization to list the datasets for.
+        """
+        response = requests.get(
+            f"{API_HOST}/dataset-optimization/run/",
+            params={"dataset_organization_id": organization_id},
+            headers=get_auth_headers(),
+            timeout=READ_TIMEOUT,
+        )
+        raise_for_status_with_reason(response)
+        runs = response.json()
+        return [
+            DataOptimizationRunOut(
+                **run,
+            )
+            for run in runs
         ]
 
     @staticmethod
@@ -769,10 +795,16 @@ class DataOptimizationDatasetOut(BaseModel):
     classes: typing.Optional[list[str]] = None
     labeling_info: LabelingInfo
 
-    run_id: typing.Optional[str]
     organization_id: typing.Optional[int]
     creator_id: typing.Optional[int]
     created_at: datetime.datetime
     updated_at: datetime.datetime
 
+
+class DataOptimizationRunOut(DataOptimizationDatasetOut):
+    id: int
+    name: str
+    run_id: str
     status: RunStatus
+    approved: bool
+    created_at: datetime.datetime
