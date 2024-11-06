@@ -347,7 +347,7 @@ class OptimizationDataset(BaseModel):
             DataOptimizationRunOut(
                 **run,
             )
-            for run in runs
+            for run in runs["datasets"]
         ]
 
     @staticmethod
