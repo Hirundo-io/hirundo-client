@@ -10,7 +10,6 @@ from hirundo import (
     StorageGCP,
     StorageIntegration,
     StorageTypes,
-    VisionRunArgs,
 )
 from tests.dataset_optimization_shared import (
     cleanup,
@@ -66,11 +65,6 @@ def test_dataset_optimization():
         test_dataset,
         sanity=True,
         alternative_env="RUN_CLASSIFICATION_GCP_SANITY_OPTIMIZATION",
-        run_args=VisionRunArgs(
-            upsample=True,
-            min_abs_bbox_size=10,
-            min_abs_bbox_area=100,
-        ),
     )
     if full_run is not None:
         assert full_run.warnings_and_errors.size == 0
