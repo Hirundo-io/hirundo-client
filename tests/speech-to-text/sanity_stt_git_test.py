@@ -43,7 +43,7 @@ test_dataset = OptimizationDataset(
     ),
     data_root_url=test_storage_git.get_url(path="/wavs"),
     labeling_info=HirundoCSV(
-        csv_url=test_storage_git.get_url(path="/meta-old.csv"),
+        csv_url=test_storage_git.get_url(path="/meta.csv"),
     ),
 )
 
