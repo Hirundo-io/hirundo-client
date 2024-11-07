@@ -386,7 +386,11 @@ class OptimizationDataset(BaseModel):
             raise ValueError("No dataset has been created")
         self.delete_by_id(self.id)
 
-    def create(self, replace_if_exists: bool = False) -> int:
+    def create(
+        self,
+        organization_id: typing.Optional[int] = None,
+        replace_if_exists: bool = False,
+    ) -> int:
         """
         Create a `OptimizationDataset` instance on the server.
         If `storage_integration_id` is not set, it will be created.
@@ -406,6 +410,7 @@ class OptimizationDataset(BaseModel):
                     k: model_dict[k]
                     for k in model_dict.keys() - {"storage_integration"}
                 },
+                "organization_id": organization_id,
                 "replace_if_exists": replace_if_exists,
             },
             headers={
@@ -423,7 +428,9 @@ class OptimizationDataset(BaseModel):
 
     @staticmethod
     def launch_optimization_run(
-        dataset_id: int, run_args: typing.Optional[RunArgs] = None
+        dataset_id: int,
+        organization_id: typing.Optional[int] = None,
+        run_args: typing.Optional[RunArgs] = None,
     ) -> str:
         """
         Run the dataset optimization process on the server using the dataset with the given ID
@@ -435,9 +442,14 @@ class OptimizationDataset(BaseModel):
         Returns:
             ID of the run (`run_id`).
         """
+        run_info = {}
+        if organization_id:
+            run_info["organization_id"] = organization_id
+        if run_args:
+            run_info["run_args"] = run_args.model_dump(mode="json")
         run_response = requests.post(
             f"{API_HOST}/dataset-optimization/run/{dataset_id}",
-            json=run_args.model_dump(mode="json") if run_args else None,
+            json=run_info if len(run_info) > 0 else None,
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
@@ -445,7 +457,10 @@ class OptimizationDataset(BaseModel):
         return run_response.json()["run_id"]
 
     def run_optimization(
-        self, replace_if_exists: bool = False, run_args: typing.Optional[RunArgs] = None
+        self,
+        organization_id: typing.Optional[int] = None,
+        replace_if_exists: bool = False,
+        run_args: typing.Optional[RunArgs] = None,
     ) -> str:
         """
         If the dataset was not created on the server yet, it is created.
@@ -471,7 +486,7 @@ class OptimizationDataset(BaseModel):
                     raise Exception(
                         f"Cannot set `min_abs_bbox_area` for labeling type {self.labeling_type}"
                     )
-            run_id = self.launch_optimization_run(self.id, run_args)
+            run_id = self.launch_optimization_run(self.id, organization_id, run_args)
             self.run_id = run_id
             logger.info("Started the run with ID: %s", run_id)
             return run_id
