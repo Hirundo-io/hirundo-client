@@ -118,7 +118,9 @@ def cleanup(test_dataset: OptimizationDataset):
     git_repo_ids = [
         integration.git.repo.id
         for integration in storage_integrations
-        if integration.type == StorageTypes.GIT and integration.git is not None
+        if integration.type == StorageTypes.GIT
+        and integration.git is not None
+        and integration.id in storage_integration_ids
     ]
     log_cleanup(storage_integration_ids, git_repo_ids)
     for storage_integration_id in storage_integration_ids:
