@@ -41,14 +41,14 @@ MAX_RETRIES = 200  # Max 200 retries for HTTP SSE connection
 
 
 class RunStatus(Enum):
-    STARTED = "STARTED"
     PENDING = "PENDING"
+    STARTED = "STARTED"
     SUCCESS = "SUCCESS"
     FAILURE = "FAILURE"
     AWAITING_MANUAL_APPROVAL = "AWAITING MANUAL APPROVAL"
-    RETRYING = "RETRYING"
     REVOKED = "REVOKED"
     REJECTED = "REJECTED"
+    RETRY = "RETRY"
 
 
 STATUS_TO_TEXT_MAP = {
@@ -57,7 +57,7 @@ STATUS_TO_TEXT_MAP = {
     RunStatus.SUCCESS.value: "Optimization run completed successfully",
     RunStatus.FAILURE.value: "Optimization run failed",
     RunStatus.AWAITING_MANUAL_APPROVAL.value: "Awaiting manual approval",
-    RunStatus.RETRYING.value: "Optimization run failed. Retrying",
+    RunStatus.RETRY.value: "Optimization run failed. Retrying",
     RunStatus.REVOKED.value: "Optimization run was cancelled",
     RunStatus.REJECTED.value: "Optimization run was rejected",
 }
@@ -67,7 +67,7 @@ STATUS_TO_PROGRESS_MAP = {
     RunStatus.SUCCESS.value: 100.0,
     RunStatus.FAILURE.value: 100.0,
     RunStatus.AWAITING_MANUAL_APPROVAL.value: 100.0,
-    RunStatus.RETRYING.value: 0.0,
+    RunStatus.RETRY.value: 0.0,
     RunStatus.REVOKED.value: 100.0,
     RunStatus.REJECTED.value: 0.0,
 }
