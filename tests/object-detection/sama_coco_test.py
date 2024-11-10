@@ -53,8 +53,7 @@ def cleanup_tests():
 def test_dataset_optimization():
     full_run = dataset_optimization_sync_test(
         test_dataset,
-        sanity=True,
-        alternative_env="RUN_CLASSIFICATION_GCP_SANITY_OPTIMIZATION",
+        alternative_env="RUN_COCO_OD_GCP_SANITY_OPTIMIZATION",
     )
     if full_run is not None:
         assert full_run.warnings_and_errors.size == 0
@@ -67,5 +66,5 @@ def test_dataset_optimization():
 @pytest.mark.asyncio
 async def test_async_dataset_optimization():
     await dataset_optimization_async_test(
-        test_dataset, "RUN_CLASSIFICATION_GCP_SANITY_OPTIMIZATION"
+        test_dataset, "RUN_COCO_OD_GCP_SANITY_OPTIMIZATION"
     )
