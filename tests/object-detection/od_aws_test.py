@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 unique_id = get_unique_id()
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS-BDD-100k-validation-OD-dataset{unique_id}",
-    labelling_type=LabellingType.ObjectDetection,
+    labelling_type=LabellingType.OBJECT_DETECTION,
     dataset_storage=StorageLink(
         storage_integration=StorageIntegration(
             name=f"AWS-open-source-datasets{unique_id}",
@@ -56,9 +56,9 @@ test_dataset = OptimizationDataset(
 
 @pytest.fixture(autouse=True)
 def cleanup_tests():
-    cleanup(test_dataset, unique_id)
+    cleanup(test_dataset)
     yield
-    cleanup(test_dataset, unique_id)
+    cleanup(test_dataset)
 
 
 def test_dataset_optimization():
