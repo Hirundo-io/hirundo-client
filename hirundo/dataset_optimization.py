@@ -97,7 +97,7 @@ CUSTOMER_INTERCHANGE_DTYPES: DtypeArg = {
 }
 
 
-class AugmentationNames(Enum):
+class AugmentationNames(str, Enum):
     RandomHorizontalFlip = "RandomHorizontalFlip"
     RandomVerticalFlip = "RandomVerticalFlip"
     RandomRotation = "RandomRotation"
