@@ -106,6 +106,12 @@ class AugmentationNames(str, Enum):
     RandomPerspective = "RandomPerspective"
 
 
+class Modality(str, Enum):
+    IMAGE = "Image"
+    RADAR = "Radar"
+    EKG = "EKG"
+
+
 class OptimizationDataset(BaseModel):
     name: str
     """
@@ -152,6 +158,11 @@ class OptimizationDataset(BaseModel):
     Used to define which augmentations are apply to a vision dataset.
     For audio datasets, this field is ignored.
     If no value is provided, all augmentations are applied to vision datasets.
+    """
+    modality: Modality = Modality.IMAGE
+    """
+    Used to define the modality of the dataset.
+    Defaults to Image.
     """
 
     storage_integration_id: typing.Optional[int] = Field(default=None, init=False)
