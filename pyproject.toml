@@ -64,6 +64,7 @@ dev = [
     "pre-commit>=3.7.1",
     "ruff==0.6.5",
     "bumpver",
+    "platformdirs>=4.3.6"
 ]
 docs = [
     "sphinx>=7.4.7",
@@ -75,6 +76,7 @@ docs = [
     "furo",
     "sphinx-multiversion",
     "starlette>0.40.0",
+    "esbonio",
 ]
 
 [tool.bumpver]
