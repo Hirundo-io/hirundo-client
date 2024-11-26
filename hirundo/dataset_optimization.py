@@ -97,6 +97,21 @@ CUSTOMER_INTERCHANGE_DTYPES: DtypeArg = {
 }
 
 
+class AugmentationNames(str, Enum):
+    RandomHorizontalFlip = "RandomHorizontalFlip"
+    RandomVerticalFlip = "RandomVerticalFlip"
+    RandomRotation = "RandomRotation"
+    ColorJitter = "ColorJitter"
+    RandomAffine = "RandomAffine"
+    RandomPerspective = "RandomPerspective"
+
+
+class Modality(str, Enum):
+    IMAGE = "Image"
+    RADAR = "Radar"
+    EKG = "EKG"
+
+
 class OptimizationDataset(BaseModel):
     name: str
     """
@@ -136,6 +151,18 @@ class OptimizationDataset(BaseModel):
     - `DatasetMetadataType.HIRUNDO_CSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
 
     Currently no other formats are supported. Future versions of `hirundo` may support additional formats.
+    """
+
+    augmentations: typing.Optional[list[AugmentationNames]] = None
+    """
+    Used to define which augmentations are apply to a vision dataset.
+    For audio datasets, this field is ignored.
+    If no value is provided, all augmentations are applied to vision datasets.
+    """
+    modality: Modality = Modality.IMAGE
+    """
+    Used to define the modality of the dataset.
+    Defaults to Image.
     """
 
     storage_integration_id: typing.Optional[int] = Field(default=None, init=False)
