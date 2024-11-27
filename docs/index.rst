@@ -65,8 +65,14 @@ Suspect DataFrame columns:
 Errors and warnings DataFrame columns:
    - ``status``: status message (one of ``NO_LABELS`` / ``MISSING_IMAGE`` / ``INVALID_IMAGE`` / ``INVALID_BBOX`` / ``INVALID_BBOX_SIZE``)
 
+Google Colab notebooks with more examples
+-----------------------------------------
+You can find more examples of how to use ``hirundo`` in
+`Google Colab notebooks <https://github.com/Hirundo-io/hirundo-client/tree/main/notebooks>`_.
+
+Package contents
+----------------
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 4
 
    modules

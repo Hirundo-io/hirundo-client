@@ -11,7 +11,7 @@ Support dataset storage integrations include:
    - Git LFS (Large File Storage) repositories (e.g. GitHub or HuggingFace)
 
 Optimizing a classification dataset
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------
 
 Currently ``hirundo`` requires a CSV file with the following columns (all columns are required):
    - ``image_path``: The location of the image within the dataset ``root``
@@ -23,7 +23,7 @@ And outputs a CSV with the same columns and:
    - ``suggested_label_conf``: suggested label confidence
 
 Optimizing an object detection (OD) dataset
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------
 
 Currently ``hirundo`` requires a CSV file with the following columns (all columns are required):
    - ``image_path``: The location of the image within the dataset ``root``
@@ -46,7 +46,7 @@ You can install the codebase with a simple `pip install hirundo` to install the 
 ## Usage
 
 Classification example:
-```
+```python
 from hirundo.dataset_optimization import OptimizationDataset
 from hirundo.enum import LabellingType
 from hirundo.storage import StorageIntegration, StorageLink, StorageTypes
@@ -78,7 +78,7 @@ print(results)
 
 Object detection example:
 
-```
+```python
 from hirundo.dataset_optimization import OptimizationDataset
 from hirundo.enum import LabellingType
 from hirundo.storage import StorageIntegration, StorageLink, StorageTypes
@@ -112,4 +112,4 @@ Note: Currently we only support the main CPython release 3.9, 3.10 and 3.11. PyP
 
 ## Further documentation
 
-To learn about mroe how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the Google Colab examples.
+To learn about more how to use this library, please visit the [documentation](http://docs.hirundo.io/) or see the [Google Colab examples](https://github.com/Hirundo-io/hirundo-client/tree/main/notebooks).
