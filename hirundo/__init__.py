@@ -1,5 +1,6 @@
 from .dataset_optimization import (
     COCO,
+    YOLO,
     HirundoCSV,
     HirundoError,
     OptimizationDataset,
@@ -22,6 +23,7 @@ from .storage import (
 
 __all__ = [
     "COCO",
+    "YOLO",
     "HirundoCSV",
     "HirundoError",
     "OptimizationDataset",

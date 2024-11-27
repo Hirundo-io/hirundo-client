@@ -218,7 +218,6 @@ class GitRepo(BaseModel):
 
 class GitRepoOut(BaseModel):
     id: int
-
     name: str
     repository_url: RepoUrl
 

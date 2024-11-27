@@ -153,7 +153,17 @@ class COCO(Metadata):
         return self.json_url
 
 
-LabelingInfo = typing.Union[HirundoCSV, COCO]
+class YOLO(Metadata):
+    type: DatasetMetadataType = DatasetMetadataType.YOLO
+    data_yaml_url: typing.Optional[HirundoUrl] = None
+    labels_dir_url: HirundoUrl
+
+    @property
+    def metadata_url(self) -> HirundoUrl:
+        return self.labels_dir_url
+
+
+LabelingInfo = typing.Union[HirundoCSV, COCO, YOLO]
 """
 The dataset labeling info. The dataset labeling info can be one of the following:
 - `DatasetMetadataType.HirundoCSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
@@ -173,11 +183,13 @@ class VisionRunArgs(BaseModel):
     """
     min_abs_bbox_area: int = 0
     """
-    Minimum absolute area (in pixels) of a bounding box to keep it in the dataset for optimization.
+    Minimum absolute area (in pixels²) of a bounding box to keep it in the dataset for optimization.
     """
     min_rel_bbox_size: float = 0.0
     """
-    Minimum relative size (as a fraction of the image size) of a bounding box to keep it in the dataset for optimization.
+    Minimum relative size (as a fraction of both image height and width) of a bounding box to keep it in the dataset for optimization.
+    i.e. if the bounding box is 10% of the image width and 5% of the image height, it will be kept if this value is 0.05, but not if the
+    value is 0.06 (since both width and height are checked).
     """
     min_rel_bbox_area: float = 0.0
     """
@@ -484,7 +496,7 @@ class OptimizationDataset(BaseModel):
                     )
                 ):
                     raise Exception(
-                        f"Cannot set `min_abs_bbox_area` for labeling type {self.labeling_type}"
+                        f"Cannot set `min_abs_bbox_size`, `min_abs_bbox_area`, `min_rel_bbox_size`, or `min_rel_bbox_area` for labeling type {self.labeling_type}"
                     )
             run_id = self.launch_optimization_run(self.id, organization_id, run_args)
             self.run_id = run_id

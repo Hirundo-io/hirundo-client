@@ -27,7 +27,7 @@ class StorageS3Base(BaseModel):
     # ⬆️ We could restrict this, but if we're allowing custom endpoints then the validation may be wrong
     access_key_id: typing.Optional[str] = None
 
-    def get_url(self, path: typing.Union[str, Path]):
+    def get_url(self, path: typing.Union[str, Path]) -> Url:
         return Url(
             f"{S3_PREFIX}{self.bucket_url.removeprefix(S3_PREFIX).removesuffix('/')}/{str(path).removeprefix('/')}"
         )
@@ -45,7 +45,7 @@ class StorageGCPBase(BaseModel):
     bucket_name: str
     project: str
 
-    def get_url(self, path: typing.Union[str, Path]):
+    def get_url(self, path: typing.Union[str, Path]) -> Url:
         return Url(f"gs://{self.bucket_name}/{str(path).removeprefix('/')}")
 
 
