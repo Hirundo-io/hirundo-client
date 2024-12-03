@@ -443,7 +443,15 @@ class OptimizationDataset(BaseModel):
     ) -> int:
         """
         Create a `OptimizationDataset` instance on the server.
-        If `storage_integration_id` is not set, it will be created.
+        If the `storage_integration_id` field is not set, the storage integration will also be created and the field will be set.
+
+        Args:
+            organization_id: The ID of the organization to create the dataset for.
+            replace_if_exists: If True, the dataset will be replaced if it already exists
+                (this is determined by a dataset of the same name in the same organization).
+
+        Returns:
+            The ID of the created `OptimizationDataset` instance
         """
         if self.storage_integration is None and self.storage_integration_id is None:
             raise ValueError("No dataset storage has been provided")
