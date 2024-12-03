@@ -506,6 +506,23 @@ class OptimizationDataset(BaseModel):
         raise_for_status_with_reason(run_response)
         return run_response.json()["run_id"]
 
+    def _validate_run_args(self, run_args: RunArgs) -> None:
+        if self.labeling_type == LabelingType.SPEECH_TO_TEXT:
+            raise Exception("Speech to text cannot have `run_args` set")
+        if self.labeling_type != LabelingType.OBJECT_DETECTION and any(
+            (
+                run_args.min_abs_bbox_size != 0,
+                run_args.min_abs_bbox_area != 0,
+                run_args.min_rel_bbox_size != 0,
+                run_args.min_rel_bbox_area != 0,
+            )
+        ):
+            raise Exception(
+                "Cannot set `min_abs_bbox_size`, `min_abs_bbox_area`, "
+                + "`min_rel_bbox_size`, or `min_rel_bbox_area` for "
+                + f"labeling type {self.labeling_type}"
+            )
+
     def run_optimization(
         self,
         organization_id: typing.Optional[int] = None,
@@ -523,19 +540,7 @@ class OptimizationDataset(BaseModel):
             if not self.id:
                 self.id = self.create(replace_if_exists=replace_if_exists)
             if run_args is not None:
-                if self.labeling_type == LabelingType.SPEECH_TO_TEXT:
-                    raise Exception("Speech to text cannot have `run_args` set")
-                if self.labeling_type != LabelingType.OBJECT_DETECTION and any(
-                    (
-                        run_args.min_abs_bbox_size != 0,
-                        run_args.min_abs_bbox_area != 0,
-                        run_args.min_rel_bbox_size != 0,
-                        run_args.min_rel_bbox_area != 0,
-                    )
-                ):
-                    raise Exception(
-                        f"Cannot set `min_abs_bbox_size`, `min_abs_bbox_area`, `min_rel_bbox_size`, or `min_rel_bbox_area` for labeling type {self.labeling_type}"
-                    )
+                self._validate_run_args(run_args)
             run_id = self.launch_optimization_run(self.id, organization_id, run_args)
             self.run_id = run_id
             logger.info("Started the run with ID: %s", run_id)
