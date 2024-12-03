@@ -7,8 +7,8 @@ from hirundo import (
     HirundoCSV,
     LabelingType,
     OptimizationDataset,
+    StorageConfig,
     StorageGCP,
-    StorageIntegration,
     StorageTypes,
 )
 from tests.classification.cifar100_classes import cifar100_classes
@@ -29,7 +29,7 @@ gcp_bucket = StorageGCP(
 test_dataset = OptimizationDataset(
     name=f"TEST-GCP cifar 100 classification dataset{unique_id}",
     labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
-    storage_integration=StorageIntegration(
+    storage_config=StorageConfig(
         name=f"cifar100bucket{unique_id}",
         type=StorageTypes.GCP,
         gcp=gcp_bucket,

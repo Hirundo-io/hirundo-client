@@ -13,10 +13,10 @@ from .enum import (
 )
 from .git import GitRepo
 from .storage import (
+    StorageConfig,
     StorageGCP,
-    # StorageAzure,  TODO: Azure storage integration is coming soon
+    # StorageAzure,  TODO: Azure storage is coming soon
     StorageGit,
-    StorageIntegration,
     StorageS3,
     StorageTypes,
 )
@@ -35,9 +35,9 @@ __all__ = [
     "StorageTypes",
     "StorageS3",
     "StorageGCP",
-    # "StorageAzure",  TODO: Azure storage integration is coming soon
+    # "StorageAzure",  TODO: Azure storage is coming soon
     "StorageGit",
-    "StorageIntegration",
+    "StorageConfig",
 ]
 
 __version__ = "0.1.9b1"

@@ -7,7 +7,7 @@ import requests
 from pydantic import BaseModel, model_validator
 from pydantic_core import Url
 
-from hirundo._constraints import S3BucketUrl, StorageIntegrationName
+from hirundo._constraints import S3BucketUrl, StorageConfigName
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
 from hirundo._http import raise_for_status_with_reason
@@ -57,7 +57,7 @@ class StorageGCPOut(StorageGCPBase):
     pass
 
 
-# TODO: Azure storage integration is coming soon
+# TODO: Azure storage config is coming soon
 # class StorageAzure(BaseModel):
 #     account_url: HttpUrl
 #     container_name: str
@@ -120,46 +120,46 @@ class StorageGitOut(BaseModel):
 
 class StorageTypes(str, Enum):
     """
-    Enum for the different types of storage integrations.
+    Enum for the different types of storage configs.
     Supported types are:
     """
 
     S3 = "S3"
     GCP = "GCP"
-    # AZURE = "Azure"  TODO: Azure storage integration is coming soon
+    # AZURE = "Azure"  TODO: Azure storage config is coming soon
     GIT = "Git"
     LOCAL = "Local"
     """
-    Local storage integration is only supported for on-premises installations.
+    Local storage config is only supported for on-premises installations.
     """
 
 
-class StorageIntegration(BaseModel):
+class StorageConfig(BaseModel):
     id: typing.Optional[int] = None
     """
-    The ID of the `StorageIntegration` in the Hirundo system.
+    The ID of the `StorageConfig` in the Hirundo system.
     """
 
     organization_id: typing.Optional[int] = None
     """
-    The ID of the organization that the `StorageIntegration` belongs to.
+    The ID of the organization that the `StorageConfig` belongs to.
     If not provided, it will be assigned to your default organization.
     """
 
-    name: StorageIntegrationName
+    name: StorageConfigName
     """
-    A name to identify the `StorageIntegration` in the Hirundo system.
+    A name to identify the `StorageConfig` in the Hirundo system.
     """
     type: typing.Optional[StorageTypes] = pydantic.Field(
         examples=[
             StorageTypes.S3,
             StorageTypes.GCP,
-            # StorageTypes.AZURE,  TODO: Azure storage integration is coming soon
+            # StorageTypes.AZURE,  TODO: Azure storage is coming soon
             StorageTypes.GIT,
         ]
     )
     """
-    The type of the `StorageIntegration`.
+    The type of the `StorageConfig`.
     Supported types are:
     - `S3`
     - `GCP`
@@ -181,7 +181,7 @@ class StorageIntegration(BaseModel):
         ],
     )
     """
-    The Amazon Web Services (AWS) S3 storage integration details.
+    The Amazon Web Services (AWS) S3 storage config details.
     Use this if you want to link to an S3 bucket.
     """
     gcp: typing.Optional[StorageGCP] = pydantic.Field(
@@ -210,7 +210,7 @@ class StorageIntegration(BaseModel):
         ],
     )
     """
-    The Google Cloud (GCP) Storage integration details.
+    The Google Cloud (GCP) Storage config details.
     Use this if you want to link to an GCS bucket.
     """
     azure: None = None
@@ -226,7 +226,7 @@ class StorageIntegration(BaseModel):
     #         },
     #         None,
     #     ],
-    # )  TODO: Azure storage integration is coming soon
+    # )  TODO: Azure storage config is coming soon
     git: typing.Optional[StorageGit] = pydantic.Field(
         default=None,
         examples=[
@@ -245,102 +245,100 @@ class StorageIntegration(BaseModel):
         ],
     )
     """
-    The Git storage integration details.
+    The Git storage config details.
     Use this if you want to link to a Git repository.
     """
 
     @staticmethod
-    def get_by_id(storage_integration_id: int) -> "ResponseStorageIntegration":
+    def get_by_id(storage_config_id: int) -> "ResponseStorageConfig":
         """
-        Retrieves a `StorageIntegration` instance from the server by its ID
+        Retrieves a `StorageConfig` instance from the server by its ID
 
         Args:
-            storage_integration_id: The ID of the `StorageIntegration` to retrieve
+            storage_config_id: The ID of the `StorageConfig` to retrieve
         """
-        storage_integration = requests.get(
-            f"{API_HOST}/storage-integration/{storage_integration_id}",
+        storage_config = requests.get(
+            f"{API_HOST}/storage-integration/{storage_config_id}",
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
-        raise_for_status_with_reason(storage_integration)
-        return ResponseStorageIntegration(**storage_integration.json())
+        raise_for_status_with_reason(storage_config)
+        return ResponseStorageConfig(**storage_config.json())
 
     @staticmethod
-    def get_by_name(
-        name: str, storage_type: StorageTypes
-    ) -> "ResponseStorageIntegration":
+    def get_by_name(name: str, storage_type: StorageTypes) -> "ResponseStorageConfig":
         """
-        Retrieves a `StorageIntegration` instance from the server by its name
+        Retrieves a `StorageConfig` instance from the server by its name
 
         Args:
-            name: The name of the `StorageIntegration` to retrieve
-            storage_type: The type of the `StorageIntegration` to retrieve
+            name: The name of the `StorageConfig` to retrieve
+            storage_type: The type of the `StorageConfig` to retrieve
 
             Note: The type is required because the name is not unique across different storage types
         """
-        storage_integration = requests.get(
+        storage_config = requests.get(
             f"{API_HOST}/storage-integration/by-name/{name}?storage_type={storage_type.value}",
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
-        raise_for_status_with_reason(storage_integration)
-        return ResponseStorageIntegration(**storage_integration.json())
+        raise_for_status_with_reason(storage_config)
+        return ResponseStorageConfig(**storage_config.json())
 
     @staticmethod
     def list(
         organization_id: typing.Optional[int] = None,
-    ) -> list["ResponseStorageIntegration"]:
+    ) -> list["ResponseStorageConfig"]:
         """
-        Lists all the `StorageIntegration`'s created by user's default organization
-        Note: The return type is `list[dict]` and not `list[StorageIntegration]`
+        Lists all the `StorageConfig`'s created by user's default organization
+        Note: The return type is `list[dict]` and not `list[StorageConfig]`
 
         Args:
-            organization_id: The ID of the organization to list `StorageIntegration`'s for.
-            If not provided, it will list `StorageIntegration`'s for the default organization.
+            organization_id: The ID of the organization to list `StorageConfig`'s for.
+            If not provided, it will list `StorageConfig`'s for the default organization.
         """
-        storage_integrations = requests.get(
+        storage_configs = requests.get(
             f"{API_HOST}/storage-integration/",
             params={"storage_integration_organization_id": organization_id},
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
-        raise_for_status_with_reason(storage_integrations)
-        return [ResponseStorageIntegration(**si) for si in storage_integrations.json()]
+        raise_for_status_with_reason(storage_configs)
+        return [ResponseStorageConfig(**si) for si in storage_configs.json()]
 
     @staticmethod
-    def delete_by_id(storage_integration_id) -> None:
+    def delete_by_id(storage_config_id) -> None:
         """
-        Deletes a `StorageIntegration` instance from the server by its ID
+        Deletes a `StorageConfig` instance from the server by its ID
 
         Args:
-            storage_integration_id: The ID of the `StorageIntegration` to delete
+            storage_config_id: The ID of the `StorageConfig` to delete
         """
-        storage_integration = requests.delete(
-            f"{API_HOST}/storage-integration/{storage_integration_id}",
+        storage_config = requests.delete(
+            f"{API_HOST}/storage-integration/{storage_config_id}",
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
-        raise_for_status_with_reason(storage_integration)
-        logger.info("Deleted storage integration with ID: %s", storage_integration_id)
+        raise_for_status_with_reason(storage_config)
+        logger.info("Deleted storage config with ID: %s", storage_config_id)
 
     def delete(self) -> None:
         """
-        Deletes the `StorageIntegration` instance from the server
+        Deletes the `StorageConfig` instance from the server
         """
         if not self.id:
-            raise ValueError("No StorageIntegration has been created")
+            raise ValueError("No StorageConfig has been created")
         self.delete_by_id(self.id)
 
     def create(self, replace_if_exists: bool = False) -> int:
         """
-        Create a `StorageIntegration` instance on the server
+        Create a `StorageConfig` instance on the server
 
         Args:
-            replace_if_exists: If a `StorageIntegration` with the same name and type already exists, replace it.
+            replace_if_exists: If a `StorageConfig` with the same name and type already exists, replace it.
         """
         if self.git and self.git.repo:
             self.git.repo_id = self.git.repo.create(replace_if_exists=replace_if_exists)
-        storage_integration = requests.post(
+        storage_config = requests.post(
             f"{API_HOST}/storage-integration/",
             json={
                 **self.model_dump(mode="json"),
@@ -352,11 +350,11 @@ class StorageIntegration(BaseModel):
             },
             timeout=MODIFY_TIMEOUT,
         )
-        raise_for_status_with_reason(storage_integration)
-        storage_integration_id = storage_integration.json()["id"]
-        self.id = storage_integration_id
-        logger.info("Created storage integration with ID: %s", storage_integration_id)
-        return storage_integration_id
+        raise_for_status_with_reason(storage_config)
+        storage_config_id = storage_config.json()["id"]
+        self.id = storage_config_id
+        logger.info("Created storage config with ID: %s", storage_config_id)
+        return storage_config_id
 
     @model_validator(mode="after")
     def validate_storage_type(self):
@@ -385,9 +383,9 @@ class StorageIntegration(BaseModel):
         return self
 
 
-class ResponseStorageIntegration(BaseModel):
+class ResponseStorageConfig(BaseModel):
     id: int
-    name: StorageIntegrationName
+    name: StorageConfigName
     type: StorageTypes
     organization_name: str
     creator_name: str

@@ -24,7 +24,7 @@ from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.enum import DatasetMetadataType, LabelingType
 from hirundo.logger import get_logger
-from hirundo.storage import ResponseStorageIntegration, StorageIntegration
+from hirundo.storage import ResponseStorageConfig, StorageConfig
 
 logger = get_logger(__name__)
 
@@ -236,17 +236,19 @@ class OptimizationDataset(BaseModel):
     """
     Language of the Speech-to-Text audio dataset. This is required for Speech-to-Text datasets.
     """
-    storage_integration_id: typing.Optional[int] = None
+    storage_config_id: typing.Optional[int] = None
     """
-    The ID of the storage integration used to store the dataset and metadata.
+    The ID of the storage config used to store the dataset and metadata.
     """
-    storage_integration: typing.Optional[StorageIntegration] = None
+    storage_config: typing.Optional[
+        typing.Union[StorageConfig, ResponseStorageConfig]
+    ] = None
     """
-    The `StorageIntegration` instance to link to.
+    The `StorageConfig` instance to link to.
     """
     data_root_url: HirundoUrl
     """
-    Path for data (e.g. images) within the `StorageIntegration` instance,
+    URL for data (e.g. images) within the `StorageConfig` instance,
     e.g. `s3://my-bucket-name/my-images-folder`, `gs://my-bucket-name/my-images-folder`,
     or `ssh://my-username@my-repo-name/my-images-folder`
     (or `file:///datasets/my-images-folder` if using LOCAL storage type with on-premises installation)
@@ -282,16 +284,13 @@ class OptimizationDataset(BaseModel):
 
     @model_validator(mode="after")
     def validate_dataset(self):
-        if self.storage_integration is None and self.storage_integration_id is None:
+        if self.storage_config is None and self.storage_config_id is None:
             raise ValueError(
-                "No dataset storage has been provided. Provide on via `storage_integration` or `storage_integration_id`"
+                "No dataset storage has been provided. Provide on via `storage_config` or `storage_config_id`"
             )
-        elif (
-            self.storage_integration is not None
-            and self.storage_integration_id is not None
-        ):
+        elif self.storage_config is not None and self.storage_config_id is not None:
             raise ValueError(
-                "Both `storage_integration` and `storage_integration_id` have been provided. Pick one."
+                "Both `storage_config` and `storage_config_id` have been provided. Pick one."
             )
         if self.labeling_type == LabelingType.SPEECH_TO_TEXT and self.language is None:
             raise ValueError("Language is required for Speech-to-Text datasets.")
@@ -416,22 +415,22 @@ class OptimizationDataset(BaseModel):
         raise_for_status_with_reason(response)
         logger.info("Deleted dataset with ID: %s", dataset_id)
 
-    def delete(self, storage_integration=True) -> None:
+    def delete(self, storage_config=True) -> None:
         """
         Deletes the active `OptimizationDataset` instance from the server.
         It can only be used on a `OptimizationDataset` instance that has been created.
 
         Args:
-            storage_integration: If True, the `OptimizationDataset`'s `StorageIntegration` will also be deleted
+            storage_config: If True, the `OptimizationDataset`'s `StorageConfig` will also be deleted
 
-        Note: If `storage_integration` is not set to `False` then the `storage_integration_id` must be set
-        This can either be set manually or by creating the `StorageIntegration` instance via the `OptimizationDataset`'s
+        Note: If `storage_config` is not set to `False` then the `storage_config_id` must be set
+        This can either be set manually or by creating the `StorageConfig` instance via the `OptimizationDataset`'s
         `create` method
         """
-        if storage_integration:
-            if not self.storage_integration_id:
-                raise ValueError("No storage integration has been created")
-            StorageIntegration.delete_by_id(self.storage_integration_id)
+        if storage_config:
+            if not self.storage_config_id:
+                raise ValueError("No storage config has been created")
+            StorageConfig.delete_by_id(self.storage_config_id)
         if not self.id:
             raise ValueError("No dataset has been created")
         self.delete_by_id(self.id)
@@ -443,7 +442,7 @@ class OptimizationDataset(BaseModel):
     ) -> int:
         """
         Create a `OptimizationDataset` instance on the server.
-        If the `storage_integration_id` field is not set, the storage integration will also be created and the field will be set.
+        If the `storage_config_id` field is not set, the storage config will also be created and the field will be set.
 
         Args:
             organization_id: The ID of the organization to create the dataset for.
@@ -453,21 +452,32 @@ class OptimizationDataset(BaseModel):
         Returns:
             The ID of the created `OptimizationDataset` instance
         """
-        if self.storage_integration is None and self.storage_integration_id is None:
+        if self.storage_config is None and self.storage_config_id is None:
             raise ValueError("No dataset storage has been provided")
-        if self.storage_integration and self.storage_integration_id is None:
-            self.storage_integration_id = self.storage_integration.create(
-                replace_if_exists=replace_if_exists,
+        elif self.storage_config and self.storage_config_id is None:
+            if isinstance(self.storage_config, ResponseStorageConfig):
+                self.storage_config_id = self.storage_config.id
+            elif isinstance(self.storage_config, StorageConfig):
+                self.storage_config_id = self.storage_config.create(
+                    replace_if_exists=replace_if_exists,
+                )
+        elif (
+            self.storage_config is not None
+            and self.storage_config_id is not None
+            and (
+                not isinstance(self.storage_config, ResponseStorageConfig)
+                or self.storage_config.id != self.storage_config_id
+            )
+        ):
+            raise ValueError(
+                "Both `storage_config` and `storage_config_id` have been provided. Storage config IDs do not match."
             )
         model_dict = self.model_dump(mode="json")
         # ⬆️ Get dict of model fields from Pydantic model instance
         dataset_response = requests.post(
             f"{API_HOST}/dataset-optimization/dataset/",
             json={
-                **{
-                    k: model_dict[k]
-                    for k in model_dict.keys() - {"storage_integration"}
-                },
+                **{k: model_dict[k] for k in model_dict.keys() - {"storage_config"}},
                 "organization_id": organization_id,
                 "replace_if_exists": replace_if_exists,
             },
@@ -572,9 +582,9 @@ class OptimizationDataset(BaseModel):
 
     def clean_ids(self):
         """
-        Reset `dataset_id`, `storage_integration_id`, and `run_id` values on the instance to default value of `None`
+        Reset `dataset_id`, `storage_config_id`, and `run_id` values on the instance to default value of `None`
         """
-        self.storage_integration_id = None
+        self.storage_config_id = None
         self.id = None
         self.run_id = None
 
@@ -866,7 +876,7 @@ class DataOptimizationDatasetOut(BaseModel):
     name: str
     labeling_type: LabelingType
 
-    storage_integration: ResponseStorageIntegration
+    storage_config: ResponseStorageConfig
 
     data_root_url: HirundoUrl
 

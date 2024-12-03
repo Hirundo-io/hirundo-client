@@ -6,7 +6,7 @@ from hirundo import (
     HirundoCSV,
     LabelingType,
     OptimizationDataset,
-    StorageIntegration,
+    StorageConfig,
     StorageS3,
     StorageTypes,
 )
@@ -28,7 +28,7 @@ s3_bucket = StorageS3(
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS cifar10 classification dataset{unique_id}",
     labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
-    storage_integration=StorageIntegration(
+    storage_config=StorageConfig(
         name=f"cifar10bucket{unique_id}",
         type=StorageTypes.S3,
         s3=s3_bucket,
