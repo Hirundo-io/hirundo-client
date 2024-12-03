@@ -300,6 +300,17 @@ class OptimizationDataset(BaseModel):
             and self.language is not None
         ):
             raise ValueError("Language is only allowed for Speech-to-Text datasets.")
+        if (
+            self.labeling_info.type == DatasetMetadataType.YOLO
+            and isinstance(self.labeling_info, YOLO)
+            and (
+                self.labeling_info.data_yaml_url is not None
+                and self.classes is not None
+            )
+        ):
+            raise ValueError(
+                "Only one of `classes` or `labeling_info.data_yaml_url` should be provided for YOLO datasets"
+            )
         return self
 
     @staticmethod
