@@ -3,12 +3,13 @@ import os
 
 import pytest
 from hirundo import (
-    LabellingType,
+    HirundoCSV,
+    LabelingType,
     OptimizationDataset,
-    StorageIntegration,
-    StorageLink,
+    StorageConfig,
     StorageS3,
     StorageTypes,
+    VisionRunArgs,
 )
 from tests.dataset_optimization_shared import (
     cleanup,
@@ -20,23 +21,26 @@ from tests.dataset_optimization_shared import (
 logger = logging.getLogger(__name__)
 
 unique_id = get_unique_id()
+s3_bucket = StorageS3(
+    bucket_url="s3://hirundo-open-source-datasets",
+    region_name="il-central-1",
+    access_key_id=os.environ["AWS_ACCESS_KEY"],
+    secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+)
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS-BDD-100k-subset-1000-OD-dataset{unique_id}",
-    labelling_type=LabellingType.OBJECT_DETECTION,
-    dataset_storage=StorageLink(
-        storage_integration=StorageIntegration(
-            name=f"AWS-open-source-datasets-sanity{unique_id}",
-            type=StorageTypes.S3,
-            s3=StorageS3(
-                bucket_url="s3://hirundo-open-source-datasets",
-                region_name="il-central-1",
-                access_key_id=os.environ["AWS_ACCESS_KEY"],
-                secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
-            ),
-        ),
-        path="/bdd100k_subset_1000_hirundo.zip/bdd100k",
+    labeling_type=LabelingType.OBJECT_DETECTION,
+    storage_config=StorageConfig(
+        name=f"AWS-open-source-datasets-sanity{unique_id}",
+        type=StorageTypes.S3,
+        s3=s3_bucket,
     ),
-    dataset_metadata_path="bdd100k.csv",
+    labeling_info=HirundoCSV(
+        csv_url=s3_bucket.get_url(
+            path="/bdd100k_subset_1000_hirundo.zip/bdd100k/bdd100k.csv"
+        ),
+    ),
+    data_root_url=s3_bucket.get_url(path="/bdd100k_subset_1000_hirundo.zip/bdd100k"),
     classes=[
         "traffic light",
         "traffic sign",
@@ -64,12 +68,19 @@ def cleanup_tests():
 
 def test_dataset_optimization():
     full_run = dataset_optimization_sync_test(
-        test_dataset, sanity=True, alternative_env="RUN_OD_AWS_SANITY_OPTIMIZATION"
+        test_dataset,
+        sanity=True,
+        alternative_env="RUN_OD_AWS_SANITY_OPTIMIZATION",
+        run_args=VisionRunArgs(
+            upsample=True,
+            min_abs_bbox_size=10,
+            min_abs_bbox_area=100,
+        ),
     )
     if full_run is not None:
-        assert full_run.warnings_and_errors.size == 0
+        assert full_run.warnings_and_errors.shape[0] == 120
         logger.info("Warnings and errors count: %s", full_run.warnings_and_errors.size)
-        assert full_run.suspects.shape[0] == 1_250
+        assert full_run.suspects.shape[0] == 1_130
         # TODO: Add more assertions for results
     else:
         logger.info("Full dataset optimization was not run!")

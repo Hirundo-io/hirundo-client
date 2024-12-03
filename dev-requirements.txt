@@ -130,8 +130,10 @@ pkginfo==1.10.0
     # via
     #   -c requirements.txt
     #   twine
-platformdirs==4.2.2
-    # via virtualenv
+platformdirs==4.3.6
+    # via
+    #   hirundo (pyproject.toml)
+    #   virtualenv
 pluggy==1.5.0
     # via pytest
 pre-commit==3.7.1

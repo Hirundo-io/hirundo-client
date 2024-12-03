@@ -7,7 +7,7 @@ packages = ["hirundo"]
 
 [project]
 name = "hirundo"
-version = "0.1.8"
+version = "0.1.9b1"
 description = "This package is used to interface with Hirundo's platform. It provides a simple API to optimize your ML datasets."
 authors = [{ name = "Hirundo", email = "dev@hirundo.io" }]
 readme = "README.md"
@@ -64,6 +64,7 @@ dev = [
     "pre-commit>=3.7.1",
     "ruff==0.6.5",
     "bumpver",
+    "platformdirs>=4.3.6"
 ]
 docs = [
     "sphinx>=7.4.7",
@@ -75,6 +76,7 @@ docs = [
     "furo",
     "sphinx-multiversion",
     "starlette>0.40.0",
+    "esbonio",
 ]
 
 [tool.bumpver]
