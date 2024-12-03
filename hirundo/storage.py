@@ -63,14 +63,16 @@ class StorageGCPOut(StorageGCPBase):
 #     container_name: str
 #     tenant_id: str
 #
-#     def get_url(self, path: typing.Union[str, Path]):
-#         return f"{str(self.account_url)}/{self.container_nam}/{path}"
+#     def get_url(self, path: typing.Union[str, Path]) -> Url:
+#         return Url(f"{str(self.account_url)}/{self.container_nam}/{str(path).removeprefix('/')}")
 # class StorageAzureOut(BaseModel):
 #     container: str
 #     account_url: str
 
 
-def get_git_repo_url(repo_url: typing.Union[str, Url], path: typing.Union[str, Path]):
+def get_git_repo_url(
+    repo_url: typing.Union[str, Url], path: typing.Union[str, Path]
+) -> Url:
     if not isinstance(repo_url, Url):
         repo_url = Url(repo_url)
     return Url(
@@ -100,7 +102,7 @@ class StorageGit(BaseModel):
             raise ValueError("Either repo_id or repo must be provided")
         return self
 
-    def get_url(self, path: typing.Union[str, Path]):
+    def get_url(self, path: typing.Union[str, Path]) -> Url:
         if not self.repo:
             raise ValueError("Repo must be provided to use `get_url`")
         repo_url = self.repo.repository_url
@@ -111,7 +113,7 @@ class StorageGitOut(BaseModel):
     repo: GitRepoOut
     branch: str
 
-    def get_url(self, path: typing.Union[str, Path]):
+    def get_url(self, path: typing.Union[str, Path]) -> Url:
         repo_url = self.repo.repository_url
         return get_git_repo_url(repo_url, path)
 
