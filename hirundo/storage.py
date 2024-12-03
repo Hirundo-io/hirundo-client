@@ -258,7 +258,7 @@ class StorageConfig(BaseModel):
             storage_config_id: The ID of the `StorageConfig` to retrieve
         """
         storage_config = requests.get(
-            f"{API_HOST}/storage-integration/{storage_config_id}",
+            f"{API_HOST}/storage-config/{storage_config_id}",
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
@@ -277,7 +277,7 @@ class StorageConfig(BaseModel):
             Note: The type is required because the name is not unique across different storage types
         """
         storage_config = requests.get(
-            f"{API_HOST}/storage-integration/by-name/{name}?storage_type={storage_type.value}",
+            f"{API_HOST}/storage-config/by-name/{name}?storage_type={storage_type.value}",
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
@@ -297,8 +297,8 @@ class StorageConfig(BaseModel):
             If not provided, it will list `StorageConfig`'s for the default organization.
         """
         storage_configs = requests.get(
-            f"{API_HOST}/storage-integration/",
-            params={"storage_integration_organization_id": organization_id},
+            f"{API_HOST}/storage-config/",
+            params={"storage_config_organization_id": organization_id},
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
@@ -314,7 +314,7 @@ class StorageConfig(BaseModel):
             storage_config_id: The ID of the `StorageConfig` to delete
         """
         storage_config = requests.delete(
-            f"{API_HOST}/storage-integration/{storage_config_id}",
+            f"{API_HOST}/storage-config/{storage_config_id}",
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
@@ -339,7 +339,7 @@ class StorageConfig(BaseModel):
         if self.git and self.git.repo:
             self.git.repo_id = self.git.repo.create(replace_if_exists=replace_if_exists)
         storage_config = requests.post(
-            f"{API_HOST}/storage-integration/",
+            f"{API_HOST}/storage-config/",
             json={
                 **self.model_dump(mode="json"),
                 "replace_if_exists": replace_if_exists,
