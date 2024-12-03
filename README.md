@@ -5,7 +5,7 @@ This package exposes access to Hirundo APIs for dataset optimization for Machine
 Dataset optimization is currently available for datasets labelled for classification and object detection.
 
 
-Support dataset storage integrations include:
+Support dataset storage configs include:
    - Google Cloud (GCP) Storage
    - Amazon Web Services (AWS) S3
    - Git LFS (Large File Storage) repositories (e.g. GitHub or HuggingFace)
@@ -52,7 +52,7 @@ from hirundo import (
     LabelingType,
     OptimizationDataset,
     StorageGCP,
-    StorageIntegration,
+    StorageConfig,
     StorageTypes,
 )
 
@@ -64,7 +64,7 @@ gcp_bucket = StorageGCP(
 test_dataset = OptimizationDataset(
     name="TEST-GCP cifar 100 classification dataset",
     labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
-    storage_integration=StorageIntegration(
+    storage_config=StorageConfig(
         name="cifar100bucket",
         type=StorageTypes.GCP,
         gcp=gcp_bucket,
@@ -91,7 +91,7 @@ from hirundo import (
     LabelingType,
     OptimizationDataset,
     StorageGit,
-    StorageIntegration,
+    StorageConfig,
     StorageTypes,
 )
 
@@ -105,7 +105,7 @@ git_storage = StorageGit(
 test_dataset = OptimizationDataset(
     name="TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset",
     labeling_type=LabelingType.OBJECT_DETECTION,
-    storage_integration=StorageIntegration(
+    storage_config=StorageConfig(
         name="BDD-100k-validation-dataset",
         type=StorageTypes.GIT,
         git=git_storage,

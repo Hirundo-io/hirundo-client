@@ -8,21 +8,21 @@ from hirundo import (
     HirundoCSV,
     LabelingType,
     OptimizationDataset,
+    StorageConfig,
     StorageGCP,
     StorageGit,
-    StorageIntegration,
     StorageTypes,
 )
 from tests.dataset_optimization_shared import get_unique_id
 
 unique_id = get_unique_id()
-gcp_storage_integration_name = f"T-cifar1bucket_get_by_name{unique_id}"
+gcp_storage_config_name = f"T-cifar1bucket_get_by_name{unique_id}"
 gcp_optimization_dataset_name = f"T-cifar1_get_by_name{unique_id}"
-git_storage_integration_name = f"T-BDD-100k-validation-git_get_by_name{unique_id}"
+git_storage_config_name = f"T-BDD-100k-validation-git_get_by_name{unique_id}"
 git_repository_name = f"T-BDD-100k-validation-git-repo_get_by_name{unique_id}"
 git_optimization_dataset_name = f"T-BDD-100k-validation-dataset_get_by_name{unique_id}"
 
-new_storage_integration: typing.Optional[StorageIntegration] = None
+new_storage_config: typing.Optional[StorageConfig] = None
 new_dataset = None
 
 
@@ -31,19 +31,15 @@ def cleanup_tests():
     yield
     if new_dataset:
         new_dataset.delete()
-    if (
-        new_storage_integration
-        and new_storage_integration.git
-        and new_storage_integration.git.repo
-    ):
-        new_storage_integration.git.repo.delete()
-    if new_storage_integration:
-        new_storage_integration.delete()
+    if new_storage_config and new_storage_config.git and new_storage_config.git.repo:
+        new_storage_config.git.repo.delete()
+    if new_storage_config:
+        new_storage_config.delete()
 
 
 def test_get_by_name_gcp():
-    StorageIntegration(
-        name=gcp_storage_integration_name,
+    StorageConfig(
+        name=gcp_storage_config_name,
         type=StorageTypes.GCP,
         gcp=StorageGCP(
             bucket_name="cifar1bucket",
@@ -52,18 +48,18 @@ def test_get_by_name_gcp():
         ),
     ).create(replace_if_exists=True)
 
-    new_storage_integration = StorageIntegration.get_by_name(
-        gcp_storage_integration_name, StorageTypes.GCP
+    new_storage_config = StorageConfig.get_by_name(
+        gcp_storage_config_name, StorageTypes.GCP
     )
 
-    assert new_storage_integration is not None
-    assert new_storage_integration.gcp is not None
-    storage_gcp = new_storage_integration.gcp
+    assert new_storage_config is not None
+    assert new_storage_config.gcp is not None
+    storage_gcp = new_storage_config.gcp
 
     OptimizationDataset(
         name=gcp_optimization_dataset_name,
         labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
-        storage_integration_id=new_storage_integration.id,
+        storage_config=new_storage_config,
         labeling_info=HirundoCSV(
             csv_url=storage_gcp.get_url("/pytorch-cifar/data/cifar1.csv"),
         ),
@@ -75,8 +71,8 @@ def test_get_by_name_gcp():
 
 
 def test_get_by_name_git():
-    StorageIntegration(
-        name=git_storage_integration_name,
+    StorageConfig(
+        name=git_storage_config_name,
         type=StorageTypes.GIT,
         git=StorageGit(
             repo=GitRepo(
@@ -86,18 +82,18 @@ def test_get_by_name_git():
             branch="main",
         ),
     ).create(replace_if_exists=True)
-    new_storage_integration = StorageIntegration.get_by_name(
-        git_storage_integration_name, StorageTypes.GIT
+    new_storage_config = StorageConfig.get_by_name(
+        git_storage_config_name, StorageTypes.GIT
     )
 
-    assert new_storage_integration is not None
-    assert new_storage_integration.git is not None
-    storage_git = new_storage_integration.git
+    assert new_storage_config is not None
+    assert new_storage_config.git is not None
+    storage_git = new_storage_config.git
 
     OptimizationDataset(
         name=git_optimization_dataset_name,
         labeling_type=LabelingType.OBJECT_DETECTION,
-        storage_integration_id=new_storage_integration.id,
+        storage_config=new_storage_config,
         labeling_info=HirundoCSV(
             csv_url=storage_git.get_url(
                 path="/BDD100K Val from Hirundo.zip/bdd100k/bdd100k.csv"

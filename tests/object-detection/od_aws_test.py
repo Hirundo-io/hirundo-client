@@ -6,7 +6,7 @@ from hirundo import (
     HirundoCSV,
     LabelingType,
     OptimizationDataset,
-    StorageIntegration,
+    StorageConfig,
     StorageS3,
     StorageTypes,
 )
@@ -28,7 +28,7 @@ s3_bucket = StorageS3(
 test_dataset = OptimizationDataset(
     name=f"TEST-AWS-BDD-100k-validation-OD-dataset{unique_id}",
     labeling_type=LabelingType.OBJECT_DETECTION,
-    storage_integration=StorageIntegration(
+    storage_config=StorageConfig(
         name=f"AWS-open-source-datasets{unique_id}",
         type=StorageTypes.S3,
         s3=s3_bucket,

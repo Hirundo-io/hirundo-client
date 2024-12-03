@@ -6,8 +6,8 @@ from hirundo import (
     HirundoCSV,
     LabelingType,
     OptimizationDataset,
+    StorageConfig,
     StorageGit,
-    StorageIntegration,
     StorageTypes,
 )
 from tests.dataset_optimization_shared import (
@@ -29,7 +29,7 @@ git_storage = StorageGit(
 test_dataset = OptimizationDataset(
     name=f"TEST-HuggingFace-BDD-100k-validation-OD-validation-dataset{unique_id}",
     labeling_type=LabelingType.OBJECT_DETECTION,
-    storage_integration=StorageIntegration(
+    storage_config=StorageConfig(
         name=f"BDD-100k-validation-dataset{unique_id}",
         type=StorageTypes.GIT,
         git=git_storage,

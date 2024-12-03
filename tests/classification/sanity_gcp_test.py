@@ -7,8 +7,8 @@ from hirundo import (
     HirundoCSV,
     LabelingType,
     OptimizationDataset,
+    StorageConfig,
     StorageGCP,
-    StorageIntegration,
     StorageTypes,
 )
 from hirundo.dataset_optimization import AugmentationNames
@@ -30,7 +30,7 @@ gcp_bucket = StorageGCP(
 test_dataset = OptimizationDataset(
     name=f"TEST-GCP sanity dataset{unique_id}",
     labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
-    storage_integration=StorageIntegration(
+    storage_config=StorageConfig(
         name=f"cifar1bucket{unique_id}",
         type=StorageTypes.GCP,
         gcp=gcp_bucket,

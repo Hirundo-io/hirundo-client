@@ -7,8 +7,8 @@ from hirundo import (
     HirundoCSV,
     LabelingType,
     OptimizationDataset,
+    StorageConfig,
     StorageGit,
-    StorageIntegration,
     StorageTypes,
 )
 from hirundo.git import GitPlainAuthBase
@@ -36,7 +36,7 @@ test_dataset = OptimizationDataset(
     name=f"TEST-STT-RoboShaulTiny-dataset{unique_id}",
     labeling_type=LabelingType.SPEECH_TO_TEXT,
     language="he",
-    storage_integration=StorageIntegration(
+    storage_config=StorageConfig(
         name=f"STT-RoboShaulTiny-dataset{unique_id}",
         type=StorageTypes.GIT,
         git=test_storage_git,

@@ -7,8 +7,8 @@ from hirundo import (
     COCO,
     LabelingType,
     OptimizationDataset,
+    StorageConfig,
     StorageGCP,
-    StorageIntegration,
     StorageTypes,
 )
 from tests.dataset_optimization_shared import (
@@ -29,7 +29,7 @@ gcp_bucket = StorageGCP(
 test_dataset = OptimizationDataset(
     name=f"TEST-GCP sanity COCO dataset{unique_id}",
     labeling_type=LabelingType.OBJECT_DETECTION,
-    storage_integration=StorageIntegration(
+    storage_config=StorageConfig(
         name=f"sama-coco-{unique_id}",
         type=StorageTypes.GCP,
         gcp=gcp_bucket,

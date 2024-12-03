@@ -12,7 +12,7 @@ S3BucketUrl = Annotated[
     ),
 ]
 
-StorageIntegrationName = Annotated[
+StorageConfigName = Annotated[
     str,
     StringConstraints(
         min_length=1,
