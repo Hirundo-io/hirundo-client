@@ -745,13 +745,15 @@ class OptimizationDataset(BaseModel):
                         and iteration["result"]["result"]
                         and isinstance(iteration["result"]["result"], str)
                     ):
+                        result_info = iteration["result"]["result"].split(":")
+                        stage = result_info[0]
                         current_progress_percentage = float(
-                            iteration["result"]["result"].removesuffix("% done")
+                            result_info[1].removeprefix(" ").removesuffix("% done")
                         )
                         desc = (
                             "Optimization run completed. Uploading results"
                             if current_progress_percentage == 100.0
-                            else "Optimization run in progress"
+                            else stage
                         )
                         t.set_description(desc)
                         t.n = current_progress_percentage
