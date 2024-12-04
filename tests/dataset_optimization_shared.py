@@ -156,7 +156,7 @@ def dataset_optimization_sync_test(
         alternative_env and os.getenv(alternative_env, "false") == "true"
     ):
         run_id = test_dataset.run_optimization(
-            replace_if_exists=True, run_args=run_args
+            replace_dataset_if_exists=True, run_args=run_args
         )
         logger.info("Sync: Started dataset optimization run with run ID %s", run_id)
         logger.info("Sync: Checking run progress")
@@ -177,7 +177,7 @@ async def dataset_optimization_async_test(
     logger.info("Async: Finished cleanup")
     if os.getenv(env, "false") == "true":
         run_id = test_dataset.run_optimization(
-            replace_if_exists=True, run_args=run_args
+            replace_dataset_if_exists=True, run_args=run_args
         )
         logger.info("Async: Started dataset optimization run with run ID %s", run_id)
         events_generator = test_dataset.acheck_run()

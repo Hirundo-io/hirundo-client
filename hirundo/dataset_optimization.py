@@ -544,19 +544,25 @@ class OptimizationDataset(BaseModel):
     def run_optimization(
         self,
         organization_id: typing.Optional[int] = None,
-        replace_if_exists: bool = False,
+        replace_dataset_if_exists: bool = False,
         run_args: typing.Optional[RunArgs] = None,
     ) -> str:
         """
         If the dataset was not created on the server yet, it is created.
         Run the dataset optimization process on the server using the active `OptimizationDataset` instance
 
+        Args:
+            organization_id: The ID of the organization to run the optimization for.
+            replace_dataset_if_exists: If True, the dataset will be replaced if it already exists
+                (this is determined by a dataset of the same name in the same organization).
+            run_args: The run arguments to use for the optimization run
+
         Returns:
             An ID of the run (`run_id`) and stores that `run_id` on the instance
         """
         try:
             if not self.id:
-                self.id = self.create(replace_if_exists=replace_if_exists)
+                self.id = self.create(replace_if_exists=replace_dataset_if_exists)
             if run_args is not None:
                 self._validate_run_args(run_args)
             run_id = self.launch_optimization_run(self.id, organization_id, run_args)
