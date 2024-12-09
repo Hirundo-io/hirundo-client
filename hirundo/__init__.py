@@ -1,35 +1,43 @@
 from .dataset_optimization import (
+    COCO,
+    YOLO,
+    HirundoCSV,
     HirundoError,
     OptimizationDataset,
+    RunArgs,
+    VisionRunArgs,
 )
 from .enum import (
     DatasetMetadataType,
-    LabellingType,
+    LabelingType,
 )
 from .git import GitRepo
 from .storage import (
+    StorageConfig,
     StorageGCP,
-    # StorageAzure,  TODO: Azure storage integration is coming soon
+    # StorageAzure,  TODO: Azure storage is coming soon
     StorageGit,
-    StorageIntegration,
-    StorageLink,
     StorageS3,
     StorageTypes,
 )
 
 __all__ = [
+    "COCO",
+    "YOLO",
+    "HirundoCSV",
     "HirundoError",
     "OptimizationDataset",
-    "LabellingType",
+    "RunArgs",
+    "VisionRunArgs",
+    "LabelingType",
     "DatasetMetadataType",
     "GitRepo",
-    "StorageLink",
     "StorageTypes",
     "StorageS3",
     "StorageGCP",
-    # "StorageAzure",  TODO: Azure storage integration is coming soon
+    # "StorageAzure",  TODO: Azure storage is coming soon
     "StorageGit",
-    "StorageIntegration",
+    "StorageConfig",
 ]
 
-__version__ = "0.1.8"
+__version__ = "0.1.9b1"

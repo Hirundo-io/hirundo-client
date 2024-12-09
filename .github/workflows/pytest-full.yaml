@@ -22,6 +22,8 @@ jobs:
             env: RUN_AWS_OD_OPTIMIZATION
           - test: object-detection/od_git_test.py
             env: RUN_OD_GIT_OPTIMIZATION
+          - test: tests/object-detection/sama_coco_test.py
+            env: RUN_COCO_OD_GCP_SANITY_OPTIMIZATION
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
