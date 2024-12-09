@@ -753,8 +753,10 @@ class OptimizationDataset(BaseModel):
                             )
                         elif len(result_info) == 1:
                             stage = result_info[0]
+                            current_progress_percentage = t.n  # Keep the same progress
                         else:
                             stage = "Unknown progress state"
+                            current_progress_percentage = t.n  # Keep the same progress
                         desc = (
                             "Optimization run completed. Uploading results"
                             if current_progress_percentage == 100.0
