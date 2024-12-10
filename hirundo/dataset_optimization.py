@@ -179,21 +179,22 @@ class VisionRunArgs(BaseModel):
     """
     min_abs_bbox_size: int = 0
     """
-    Minimum absolute size (in pixels) of a bounding box to keep it in the dataset for optimization.
+    Minimum valid size (in pixels) of a bounding box to keep it in the dataset for optimization.
     """
     min_abs_bbox_area: int = 0
     """
-    Minimum absolute area (in pixels²) of a bounding box to keep it in the dataset for optimization.
+    Minimum valid absolute area (in pixels²) of a bounding box to keep it in the dataset for optimization.
     """
     min_rel_bbox_size: float = 0.0
     """
-    Minimum relative size (as a fraction of both image height and width) of a bounding box to keep it in the dataset for optimization.
+    Minimum valid size (as a fraction of both image height and width) for a bounding box
+    to keep it in the dataset for optimization, relative to the corresponding dimension size,
     i.e. if the bounding box is 10% of the image width and 5% of the image height, it will be kept if this value is 0.05, but not if the
     value is 0.06 (since both width and height are checked).
     """
     min_rel_bbox_area: float = 0.0
     """
-    Minimum relative area (as a fraction of the image area) of a bounding box to keep it in the dataset for optimization.
+    Minimum valid relative area (as a fraction of the image area) of a bounding box to keep it in the dataset for optimization.
     """
 
 
