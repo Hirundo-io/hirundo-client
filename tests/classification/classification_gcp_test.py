@@ -4,11 +4,11 @@ import os
 
 import pytest
 from hirundo import (
-    LabellingType,
+    HirundoCSV,
+    LabelingType,
     OptimizationDataset,
+    StorageConfig,
     StorageGCP,
-    StorageIntegration,
-    StorageLink,
     StorageTypes,
 )
 from tests.classification.cifar100_classes import cifar100_classes
@@ -21,22 +21,23 @@ from tests.dataset_optimization_shared import (
 logger = logging.getLogger(__name__)
 
 unique_id = get_unique_id()
+gcp_bucket = StorageGCP(
+    bucket_name="cifar100bucket",
+    project="Hirundo-global",
+    credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
+)
 test_dataset = OptimizationDataset(
     name=f"TEST-GCP cifar 100 classification dataset{unique_id}",
-    labelling_type=LabellingType.SINGLE_LABEL_CLASSIFICATION,
-    dataset_storage=StorageLink(
-        storage_integration=StorageIntegration(
-            name=f"cifar100bucket{unique_id}",
-            type=StorageTypes.GCP,
-            gcp=StorageGCP(
-                bucket_name="cifar100bucket",
-                project="Hirundo-global",
-                credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
-            ),
-        ),
-        path="/pytorch-cifar/data",
+    labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
+    storage_config=StorageConfig(
+        name=f"cifar100bucket{unique_id}",
+        type=StorageTypes.GCP,
+        gcp=gcp_bucket,
     ),
-    dataset_metadata_path="cifar100.csv",
+    data_root_url=gcp_bucket.get_url(path="/pytorch-cifar/data"),
+    labeling_info=HirundoCSV(
+        csv_url=gcp_bucket.get_url(path="/pytorch-cifar/data/cifar100.csv"),
+    ),
     classes=cifar100_classes,
 )
 
