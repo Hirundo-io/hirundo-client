@@ -60,11 +60,12 @@ dev = [
     "httpx-sse>=0.4.0",
     "pytest>=8.2.0",
     "pytest-asyncio>=0.23.6",
-    "uv",
+    "uv>=0.5.8",
     "pre-commit>=3.7.1",
-    "ruff==0.6.5",
+    "ruff>=0.8.2",
     "bumpver",
-    "platformdirs>=4.3.6"
+    "platformdirs>=4.3.6",
+    "safety>=3.2.13",
 ]
 docs = [
     "sphinx>=7.4.7",
@@ -75,8 +76,10 @@ docs = [
     "autodoc_pydantic>=2.2.0",
     "furo",
     "sphinx-multiversion",
-    "starlette>0.40.0",
     "esbonio",
+    "starlette>0.40.0",
+    "markupsafe>=3.0.2",
+    #  Force `starlette` and `markupsafe` to versions compatible with `dev` dependencies.
 ]
 
 [tool.bumpver]

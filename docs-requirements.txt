@@ -118,8 +118,10 @@ markdown-it-py==3.0.0
     # via
     #   -c requirements.txt
     #   rich
-markupsafe==2.1.5
-    # via jinja2
+markupsafe==3.0.2
+    # via
+    #   hirundo (pyproject.toml)
+    #   jinja2
 mdurl==0.1.2
     # via
     #   -c requirements.txt
