@@ -316,7 +316,9 @@ urllib3==2.2.2
 uv==0.5.8
     # via hirundo (pyproject.toml)
 virtualenv==20.26.3
-    # via pre-commit
+    # via
+    #   hirundo (pyproject.toml)
+    #   pre-commit
 zipp==3.19.2
     # via
     #   -c requirements.txt

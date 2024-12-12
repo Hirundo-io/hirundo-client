@@ -62,6 +62,8 @@ dev = [
     "pytest-asyncio>=0.23.6",
     "uv>=0.5.8",
     "pre-commit>=3.7.1",
+    "virtualenv>=20.6.6",
+    #  ⬆️ Needed for `pre-commit` and locking version for `safety-cli`
     "ruff>=0.8.2",
     "bumpver",
     "platformdirs>=4.3.6",
