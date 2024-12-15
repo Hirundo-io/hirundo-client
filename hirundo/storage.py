@@ -28,6 +28,18 @@ class StorageS3Base(BaseModel):
     access_key_id: typing.Optional[str] = None
 
     def get_url(self, path: typing.Union[str, Path]) -> Url:
+        """
+        Get the full URL for a file in the S3 bucket
+
+        Chains the bucket URL with the path, ensuring that the path is formatted correctly
+
+        Args:
+            - path: The path to the file in the S3 bucket, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+        Returns:
+            The full URL to the file in the S3 bucket, e.g. `s3://my-bucket/my-file.txt` or `s3://my-bucket/my-folder/my-file.txt`,
+            where `s3://my-bucket` is the bucket URL provided in the S3 storage config
+        """
         return Url(
             f"{S3_PREFIX}{self.bucket_url.removeprefix(S3_PREFIX).removesuffix('/')}/{str(path).removeprefix('/')}"
         )
@@ -46,6 +58,18 @@ class StorageGCPBase(BaseModel):
     project: str
 
     def get_url(self, path: typing.Union[str, Path]) -> Url:
+        """
+        Get the full URL for a file in the GCP bucket
+
+        Chains the bucket URL with the path, ensuring that the path is formatted correctly
+
+        Args:
+            - path: The path to the file in the GCP bucket, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+        Returns:
+            The full URL to the file in the GCP bucket, e.g. `gs://my-bucket/my-file.txt` or `gs://my-bucket/my-folder/my-file.txt`,
+            where `my-bucket` is the bucket name provided in the GCP storage config
+        """
         return Url(f"gs://{self.bucket_name}/{str(path).removeprefix('/')}")
 
 
@@ -62,9 +86,20 @@ class StorageGCPOut(StorageGCPBase):
 #     account_url: HttpUrl
 #     container_name: str
 #     tenant_id: str
-#
+
 #     def get_url(self, path: typing.Union[str, Path]) -> Url:
-#         return Url(f"{str(self.account_url)}/{self.container_nam}/{str(path).removeprefix('/')}")
+#         """
+#         Get the full URL for a file in the Azure container
+
+#         Chains the container URL with the path, ensuring that the path is formatted correctly
+
+#         Args:
+#             - path: The path to the file in the Azure container, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+#         Returns:
+#             The full URL to the file in the Azure container
+#         """
+#         return Url(f"{str(self.account_url)}/{self.container_name}/{str(path).removeprefix('/')}")
 # class StorageAzureOut(BaseModel):
 #     container: str
 #     account_url: str
@@ -73,6 +108,18 @@ class StorageGCPOut(StorageGCPBase):
 def get_git_repo_url(
     repo_url: typing.Union[str, Url], path: typing.Union[str, Path]
 ) -> Url:
+    """
+    Get the full URL for a file in the git repository
+
+    Chains the repository URL with the path, ensuring that the path is formatted correctly
+
+    Args:
+        - repo_url: The URL of the git repository, e.g. `https://my-git-repository.com`
+        - path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+    Returns:
+        The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`
+    """
     if not isinstance(repo_url, Url):
         repo_url = Url(repo_url)
     return Url(
@@ -103,6 +150,18 @@ class StorageGit(BaseModel):
         return self
 
     def get_url(self, path: typing.Union[str, Path]) -> Url:
+        """
+        Get the full URL for a file in the git repository
+
+        Chains the repository URL with the path, ensuring that the path is formatted correctly
+
+        Args:
+            - path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+        Returns:
+            The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`,
+            where `https://my-git-repository.com` is the repository URL provided in the git storage config's git repo
+        """
         if not self.repo:
             raise ValueError("Repo must be provided to use `get_url`")
         repo_url = self.repo.repository_url
@@ -114,6 +173,18 @@ class StorageGitOut(BaseModel):
     branch: str
 
     def get_url(self, path: typing.Union[str, Path]) -> Url:
+        """
+        Get the full URL for a file in the git repository
+
+        Chains the repository URL with the path, ensuring that the path is formatted correctly
+
+        Args:
+            - path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+        Returns:
+            The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`,
+            where `https://my-git-repository.com` is the repository URL provided in the git storage config's git repo
+        """
         repo_url = self.repo.repository_url
         return get_git_repo_url(repo_url, path)
 
