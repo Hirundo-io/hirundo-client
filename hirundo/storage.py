@@ -1,42 +1,130 @@
 import typing
 from enum import Enum
+from pathlib import Path
 
 import pydantic
 import requests
 from pydantic import BaseModel, model_validator
 from pydantic_core import Url
 
-from hirundo._constraints import S3BucketUrl, StorageIntegrationName
+from hirundo._constraints import S3BucketUrl, StorageConfigName
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
-from hirundo.git import GitRepo
+from hirundo.git import GitRepo, GitRepoOut
 from hirundo.logger import get_logger
 
 logger = get_logger(__name__)
 
+S3_PREFIX = "s3://"
 
-class StorageS3(BaseModel):
+
+class StorageS3Base(BaseModel):
     endpoint_url: typing.Optional[Url] = None
     bucket_url: S3BucketUrl
     region_name: str
     # ⬆️ We could restrict this, but if we're allowing custom endpoints then the validation may be wrong
     access_key_id: typing.Optional[str] = None
+
+    def get_url(self, path: typing.Union[str, Path]) -> Url:
+        """
+        Get the full URL for a file in the S3 bucket
+
+        Chains the bucket URL with the path, ensuring that the path is formatted correctly
+
+        Args:
+            - path: The path to the file in the S3 bucket, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+        Returns:
+            The full URL to the file in the S3 bucket, e.g. `s3://my-bucket/my-file.txt` or `s3://my-bucket/my-folder/my-file.txt`,
+            where `s3://my-bucket` is the bucket URL provided in the S3 storage config
+        """
+        return Url(
+            f"{S3_PREFIX}{self.bucket_url.removeprefix(S3_PREFIX).removesuffix('/')}/{str(path).removeprefix('/')}"
+        )
+
+
+class StorageS3(StorageS3Base):
     secret_access_key: typing.Optional[str] = None
 
 
-class StorageGCP(BaseModel):
+class StorageS3Out(StorageS3Base):
+    pass
+
+
+class StorageGCPBase(BaseModel):
     bucket_name: str
     project: str
+
+    def get_url(self, path: typing.Union[str, Path]) -> Url:
+        """
+        Get the full URL for a file in the GCP bucket
+
+        Chains the bucket URL with the path, ensuring that the path is formatted correctly
+
+        Args:
+            - path: The path to the file in the GCP bucket, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+        Returns:
+            The full URL to the file in the GCP bucket, e.g. `gs://my-bucket/my-file.txt` or `gs://my-bucket/my-folder/my-file.txt`,
+            where `my-bucket` is the bucket name provided in the GCP storage config
+        """
+        return Url(f"gs://{self.bucket_name}/{str(path).removeprefix('/')}")
+
+
+class StorageGCP(StorageGCPBase):
     credentials_json: typing.Optional[dict] = None
 
 
-# TODO: Azure storage integration is coming soon
+class StorageGCPOut(StorageGCPBase):
+    pass
+
+
+# TODO: Azure storage config is coming soon
 # class StorageAzure(BaseModel):
+#     account_url: HttpUrl
+#     container_name: str
+#     tenant_id: str
+
+#     def get_url(self, path: typing.Union[str, Path]) -> Url:
+#         """
+#         Get the full URL for a file in the Azure container
+
+#         Chains the container URL with the path, ensuring that the path is formatted correctly
+
+#         Args:
+#             - path: The path to the file in the Azure container, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+#         Returns:
+#             The full URL to the file in the Azure container
+#         """
+#         return Url(f"{str(self.account_url)}/{self.container_name}/{str(path).removeprefix('/')}")
+# class StorageAzureOut(BaseModel):
 #     container: str
-#     account_name: str
-#     account_key: str
+#     account_url: str
+
+
+def get_git_repo_url(
+    repo_url: typing.Union[str, Url], path: typing.Union[str, Path]
+) -> Url:
+    """
+    Get the full URL for a file in the git repository
+
+    Chains the repository URL with the path, ensuring that the path is formatted correctly
+
+    Args:
+        - repo_url: The URL of the git repository, e.g. `https://my-git-repository.com`
+        - path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+    Returns:
+        The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`
+    """
+    if not isinstance(repo_url, Url):
+        repo_url = Url(repo_url)
+    return Url(
+        f"{repo_url.scheme}{str(repo_url).removeprefix(repo_url.scheme)}/{str(path).removeprefix('/')}"
+    )
 
 
 class StorageGit(BaseModel):
@@ -61,46 +149,88 @@ class StorageGit(BaseModel):
             raise ValueError("Either repo_id or repo must be provided")
         return self
 
+    def get_url(self, path: typing.Union[str, Path]) -> Url:
+        """
+        Get the full URL for a file in the git repository
+
+        Chains the repository URL with the path, ensuring that the path is formatted correctly
+
+        Args:
+            - path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+        Returns:
+            The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`,
+            where `https://my-git-repository.com` is the repository URL provided in the git storage config's git repo
+        """
+        if not self.repo:
+            raise ValueError("Repo must be provided to use `get_url`")
+        repo_url = self.repo.repository_url
+        return get_git_repo_url(repo_url, path)
+
+
+class StorageGitOut(BaseModel):
+    repo: GitRepoOut
+    branch: str
+
+    def get_url(self, path: typing.Union[str, Path]) -> Url:
+        """
+        Get the full URL for a file in the git repository
+
+        Chains the repository URL with the path, ensuring that the path is formatted correctly
+
+        Args:
+            - path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+
+        Returns:
+            The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`,
+            where `https://my-git-repository.com` is the repository URL provided in the git storage config's git repo
+        """
+        repo_url = self.repo.repository_url
+        return get_git_repo_url(repo_url, path)
+
 
 class StorageTypes(str, Enum):
     """
-    Enum for the different types of storage integrations.
+    Enum for the different types of storage configs.
     Supported types are:
     """
 
     S3 = "S3"
     GCP = "GCP"
-    # AZURE = "Azure"  TODO: Azure storage integration is coming soon
+    # AZURE = "Azure"  TODO: Azure storage config is coming soon
     GIT = "Git"
     LOCAL = "Local"
     """
-    Local storage integration is only supported for on-premises installations.
+    Local storage config is only supported for on-premises installations.
     """
 
 
-class StorageIntegration(BaseModel):
+class StorageConfig(BaseModel):
     id: typing.Optional[int] = None
+    """
+    The ID of the `StorageConfig` in the Hirundo system.
+    """
 
     organization_id: typing.Optional[int] = None
     """
-    The ID of the organization that the `StorageIntegration` belongs to.
+    The ID of the organization that the `StorageConfig` belongs to.
     If not provided, it will be assigned to your default organization.
     """
 
-    name: StorageIntegrationName
+    name: StorageConfigName
     """
-    A name to identify the `StorageIntegration` in the Hirundo system.
+    A name to identify the `StorageConfig` in the Hirundo system.
     """
     type: typing.Optional[StorageTypes] = pydantic.Field(
         examples=[
             StorageTypes.S3,
             StorageTypes.GCP,
-            # StorageTypes.AZURE,  TODO: Azure storage integration is coming soon
+            # StorageTypes.AZURE,  TODO: Azure storage is coming soon
             StorageTypes.GIT,
         ]
     )
     """
-    The type of the `StorageIntegration`.
+    The type of the `StorageConfig`.
     Supported types are:
     - `S3`
     - `GCP`
@@ -122,7 +252,7 @@ class StorageIntegration(BaseModel):
         ],
     )
     """
-    The Amazon Web Services (AWS) S3 storage integration details.
+    The Amazon Web Services (AWS) S3 storage config details.
     Use this if you want to link to an S3 bucket.
     """
     gcp: typing.Optional[StorageGCP] = pydantic.Field(
@@ -151,7 +281,7 @@ class StorageIntegration(BaseModel):
         ],
     )
     """
-    The Google Cloud (GCP) Storage integration details.
+    The Google Cloud (GCP) Storage config details.
     Use this if you want to link to an GCS bucket.
     """
     azure: None = None
@@ -167,7 +297,7 @@ class StorageIntegration(BaseModel):
     #         },
     #         None,
     #     ],
-    # )  TODO: Azure storage integration is coming soon
+    # )  TODO: Azure storage config is coming soon
     git: typing.Optional[StorageGit] = pydantic.Field(
         default=None,
         examples=[
@@ -186,73 +316,116 @@ class StorageIntegration(BaseModel):
         ],
     )
     """
-    The Git storage integration details.
+    The Git storage config details.
     Use this if you want to link to a Git repository.
     """
 
     @staticmethod
-    def list(organization_id: typing.Optional[int] = None) -> list[dict]:
+    def get_by_id(storage_config_id: int) -> "ResponseStorageConfig":
         """
-        Lists all the `StorageIntegration`'s created by user's default organization
-        Note: The return type is `list[dict]` and not `list[StorageIntegration]`
+        Retrieves a `StorageConfig` instance from the server by its ID
 
         Args:
-            organization_id: The ID of the organization to list `StorageIntegration`'s for.
-            If not provided, it will list `StorageIntegration`'s for the default organization.
+            storage_config_id: The ID of the `StorageConfig` to retrieve
         """
-        storage_integrations = requests.get(
-            f"{API_HOST}/storage-integration/",
-            params={"storage_integration_organization_id": organization_id},
+        storage_config = requests.get(
+            f"{API_HOST}/storage-config/{storage_config_id}",
             headers=get_auth_headers(),
             timeout=READ_TIMEOUT,
         )
-        raise_for_status_with_reason(storage_integrations)
-        return storage_integrations.json()
+        raise_for_status_with_reason(storage_config)
+        return ResponseStorageConfig(**storage_config.json())
 
     @staticmethod
-    def delete_by_id(storage_integration_id) -> None:
+    def get_by_name(name: str, storage_type: StorageTypes) -> "ResponseStorageConfig":
         """
-        Deletes a `StorageIntegration` instance from the server by its ID
+        Retrieves a `StorageConfig` instance from the server by its name
 
         Args:
-            storage_integration_id: The ID of the `StorageIntegration` to delete
+            name: The name of the `StorageConfig` to retrieve
+            storage_type: The type of the `StorageConfig` to retrieve
+
+            Note: The type is required because the name is not unique across different storage types
         """
-        storage_integration = requests.delete(
-            f"{API_HOST}/storage-integration/{storage_integration_id}",
+        storage_config = requests.get(
+            f"{API_HOST}/storage-config/by-name/{name}?storage_type={storage_type.value}",
+            headers=get_auth_headers(),
+            timeout=READ_TIMEOUT,
+        )
+        raise_for_status_with_reason(storage_config)
+        return ResponseStorageConfig(**storage_config.json())
+
+    @staticmethod
+    def list(
+        organization_id: typing.Optional[int] = None,
+    ) -> list["ResponseStorageConfig"]:
+        """
+        Lists all the `StorageConfig`'s created by user's default organization
+        Note: The return type is `list[dict]` and not `list[StorageConfig]`
+
+        Args:
+            organization_id: The ID of the organization to list `StorageConfig`'s for.
+            If not provided, it will list `StorageConfig`'s for the default organization.
+        """
+        storage_configs = requests.get(
+            f"{API_HOST}/storage-config/",
+            params={"storage_config_organization_id": organization_id},
+            headers=get_auth_headers(),
+            timeout=READ_TIMEOUT,
+        )
+        raise_for_status_with_reason(storage_configs)
+        return [ResponseStorageConfig(**si) for si in storage_configs.json()]
+
+    @staticmethod
+    def delete_by_id(storage_config_id) -> None:
+        """
+        Deletes a `StorageConfig` instance from the server by its ID
+
+        Args:
+            storage_config_id: The ID of the `StorageConfig` to delete
+        """
+        storage_config = requests.delete(
+            f"{API_HOST}/storage-config/{storage_config_id}",
             headers=get_auth_headers(),
             timeout=MODIFY_TIMEOUT,
         )
-        raise_for_status_with_reason(storage_integration)
-        logger.info("Deleted storage integration with ID: %s", storage_integration_id)
+        raise_for_status_with_reason(storage_config)
+        logger.info("Deleted storage config with ID: %s", storage_config_id)
 
     def delete(self) -> None:
         """
-        Deletes the `StorageIntegration` instance from the server
+        Deletes the `StorageConfig` instance from the server
         """
         if not self.id:
-            raise ValueError("No StorageIntegration has been created")
+            raise ValueError("No StorageConfig has been created")
         self.delete_by_id(self.id)
 
-    def create(self) -> int:
+    def create(self, replace_if_exists: bool = False) -> int:
         """
-        Create a `StorageIntegration` instance on the server
+        Create a `StorageConfig` instance on the server
+
+        Args:
+            replace_if_exists: If a `StorageConfig` with the same name and type already exists, replace it.
         """
         if self.git and self.git.repo:
-            self.git.repo_id = self.git.repo.create()
-        storage_integration = requests.post(
-            f"{API_HOST}/storage-integration/",
-            json=self.model_dump(),
+            self.git.repo_id = self.git.repo.create(replace_if_exists=replace_if_exists)
+        storage_config = requests.post(
+            f"{API_HOST}/storage-config/",
+            json={
+                **self.model_dump(mode="json"),
+                "replace_if_exists": replace_if_exists,
+            },
             headers={
                 **json_headers,
                 **get_auth_headers(),
             },
             timeout=MODIFY_TIMEOUT,
         )
-        raise_for_status_with_reason(storage_integration)
-        storage_integration_id = storage_integration.json()["id"]
-        self.id = storage_integration_id
-        logger.info("Created storage integration with ID: %s", storage_integration_id)
-        return storage_integration_id
+        raise_for_status_with_reason(storage_config)
+        storage_config_id = storage_config.json()["id"]
+        self.id = storage_config_id
+        logger.info("Created storage config with ID: %s", storage_config_id)
+        return storage_config_id
 
     @model_validator(mode="after")
     def validate_storage_type(self):
@@ -281,15 +454,13 @@ class StorageIntegration(BaseModel):
         return self
 
 
-class StorageLink(BaseModel):
-    storage_integration: StorageIntegration
-    """
-    The `StorageIntegration` instance to link to.
-    """
-    path: str = "/"
-    """
-    Path for the `root` to link to within the `StorageIntegration` instance,
-    e.g. a prefix path/folder within an S3 Bucket / GCP Bucket / Azure Blob storage / Git repo.
-
-    Note: Only files in this path will be retrieved and it will be used as the root for paths in the CSV.
-    """
+class ResponseStorageConfig(BaseModel):
+    id: int
+    name: StorageConfigName
+    type: StorageTypes
+    organization_name: str
+    creator_name: str
+    s3: typing.Optional[StorageS3Out]
+    gcp: typing.Optional[StorageGCPOut]
+    # azure: typing.Optional[StorageAzureOut]
+    git: typing.Optional[StorageGitOut]

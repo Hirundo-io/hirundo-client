@@ -8,6 +8,8 @@ anyio==4.4.0
     # via
     #   -c requirements.txt
     #   httpx
+authlib==1.3.2
+    # via safety
 backports-tarfile==1.2.0
     # via
     #   -c requirements.txt
@@ -20,6 +22,8 @@ certifi==2024.7.4
     #   httpcore
     #   httpx
     #   requests
+cffi==1.17.1
+    # via cryptography
 cfgv==3.4.0
     # via pre-commit
 charset-normalizer==3.3.2
@@ -30,22 +34,31 @@ click==8.1.7
     # via
     #   -c requirements.txt
     #   bumpver
+    #   safety
     #   typer
 colorama==0.4.6
     # via bumpver
+cryptography==44.0.0
+    # via authlib
 distlib==0.3.8
     # via virtualenv
 docutils==0.21.2
     # via
     #   -c requirements.txt
     #   readme-renderer
+dparse==0.6.4
+    # via
+    #   safety
+    #   safety-schemas
 exceptiongroup==1.2.2
     # via
     #   -c requirements.txt
     #   anyio
     #   pytest
-filelock==3.15.4
-    # via virtualenv
+filelock==3.12.4
+    # via
+    #   safety
+    #   virtualenv
 h11==0.14.0
     # via
     #   -c requirements.txt
@@ -89,6 +102,8 @@ jaraco-functools==4.0.1
     # via
     #   -c requirements.txt
     #   keyring
+jinja2==3.1.4
+    # via safety
 keyring==25.2.1
     # via
     #   -c requirements.txt
@@ -101,6 +116,10 @@ markdown-it-py==3.0.0
     # via
     #   -c requirements.txt
     #   rich
+markupsafe==3.0.2
+    # via jinja2
+marshmallow==3.23.1
+    # via safety
 mdurl==0.1.2
     # via
     #   -c requirements.txt
@@ -121,7 +140,12 @@ numpy==2.0.1
     #   -c requirements.txt
     #   pandas
 packaging==24.1
-    # via pytest
+    # via
+    #   dparse
+    #   marshmallow
+    #   pytest
+    #   safety
+    #   safety-schemas
 pandas==2.2.2
     # via
     #   -c requirements.txt
@@ -130,16 +154,24 @@ pkginfo==1.10.0
     # via
     #   -c requirements.txt
     #   twine
-platformdirs==4.2.2
-    # via virtualenv
+platformdirs==4.3.6
+    # via
+    #   hirundo (pyproject.toml)
+    #   virtualenv
 pluggy==1.5.0
     # via pytest
 pre-commit==3.7.1
     # via hirundo (pyproject.toml)
+psutil==6.0.0
+    # via safety
+pycparser==2.22
+    # via cffi
 pydantic==2.8.2
     # via
     #   -c requirements.txt
     #   hirundo (pyproject.toml)
+    #   safety
+    #   safety-schemas
 pydantic-core==2.20.1
     # via
     #   -c requirements.txt
@@ -180,6 +212,7 @@ requests==2.32.3
     # via
     #   -c requirements.txt
     #   requests-toolbelt
+    #   safety
     #   twine
 requests-toolbelt==1.0.0
     # via
@@ -192,10 +225,23 @@ rfc3986==2.0.0
 rich==13.7.1
     # via
     #   -c requirements.txt
+    #   safety
     #   twine
     #   typer
-ruff==0.6.5
+ruamel-yaml==0.18.6
+    # via
+    #   safety
+    #   safety-schemas
+ruamel-yaml-clib==0.2.12
+    # via ruamel-yaml
+ruff==0.8.2
     # via hirundo (pyproject.toml)
+safety==3.2.13
+    # via hirundo (pyproject.toml)
+safety-schemas==0.0.10
+    # via safety
+setuptools==75.6.0
+    # via safety
 shellingham==1.5.4
     # via
     #   -c requirements.txt
@@ -220,7 +266,9 @@ tenacity==8.5.0
 toml==0.10.2
     # via bumpver
 tomli==2.0.1
-    # via pytest
+    # via
+    #   dparse
+    #   pytest
 tqdm==4.66.5
     # via
     #   -c requirements.txt
@@ -233,6 +281,7 @@ typer==0.12.3
     # via
     #   -c requirements.txt
     #   hirundo (pyproject.toml)
+    #   safety
 types-pyyaml==6.0.12.20240311
     # via
     #   -c requirements.txt
@@ -249,6 +298,8 @@ typing-extensions==4.12.2
     #   anyio
     #   pydantic
     #   pydantic-core
+    #   safety
+    #   safety-schemas
     #   stamina
     #   typer
 tzdata==2024.1
@@ -259,12 +310,15 @@ urllib3==2.2.2
     # via
     #   -c requirements.txt
     #   requests
+    #   safety
     #   twine
     #   types-requests
-uv==0.2.27
+uv==0.5.8
     # via hirundo (pyproject.toml)
 virtualenv==20.26.3
-    # via pre-commit
+    # via
+    #   hirundo (pyproject.toml)
+    #   pre-commit
 zipp==3.19.2
     # via
     #   -c requirements.txt
