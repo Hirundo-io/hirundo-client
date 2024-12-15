@@ -40,4 +40,4 @@ __all__ = [
     "StorageConfig",
 ]
 
-__version__ = "0.1.9b1"
+__version__ = "0.1.9"
