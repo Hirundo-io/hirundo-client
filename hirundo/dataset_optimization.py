@@ -287,7 +287,7 @@ class OptimizationDataset(BaseModel):
     def validate_dataset(self):
         if self.storage_config is None and self.storage_config_id is None:
             raise ValueError(
-                "No dataset storage has been provided. Provide on via `storage_config` or `storage_config_id`"
+                "No dataset storage has been provided. Provide one via `storage_config` or `storage_config_id`"
             )
         elif self.storage_config is not None and self.storage_config_id is not None:
             raise ValueError(
