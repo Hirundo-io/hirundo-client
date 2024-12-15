@@ -142,4 +142,4 @@ Note: Currently we only support the main CPython release 3.9, 3.10 and 3.11. PyP
 
 ## Further documentation
 
-To learn about more how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the Google Colab examples.
+To learn more about how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the Google Colab examples.
