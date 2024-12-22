@@ -35,7 +35,6 @@ dependencies = [
     "httpx>=0.27.0",
     "stamina>=24.2.0",
     "httpx-sse>=0.4.0",
-    "pandas>=2.2.2",
     "tqdm>=4.66.5",
 ]
 
@@ -82,6 +81,12 @@ docs = [
     "starlette>0.40.0",
     "markupsafe>=3.0.2",
     #  Force `starlette` and `markupsafe` to versions compatible with `dev` dependencies.
+]
+pandas = [
+    "pandas>=2.2.2",
+]
+polars = [
+    "polars>=1.0.0",
 ]
 
 [tool.bumpver]
