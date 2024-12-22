@@ -27,7 +27,7 @@ repos:
     - id: pip-compile-dev
       name: compile dev-requirements.txt
       entry: uv
-      args: ["pip", "compile", "--extra", "dev", "-o", "requirements/dev-requirements.txt", "-c", "requirements/requirements.txt"]
+      args: ["pip", "compile", "--extra", "dev", "-o", "requirements/dev.txt", "-c", "requirements/requirements.txt"]
       language: python
       always_run: false
       files: pyproject.toml$
@@ -35,21 +35,21 @@ repos:
     - id: pip-compile-pandas
       name: compile pandas-requirements.txt
       entry: uv
-      args: ["pip", "compile", "--extra", "pandas", "-o", "requirements/pandas-requirements.txt", "-c", "requirements/requirements.txt"]
+      args: ["pip", "compile", "--extra", "pandas", "-o", "requirements/pandas.txt", "-c", "requirements/requirements.txt"]
       language: python
       files: pyproject.toml$
       additional_dependencies: [uv]
     - id: pip-compile-polars
       name: compile polars-requirements.txt
       entry: uv
-      args: ["pip", "compile", "--extra", "polars", "-o", "requirements/polars-requirements.txt", "-c", "requirements/requirements.txt"]
+      args: ["pip", "compile", "--extra", "polars", "-o", "requirements/polars.txt", "-c", "requirements/requirements.txt"]
       language: python
       files: pyproject.toml$
       additional_dependencies: [uv]
     - id: pip-compile-docs
       name: compile docs-requirements.txt
       entry: uv
-      args: ["pip", "compile", "--extra", "docs", "-o", "requirements/docs-requirements.txt", "-c", "requirements/requirements.txt"]
+      args: ["pip", "compile", "--extra", "docs", "-o", "requirements/docs.txt", "-c", "requirements/requirements.txt"]
       language: python
       always_run: false
       files: pyproject.toml$
@@ -57,7 +57,7 @@ repos:
     - id: pip-sync
       name: sync
       entry: uv
-      args: ["pip", "sync", "requirements/dev-requirements.txt", "requirements/docs-requirements.txt", "requirements/pandas-requirements.txt", "requirements/polars-requirements.txt"]
+      args: ["pip", "sync", "requirements/dev.txt", "requirements/docs.txt", "requirements/pandas.txt", "requirements/polars.txt"]
       language: python
       always_run: false
       files: requirements.txt$
