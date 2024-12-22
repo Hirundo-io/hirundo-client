@@ -17,7 +17,7 @@ repos:
   - repo: local
     hooks:
     - id: pip-compile
-      name: compile requirements.txt
+      name: compile requirements/requirements.txt
       entry: uv
       args: ["pip", "compile", "-o", "requirements/requirements.txt"]
       language: python
@@ -25,7 +25,7 @@ repos:
       files: pyproject.toml$
       additional_dependencies: [uv]
     - id: pip-compile-dev
-      name: compile dev-requirements.txt
+      name: compile requirements/dev.txt
       entry: uv
       args: ["pip", "compile", "--extra", "dev", "-o", "requirements/dev.txt", "-c", "requirements/requirements.txt"]
       language: python
@@ -33,21 +33,21 @@ repos:
       files: pyproject.toml$
       additional_dependencies: [uv]
     - id: pip-compile-pandas
-      name: compile pandas-requirements.txt
+      name: compile requirements/pandas.txt
       entry: uv
       args: ["pip", "compile", "--extra", "pandas", "-o", "requirements/pandas.txt", "-c", "requirements/requirements.txt"]
       language: python
       files: pyproject.toml$
       additional_dependencies: [uv]
     - id: pip-compile-polars
-      name: compile polars-requirements.txt
+      name: compile requirements/polars.txt
       entry: uv
       args: ["pip", "compile", "--extra", "polars", "-o", "requirements/polars.txt", "-c", "requirements/requirements.txt"]
       language: python
       files: pyproject.toml$
       additional_dependencies: [uv]
     - id: pip-compile-docs
-      name: compile docs-requirements.txt
+      name: compile requirements/docs.txt
       entry: uv
       args: ["pip", "compile", "--extra", "docs", "-o", "requirements/docs.txt", "-c", "requirements/requirements.txt"]
       language: python
