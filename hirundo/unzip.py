@@ -3,10 +3,9 @@ import zipfile
 from pathlib import Path
 from typing import IO
 
-import numpy as np
 import requests
 
-from hirundo._dataframe import has_pandas, has_polars, pd, pl
+from hirundo._dataframe import float32, has_pandas, has_polars, int32, pd, pl
 from hirundo._timeouts import DOWNLOAD_READ_TIMEOUT
 from hirundo.dataset_optimization_results import DatasetOptimizationResults
 from hirundo.logger import get_logger
@@ -17,16 +16,16 @@ CUSTOMER_INTERCHANGE_DTYPES = {
     "image_path": str,
     "label_path": str,
     "segments_mask_path": str,
-    "segment_id": np.int32,
+    "segment_id": int32,
     "label": str,
     "bbox_id": str,
-    "xmin": np.float32,
-    "ymin": np.float32,
-    "xmax": np.float32,
-    "ymax": np.float32,
-    "suspect_level": np.float32,  # If exists, must be one of the values in the enum below
+    "xmin": float32,
+    "ymin": float32,
+    "xmax": float32,
+    "ymax": float32,
+    "suspect_level": float32,  # If exists, must be one of the values in the enum below
     "suggested_label": str,
-    "suggested_label_conf": np.float32,
+    "suggested_label_conf": float32,
     "status": str,
     # ⬆️ If exists, must be one of the following:
     # NO_LABELS/MISSING_IMAGE/INVALID_IMAGE/INVALID_BBOX/INVALID_BBOX_SIZE/INVALID_SEG/INVALID_SEG_SIZE
@@ -106,6 +105,8 @@ def download_and_extract_zip(run_id: str, zip_url: str) -> DatasetOptimizationRe
 
         with zipfile.ZipFile(zip_file_path, "r") as z:
             # Extract suspects file
+            suspects_df = None
+            warnings_and_errors_df = None
             try:
                 with z.open("mislabel_suspects.csv") as suspects_file:
                     suspects_df = load_df(suspects_file)
