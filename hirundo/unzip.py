@@ -5,28 +5,29 @@ from typing import IO
 
 import requests
 
-from hirundo._dataframe import float32, has_pandas, has_polars, int32, pd, pl
+from hirundo._dataframe import float32, has_pandas, has_polars, int32, pd, pl, string
 from hirundo._timeouts import DOWNLOAD_READ_TIMEOUT
 from hirundo.dataset_optimization_results import DatasetOptimizationResults
 from hirundo.logger import get_logger
 
 ZIP_FILE_CHUNK_SIZE = 50 * 1024 * 1024  # 50 MB
 
-CUSTOMER_INTERCHANGE_DTYPES = {
-    "image_path": str,
-    "label_path": str,
-    "segments_mask_path": str,
+Dtype = typing.Union[type[int32], type[float32], type[string]]
+CUSTOMER_INTERCHANGE_DTYPES: dict[str, Dtype] = {
+    "image_path": string,
+    "label_path": string,
+    "segments_mask_path": string,
     "segment_id": int32,
-    "label": str,
-    "bbox_id": str,
+    "label": string,
+    "bbox_id": string,
     "xmin": float32,
     "ymin": float32,
     "xmax": float32,
     "ymax": float32,
     "suspect_level": float32,  # If exists, must be one of the values in the enum below
-    "suggested_label": str,
+    "suggested_label": string,
     "suggested_label_conf": float32,
-    "status": str,
+    "status": string,
     # ⬆️ If exists, must be one of the following:
     # NO_LABELS/MISSING_IMAGE/INVALID_IMAGE/INVALID_BBOX/INVALID_BBOX_SIZE/INVALID_SEG/INVALID_SEG_SIZE
 }
