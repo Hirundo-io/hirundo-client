@@ -1,6 +1,14 @@
 has_pandas = False
 has_polars = False
 
+pd = None
+pl = None
+int32 = type[None]
+float32 = type[None]
+string = type[None]
+#  ⬆️ These are just placeholders for the int32, float32 and string types
+#    for when neither pandas nor polars are available
+
 try:
     import numpy as np
     import pandas as pd
