@@ -2,11 +2,11 @@ import enum
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 
 class EnvLocation(enum.Enum):
-    DOTENV = Path.cwd() / ".env"
+    DOTENV = find_dotenv(".env")
     HOME = Path.home() / ".hirundo.conf"
 
 

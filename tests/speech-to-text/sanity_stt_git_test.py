@@ -60,7 +60,9 @@ def test_dataset_optimization():
         test_dataset, sanity=True, alternative_env="RUN_STT_GIT_OPTIMIZATION"
     )
     if full_run is not None:
-        assert full_run.warnings_and_errors.size == 0
+        assert full_run.warnings_and_errors is not None
+        assert full_run.warnings_and_errors.shape[0] == 0
+        assert full_run.suspects is not None
         assert full_run.suspects.shape[0] > 100
         assert full_run.suspects.shape[0] < 150
     else:

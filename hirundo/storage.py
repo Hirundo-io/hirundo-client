@@ -34,7 +34,7 @@ class StorageS3Base(BaseModel):
         Chains the bucket URL with the path, ensuring that the path is formatted correctly
 
         Args:
-            - path: The path to the file in the S3 bucket, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+            path: The path to the file in the S3 bucket, e.g. `my-file.txt` or `/my-folder/my-file.txt`
 
         Returns:
             The full URL to the file in the S3 bucket, e.g. `s3://my-bucket/my-file.txt` or `s3://my-bucket/my-folder/my-file.txt`,
@@ -64,7 +64,7 @@ class StorageGCPBase(BaseModel):
         Chains the bucket URL with the path, ensuring that the path is formatted correctly
 
         Args:
-            - path: The path to the file in the GCP bucket, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+            path: The path to the file in the GCP bucket, e.g. `my-file.txt` or `/my-folder/my-file.txt`
 
         Returns:
             The full URL to the file in the GCP bucket, e.g. `gs://my-bucket/my-file.txt` or `gs://my-bucket/my-folder/my-file.txt`,
@@ -94,7 +94,7 @@ class StorageGCPOut(StorageGCPBase):
 #         Chains the container URL with the path, ensuring that the path is formatted correctly
 
 #         Args:
-#             - path: The path to the file in the Azure container, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+#             path: The path to the file in the Azure container, e.g. `my-file.txt` or `/my-folder/my-file.txt`
 
 #         Returns:
 #             The full URL to the file in the Azure container
@@ -114,8 +114,8 @@ def get_git_repo_url(
     Chains the repository URL with the path, ensuring that the path is formatted correctly
 
     Args:
-        - repo_url: The URL of the git repository, e.g. `https://my-git-repository.com`
-        - path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+        repo_url: The URL of the git repository, e.g. `https://my-git-repository.com`
+        path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
 
     Returns:
         The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`
@@ -156,7 +156,7 @@ class StorageGit(BaseModel):
         Chains the repository URL with the path, ensuring that the path is formatted correctly
 
         Args:
-            - path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+            path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
 
         Returns:
             The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`,
@@ -179,7 +179,7 @@ class StorageGitOut(BaseModel):
         Chains the repository URL with the path, ensuring that the path is formatted correctly
 
         Args:
-            - path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+            path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
 
         Returns:
             The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`,

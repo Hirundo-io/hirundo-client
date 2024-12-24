@@ -7,6 +7,7 @@ from .dataset_optimization import (
     RunArgs,
     VisionRunArgs,
 )
+from .dataset_optimization_results import DatasetOptimizationResults
 from .enum import (
     DatasetMetadataType,
     LabelingType,
@@ -20,6 +21,7 @@ from .storage import (
     StorageS3,
     StorageTypes,
 )
+from .unzip import load_df, load_from_zip
 
 __all__ = [
     "COCO",
@@ -38,6 +40,9 @@ __all__ = [
     # "StorageAzure",  TODO: Azure storage is coming soon
     "StorageGit",
     "StorageConfig",
+    "DatasetOptimizationResults",
+    "load_df",
+    "load_from_zip",
 ]
 
 __version__ = "0.1.9"

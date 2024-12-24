@@ -78,8 +78,12 @@ def test_dataset_optimization():
         ),
     )
     if full_run is not None:
+        assert full_run.warnings_and_errors is not None
         assert full_run.warnings_and_errors.shape[0] == 120
-        logger.info("Warnings and errors count: %s", full_run.warnings_and_errors.size)
+        logger.info(
+            "Warnings and errors count: %s", full_run.warnings_and_errors.shape[0]
+        )
+        assert full_run.suspects is not None
         assert full_run.suspects.shape[0] == 1_130
         # TODO: Add more assertions for results
     else:

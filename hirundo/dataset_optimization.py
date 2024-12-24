@@ -4,14 +4,10 @@ import typing
 from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator, Generator
 from enum import Enum
-from io import StringIO
 from typing import overload
 
 import httpx
-import numpy as np
-import pandas as pd
 import requests
-from pandas._typing import DtypeArg
 from pydantic import BaseModel, Field, model_validator
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
@@ -22,9 +18,11 @@ from hirundo._headers import get_auth_headers, json_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
+from hirundo.dataset_optimization_results import DatasetOptimizationResults
 from hirundo.enum import DatasetMetadataType, LabelingType
 from hirundo.logger import get_logger
 from hirundo.storage import ResponseStorageConfig, StorageConfig
+from hirundo.unzip import download_and_extract_zip
 
 logger = get_logger(__name__)
 
@@ -70,39 +68,6 @@ STATUS_TO_PROGRESS_MAP = {
     RunStatus.RETRY.value: 0.0,
     RunStatus.REVOKED.value: 100.0,
     RunStatus.REJECTED.value: 0.0,
-}
-
-
-class DatasetOptimizationResults(BaseModel):
-    model_config = {"arbitrary_types_allowed": True}
-
-    suspects: pd.DataFrame
-    """
-    A pandas DataFrame containing the results of the optimization run
-    """
-    warnings_and_errors: pd.DataFrame
-    """
-    A pandas DataFrame containing the warnings and errors of the optimization run
-    """
-
-
-CUSTOMER_INTERCHANGE_DTYPES: DtypeArg = {
-    "image_path": str,
-    "label_path": str,
-    "segments_mask_path": str,
-    "segment_id": np.int32,
-    "label": str,
-    "bbox_id": str,
-    "xmin": np.float32,
-    "ymin": np.float32,
-    "xmax": np.float32,
-    "ymax": np.float32,
-    "suspect_level": np.float32,  # If exists, must be one of the values in the enum below
-    "suggested_label": str,
-    "suggested_label_conf": np.float32,
-    "status": str,
-    # ⬆️ If exists, must be one of the following:
-    # NO_LABELS/MISSING_IMAGE/INVALID_IMAGE/INVALID_BBOX/INVALID_BBOX_SIZE/INVALID_SEG/INVALID_SEG_SIZE
 }
 
 
@@ -596,46 +561,6 @@ class OptimizationDataset(BaseModel):
         self.run_id = None
 
     @staticmethod
-    def _clean_df_index(df: "pd.DataFrame") -> "pd.DataFrame":
-        """
-        Clean the index of a dataframe in case it has unnamed columns.
-
-        Args:
-            df (DataFrame): Dataframe to clean
-
-        Returns:
-            DataFrame: Cleaned dataframe
-        """
-        index_cols = sorted(
-            [col for col in df.columns if col.startswith("Unnamed")], reverse=True
-        )
-        if len(index_cols) > 0:
-            df.set_index(index_cols.pop(), inplace=True)
-            df.rename_axis(index=None, columns=None, inplace=True)
-            if len(index_cols) > 0:
-                df.drop(columns=index_cols, inplace=True)
-
-        return df
-
-    @staticmethod
-    def _read_csvs_to_df(data: dict):
-        if data["state"] == RunStatus.SUCCESS.value:
-            data["result"]["suspects"] = OptimizationDataset._clean_df_index(
-                pd.read_csv(
-                    StringIO(data["result"]["suspects"]),
-                    dtype=CUSTOMER_INTERCHANGE_DTYPES,
-                )
-            )
-            data["result"]["warnings_and_errors"] = OptimizationDataset._clean_df_index(
-                pd.read_csv(
-                    StringIO(data["result"]["warnings_and_errors"]),
-                    dtype=CUSTOMER_INTERCHANGE_DTYPES,
-                )
-            )
-        else:
-            pass
-
-    @staticmethod
     def _check_run_by_id(run_id: str, retry=0) -> Generator[dict, None, None]:
         if retry > MAX_RETRIES:
             raise HirundoError("Max retries reached")
@@ -668,7 +593,6 @@ class OptimizationDataset(BaseModel):
                         raise HirundoError(last_event["reason"])
                     else:
                         raise HirundoError("Unknown error")
-                OptimizationDataset._read_csvs_to_df(data)
                 yield data
         if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:
             OptimizationDataset._check_run_by_id(run_id, retry + 1)
@@ -727,11 +651,12 @@ class OptimizationDataset(BaseModel):
                         )
                     elif iteration["state"] == RunStatus.SUCCESS.value:
                         t.close()
-                        return DatasetOptimizationResults(
-                            suspects=iteration["result"]["suspects"],
-                            warnings_and_errors=iteration["result"][
-                                "warnings_and_errors"
-                            ],
+                        zip_temporary_url = iteration["result"]
+                        logger.debug("Optimization run completed. Downloading results")
+
+                        return download_and_extract_zip(
+                            run_id,
+                            zip_temporary_url,
                         )
                     elif (
                         iteration["state"] == RunStatus.AWAITING_MANUAL_APPROVAL.value
