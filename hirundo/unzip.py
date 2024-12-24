@@ -1,11 +1,20 @@
 import typing
 import zipfile
+from collections.abc import Mapping
 from pathlib import Path
-from typing import IO
+from typing import IO, cast
 
 import requests
 
-from hirundo._dataframe import float32, has_pandas, has_polars, int32, pd, pl, string
+from hirundo._dataframe import (
+    float32,
+    has_pandas,
+    has_polars,
+    int32,
+    pd,
+    pl,
+    string,
+)
 from hirundo._timeouts import DOWNLOAD_READ_TIMEOUT
 from hirundo.dataset_optimization_results import DatasetOptimizationResults
 from hirundo.logger import get_logger
@@ -13,7 +22,9 @@ from hirundo.logger import get_logger
 ZIP_FILE_CHUNK_SIZE = 50 * 1024 * 1024  # 50 MB
 
 Dtype = typing.Union[type[int32], type[float32], type[string]]
-CUSTOMER_INTERCHANGE_DTYPES: dict[str, Dtype] = {
+
+
+CUSTOMER_INTERCHANGE_DTYPES: Mapping[str, Dtype] = {
     "image_path": string,
     "label_path": string,
     "segments_mask_path": string,
@@ -73,7 +84,10 @@ def load_df(
     if has_polars:
         return pl.read_csv(file, schema_overrides=CUSTOMER_INTERCHANGE_DTYPES)
     elif has_pandas:
-        df = pd.read_csv(file, dtype=CUSTOMER_INTERCHANGE_DTYPES)
+        from pandas._typing import DtypeArg
+
+        dtype = cast(DtypeArg, CUSTOMER_INTERCHANGE_DTYPES)
+        df = pd.read_csv(file, dtype=dtype)
         return _clean_df_index(df)
 
 

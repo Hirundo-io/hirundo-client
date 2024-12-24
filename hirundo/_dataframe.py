@@ -24,4 +24,12 @@ except ImportError:
     pass
 
 
-__all__ = ["has_polars", "has_pandas", "pd", "pl", "int32", "float32", "string"]
+__all__ = [
+    "has_polars",
+    "has_pandas",
+    "pd",
+    "pl",
+    "int32",
+    "float32",
+    "string",
+]
