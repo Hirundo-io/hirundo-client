@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import IO, cast
 
 import requests
+from pydantic_core import Url
 
 from hirundo._dataframe import (
     float32,
@@ -15,6 +16,8 @@ from hirundo._dataframe import (
     pl,
     string,
 )
+from hirundo._env import API_HOST
+from hirundo._headers import get_auth_headers
 from hirundo._timeouts import DOWNLOAD_READ_TIMEOUT
 from hirundo.dataset_optimization_results import DatasetOptimizationResults
 from hirundo.logger import get_logger
@@ -110,13 +113,29 @@ def download_and_extract_zip(run_id: str, zip_url: str) -> DatasetOptimizationRe
     cache_dir.mkdir(parents=True, exist_ok=True)
     zip_file_path = cache_dir / f"{run_id}.zip"
 
+    headers = None
+    if Url(zip_url).scheme == "file":
+        zip_url = (
+            f"{API_HOST}/dataset-optimization/run/local-download"
+            + zip_url.replace("file://", "")
+        )
+        headers = get_auth_headers()
     # Stream the zip file download
-    with requests.get(zip_url, timeout=DOWNLOAD_READ_TIMEOUT, stream=True) as r:
+    with requests.get(
+        zip_url,
+        headers=headers,
+        timeout=DOWNLOAD_READ_TIMEOUT,
+        stream=True,
+    ) as r:
         r.raise_for_status()
         with open(zip_file_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=ZIP_FILE_CHUNK_SIZE):
                 f.write(chunk)
-        logger.info("Successfully downloaded the result zip file for run ID %s", run_id)
+        logger.info(
+            "Successfully downloaded the result zip file for run ID %s to %s",
+            run_id,
+            zip_file_path,
+        )
 
         with zipfile.ZipFile(zip_file_path, "r") as z:
             # Extract suspects file
