@@ -1,25 +1,39 @@
 import typing
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
+from typing_extensions import TypeAliasType
 
-if TYPE_CHECKING:
-    from hirundo._dataframe import pd, pl
+from hirundo._dataframe import has_pandas, has_polars
+
+DataFrameType = TypeAliasType("DataFrameType", None)
+
+if has_pandas:
+    from hirundo._dataframe import pd
+
+    DataFrameType = TypeAliasType("DataFrameType", typing.Union[pd.DataFrame, None])
+if has_polars:
+    from hirundo._dataframe import pl
+
+    DataFrameType = TypeAliasType("DataFrameType", typing.Union[pl.DataFrame, None])
 
 
-class DatasetOptimizationResults(BaseModel):
-    model_config = {"arbitrary_types_allowed": True}
+T = typing.TypeVar("T")
+
+
+class DatasetOptimizationResults(BaseModel, typing.Generic[T]):
+    class Config:
+        arbitrary_types_allowed = True
 
     cached_zip_path: Path
     """
     The path to the cached zip file of the results
     """
-    suspects: "typing.Union[pl.DataFrame, pd.DataFrame, None]"
+    suspects: T
     """
     A pandas DataFrame containing the results of the optimization run
     """
-    warnings_and_errors: "typing.Union[pl.DataFrame, pd.DataFrame, None]"
+    warnings_and_errors: T
     """
     A pandas DataFrame containing the warnings and errors of the optimization run
     """

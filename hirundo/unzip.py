@@ -19,7 +19,10 @@ from hirundo._dataframe import (
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers
 from hirundo._timeouts import DOWNLOAD_READ_TIMEOUT
-from hirundo.dataset_optimization_results import DatasetOptimizationResults
+from hirundo.dataset_optimization_results import (
+    DataFrameType,
+    DatasetOptimizationResults,
+)
 from hirundo.logger import get_logger
 
 ZIP_FILE_CHUNK_SIZE = 50 * 1024 * 1024  # 50 MB
@@ -73,7 +76,7 @@ def _clean_df_index(df: "pd.DataFrame") -> "pd.DataFrame":
 
 def load_df(
     file: "typing.Union[str, IO[bytes]]",
-) -> "typing.Union[pd.DataFrame, pl.DataFrame, None]":
+) -> "DataFrameType":
     """
     Load a DataFrame from a CSV file.
 
@@ -94,7 +97,9 @@ def load_df(
         return _clean_df_index(df)
 
 
-def download_and_extract_zip(run_id: str, zip_url: str) -> DatasetOptimizationResults:
+def download_and_extract_zip(
+    run_id: str, zip_url: str
+) -> DatasetOptimizationResults[DataFrameType]:
     """
     Download and extract the zip file from the given URL.
 
@@ -166,7 +171,7 @@ def download_and_extract_zip(run_id: str, zip_url: str) -> DatasetOptimizationRe
                     "Failed to load warnings and errors into DataFrame", exc_info=e
                 )
 
-            return DatasetOptimizationResults(
+            return DatasetOptimizationResults[DataFrameType](
                 cached_zip_path=zip_file_path,
                 suspects=suspects_df,
                 warnings_and_errors=warnings_and_errors_df,
