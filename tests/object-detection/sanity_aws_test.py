@@ -73,8 +73,8 @@ def test_dataset_optimization():
         alternative_env="RUN_OD_AWS_SANITY_OPTIMIZATION",
         run_args=VisionRunArgs(
             upsample=True,
-            min_abs_bbox_size=10,
-            min_abs_bbox_area=100,
+            min_abs_bbox_size=9,
+            min_abs_bbox_area=81,
         ),
     )
     if full_run is not None:
