@@ -22,8 +22,7 @@ T = typing.TypeVar("T")
 
 
 class DatasetOptimizationResults(BaseModel, typing.Generic[T]):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
     cached_zip_path: Path
     """
