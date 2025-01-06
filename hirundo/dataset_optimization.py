@@ -128,7 +128,63 @@ class YOLO(Metadata):
         return self.labels_dir_url
 
 
-LabelingInfo = typing.Union[HirundoCSV, COCO, YOLO]
+class KeylabsAuth(BaseModel):
+    username: str
+    password: str
+    instance: str
+
+
+class Keylabs(Metadata):
+    project_id: str
+    """
+    Keylabs project ID.
+    """
+
+    labels_dir_url: HirundoUrl
+    """
+    URL to the directory containing the Keylabs labels.
+    """
+
+    with_attributes: bool = True
+    """
+    Whether to include attributes in the class name.
+    """
+
+    project_name: typing.Optional[str] = None
+    """
+    Keylabs project name (optional; added to output CSV if provided).
+    """
+    keylabs_auth: typing.Optional[KeylabsAuth] = None
+    """
+    Keylabs authentication credentials (optional; if provided, used to provide links to each sample).
+    """
+
+
+class KeylabsObjDetImages(Keylabs):
+    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjDetImages
+
+
+class KeylabsObjDetVideo(Keylabs):
+    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjDetVideo
+
+
+class KeylabsObjSegImages(Keylabs):
+    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjSegImages
+
+
+class KeylabsObjSegVideo(Keylabs):
+    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjSegVideo
+
+
+KeylabsInfo = typing.Union[
+    KeylabsObjDetImages, KeylabsObjDetVideo, KeylabsObjSegImages, KeylabsObjSegVideo
+]
+LabelingInfo = typing.Union[
+    HirundoCSV,
+    COCO,
+    YOLO,
+    KeylabsInfo,
+]
 """
 The dataset labeling info. The dataset labeling info can be one of the following:
 - `DatasetMetadataType.HirundoCSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
@@ -227,7 +283,7 @@ class OptimizationDataset(BaseModel):
     A full list of possible classes used in classification / object detection.
     It is currently required for clarity and performance.
     """
-    labeling_info: LabelingInfo
+    labeling_info: typing.Union[LabelingInfo, list[LabelingInfo]]
 
     augmentations: typing.Optional[list[AugmentationNames]] = None
     """
@@ -266,11 +322,19 @@ class OptimizationDataset(BaseModel):
         ):
             raise ValueError("Language is only allowed for Speech-to-Text datasets.")
         if (
-            self.labeling_info.type == DatasetMetadataType.YOLO
+            not isinstance(self.labeling_info, list)
+            and self.labeling_info.type == DatasetMetadataType.YOLO
             and isinstance(self.labeling_info, YOLO)
             and (
                 self.labeling_info.data_yaml_url is not None
                 and self.classes is not None
+            )
+        ) or (
+            isinstance(self.labeling_info, list)
+            and self.classes is not None
+            and any(
+                isinstance(info, YOLO) and info.data_yaml_url is not None
+                for info in self.labeling_info
             )
         ):
             raise ValueError(
@@ -822,7 +886,7 @@ class DataOptimizationDatasetOut(BaseModel):
     data_root_url: HirundoUrl
 
     classes: typing.Optional[list[str]] = None
-    labeling_info: LabelingInfo
+    labeling_info: typing.Union[LabelingInfo, list[LabelingInfo]]
 
     organization_id: typing.Optional[int]
     creator_id: typing.Optional[int]
