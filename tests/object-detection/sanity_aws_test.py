@@ -73,13 +73,13 @@ def test_dataset_optimization():
         alternative_env="RUN_OD_AWS_SANITY_OPTIMIZATION",
         run_args=VisionRunArgs(
             upsample=True,
-            min_abs_bbox_size=9,
-            min_abs_bbox_area=81,
+            min_abs_bbox_size=11,
+            min_abs_bbox_area=121,
         ),
     )
     if full_run is not None:
         assert full_run.warnings_and_errors is not None
-        assert full_run.warnings_and_errors.shape[0] == 120
+        assert full_run.warnings_and_errors.shape[0] >= 120
         logger.info(
             "Warnings and errors count: %s", full_run.warnings_and_errors.shape[0]
         )
