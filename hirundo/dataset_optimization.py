@@ -1,7 +1,6 @@
 import datetime
 import json
 import typing
-from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator, Generator
 from enum import Enum
 from typing import overload
@@ -12,14 +11,16 @@ from pydantic import BaseModel, Field, model_validator
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
-from hirundo._constraints import HirundoUrl
+from hirundo._constraints import validate_labeling_info, validate_url
 from hirundo._env import API_HOST
 from hirundo._headers import get_auth_headers, json_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
+from hirundo._urls import HirundoUrl
 from hirundo.dataset_optimization_results import DatasetOptimizationResults
 from hirundo.enum import DatasetMetadataType, LabelingType
+from hirundo.labeling import YOLO, LabelingInfo
 from hirundo.logger import get_logger
 from hirundo.storage import ResponseStorageConfig, StorageConfig
 from hirundo.unzip import download_and_extract_zip
@@ -69,128 +70,6 @@ STATUS_TO_PROGRESS_MAP = {
     RunStatus.REVOKED.value: 100.0,
     RunStatus.REJECTED.value: 0.0,
 }
-
-
-class Metadata(BaseModel, ABC):
-    type: DatasetMetadataType
-
-    @property
-    @abstractmethod
-    def metadata_url(self) -> HirundoUrl:
-        raise NotImplementedError()
-
-
-class HirundoCSV(Metadata):
-    """
-    A dataset metadata file in the Hirundo CSV format
-    """
-
-    type: DatasetMetadataType = DatasetMetadataType.HIRUNDO_CSV
-    csv_url: HirundoUrl
-    """
-    The URL to access the dataset metadata CSV file.
-    e.g. `s3://my-bucket-name/my-folder/my-metadata.csv`, `gs://my-bucket-name/my-folder/my-metadata.csv`,
-    or `ssh://my-username@my-repo-name/my-folder/my-metadata.csv`
-    (or `file:///datasets/my-folder/my-metadata.csv` if using LOCAL storage type with on-premises installation)
-    """
-
-    @property
-    def metadata_url(self) -> HirundoUrl:
-        return self.csv_url
-
-
-class COCO(Metadata):
-    """
-    A dataset metadata file in the COCO format
-    """
-
-    type: DatasetMetadataType = DatasetMetadataType.COCO
-    json_url: HirundoUrl
-    """
-    The URL to access the dataset metadata JSON file.
-    e.g. `s3://my-bucket-name/my-folder/my-metadata.json`, `gs://my-bucket-name/my-folder/my-metadata.json`,
-    or `ssh://my-username@my-repo-name/my-folder/my-metadata.json`
-    (or `file:///datasets/my-folder/my-metadata.json` if using LOCAL storage type with on-premises installation)
-    """
-
-    @property
-    def metadata_url(self) -> HirundoUrl:
-        return self.json_url
-
-
-class YOLO(Metadata):
-    type: DatasetMetadataType = DatasetMetadataType.YOLO
-    data_yaml_url: typing.Optional[HirundoUrl] = None
-    labels_dir_url: HirundoUrl
-
-    @property
-    def metadata_url(self) -> HirundoUrl:
-        return self.labels_dir_url
-
-
-class KeylabsAuth(BaseModel):
-    username: str
-    password: str
-    instance: str
-
-
-class Keylabs(Metadata):
-    project_id: str
-    """
-    Keylabs project ID.
-    """
-
-    labels_dir_url: HirundoUrl
-    """
-    URL to the directory containing the Keylabs labels.
-    """
-
-    with_attributes: bool = True
-    """
-    Whether to include attributes in the class name.
-    """
-
-    project_name: typing.Optional[str] = None
-    """
-    Keylabs project name (optional; added to output CSV if provided).
-    """
-    keylabs_auth: typing.Optional[KeylabsAuth] = None
-    """
-    Keylabs authentication credentials (optional; if provided, used to provide links to each sample).
-    """
-
-
-class KeylabsObjDetImages(Keylabs):
-    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjDetImages
-
-
-class KeylabsObjDetVideo(Keylabs):
-    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjDetVideo
-
-
-class KeylabsObjSegImages(Keylabs):
-    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjSegImages
-
-
-class KeylabsObjSegVideo(Keylabs):
-    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjSegVideo
-
-
-KeylabsInfo = typing.Union[
-    KeylabsObjDetImages, KeylabsObjDetVideo, KeylabsObjSegImages, KeylabsObjSegVideo
-]
-LabelingInfo = typing.Union[
-    HirundoCSV,
-    COCO,
-    YOLO,
-    KeylabsInfo,
-]
-"""
-The dataset labeling info. The dataset labeling info can be one of the following:
-- `DatasetMetadataType.HirundoCSV`: Indicates that the dataset metadata file is a CSV file with the Hirundo format
-
-Currently no other formats are supported. Future versions of `hirundo` may support additional formats.
-"""
 
 
 class VisionRunArgs(BaseModel):
@@ -340,6 +219,10 @@ class OptimizationDataset(BaseModel):
             raise ValueError(
                 "Only one of `classes` or `labeling_info.data_yaml_url` should be provided for YOLO datasets"
             )
+        if self.storage_config:
+            validate_labeling_info(self.labeling_info, self.storage_config)
+        if self.data_root_url and self.storage_config:
+            validate_url(self.data_root_url, self.storage_config)
         return self
 
     @staticmethod

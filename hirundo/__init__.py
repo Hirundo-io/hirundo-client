@@ -1,7 +1,4 @@
 from .dataset_optimization import (
-    COCO,
-    YOLO,
-    HirundoCSV,
     HirundoError,
     OptimizationDataset,
     RunArgs,
@@ -13,6 +10,16 @@ from .enum import (
     LabelingType,
 )
 from .git import GitRepo
+from .labeling import (
+    COCO,
+    YOLO,
+    HirundoCSV,
+    KeylabsAuth,
+    KeylabsObjDetImages,
+    KeylabsObjDetVideo,
+    KeylabsObjSegImages,
+    KeylabsObjSegVideo,
+)
 from .storage import (
     StorageConfig,
     StorageGCP,
@@ -26,13 +33,18 @@ from .unzip import load_df, load_from_zip
 __all__ = [
     "COCO",
     "YOLO",
-    "HirundoCSV",
     "HirundoError",
+    "HirundoCSV",
+    "KeylabsAuth",
+    "KeylabsObjDetImages",
+    "KeylabsObjDetVideo",
+    "KeylabsObjSegImages",
+    "KeylabsObjSegVideo",
     "OptimizationDataset",
     "RunArgs",
     "VisionRunArgs",
-    "LabelingType",
     "DatasetMetadataType",
+    "LabelingType",
     "GitRepo",
     "StorageTypes",
     "StorageS3",
