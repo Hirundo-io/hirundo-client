@@ -30,9 +30,9 @@ class DatasetOptimizationResults(BaseModel, typing.Generic[T]):
     """
     suspects: T
     """
-    A pandas DataFrame containing the results of the optimization run
+    A polars/pandas DataFrame containing the results of the optimization run
     """
     warnings_and_errors: T
     """
-    A pandas DataFrame containing the warnings and errors of the optimization run
+    A polars/pandas DataFrame containing the warnings and errors of the optimization run
     """
