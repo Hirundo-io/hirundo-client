@@ -220,7 +220,9 @@ class OptimizationDataset(BaseModel):
                 "Only one of `classes` or `labeling_info.data_yaml_url` should be provided for YOLO datasets"
             )
         if self.storage_config:
-            validate_labeling_info(self.labeling_info, self.storage_config)
+            validate_labeling_info(
+                self.labeling_type, self.labeling_info, self.storage_config
+            )
         if self.data_root_url and self.storage_config:
             validate_url(self.data_root_url, self.storage_config)
         return self

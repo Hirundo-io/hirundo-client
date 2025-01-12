@@ -11,6 +11,7 @@ from hirundo._urls import (
     S3_MIN_LENGTH,
     S3_PATTERN,
 )
+from hirundo.enum import DatasetMetadataType, LabelingType
 from hirundo.labeling import COCO, YOLO, HirundoCSV, Keylabs
 from hirundo.storage import StorageTypes
 
@@ -63,13 +64,60 @@ def validate_url(
     return url
 
 
+def validate_labeling_type(
+    labeling_type: "LabelingType", labeling_info: "LabelingInfo"
+) -> None:
+    """
+    Validate that the labeling type is compatible with the labeling info
+
+    Args:
+        labeling_type: The type of labeling that will be performed
+        labeling_info: The labeling info to validate
+    """
+    if (
+        labeling_info.type
+        in [
+            DatasetMetadataType.COCO,
+            DatasetMetadataType.YOLO,
+            DatasetMetadataType.KeylabsObjDetImages,
+            DatasetMetadataType.KeylabsObjDetVideo,
+        ]
+        and labeling_type != LabelingType.OBJECT_DETECTION
+    ):
+        raise ValueError(
+            f"Cannot use {labeling_info.type.name} labeling info with non-object detection datasets"
+        )
+    elif (
+        labeling_info.type
+        in [
+            DatasetMetadataType.KeylabsObjSegImages,
+            DatasetMetadataType.KeylabsObjSegVideo,
+        ]
+        and labeling_type != LabelingType.OBJECT_SEGMENTATION
+    ):
+        raise ValueError(
+            f"Cannot use {labeling_info.type.name} labeling info with non-segmentation datasets"
+        )
+
+
 def validate_labeling_info(
+    labeling_type: "LabelingType",
     labeling_info: "typing.Union[LabelingInfo, list[LabelingInfo]]",
     storage_config: "typing.Union[StorageConfig, ResponseStorageConfig]",
 ) -> None:
+    """
+    Validate the labeling info for a dataset
+
+    Args:
+        labeling_type: The type of labeling that will be performed
+        labeling_info: The labeling info to validate
+        storage_config: The storage configuration for the dataset.
+            StorageConfig is used to validate the URLs in the labeling info
+    """
     if isinstance(labeling_info, list):
         for labeling in labeling_info:
-            validate_labeling_info(labeling, storage_config)
+            validate_labeling_info(labeling_type, labeling, storage_config)
+        return
     elif isinstance(labeling_info, HirundoCSV):
         validate_url(labeling_info.csv_url, storage_config)
     elif isinstance(labeling_info, COCO):
@@ -80,3 +128,4 @@ def validate_labeling_info(
             validate_url(labeling_info.data_yaml_url, storage_config)
     elif isinstance(labeling_info, Keylabs):
         validate_url(labeling_info.labels_dir_url, storage_config)
+    validate_labeling_type(labeling_type, labeling_info)

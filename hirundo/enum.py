@@ -10,6 +10,9 @@ class LabelingType(str, Enum):
     SINGLE_LABEL_CLASSIFICATION = "SingleLabelClassification"
     OBJECT_DETECTION = "ObjectDetection"
     SPEECH_TO_TEXT = "SpeechToText"
+    OBJECT_SEGMENTATION = "ObjectSegmentation"
+    SEMANTIC_SEGMENTATION = "SemanticSegmentation"
+    PANOPTIC_SEGMENTATION = "PanopticSegmentation"
 
 
 class DatasetMetadataType(str, Enum):
