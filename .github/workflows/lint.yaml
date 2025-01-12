@@ -32,7 +32,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m venv .venv
           source .venv/bin/activate
-          pip install -r dev-requirements.txt
+          pip install -r requirements/dev.txt -r requirements/pandas.txt -r requirements/polars.txt
 
       - run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
       - uses: jakebailey/pyright-action@v2

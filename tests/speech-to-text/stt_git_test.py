@@ -58,9 +58,11 @@ def cleanup_tests():
 def test_dataset_optimization():
     full_run = dataset_optimization_sync_test(test_dataset, "RUN_STT_GIT_OPTIMIZATION")
     if full_run is not None:
+        assert full_run.warnings_and_errors is not None
         assert (
-            full_run.warnings_and_errors.size <= 37_527
+            full_run.warnings_and_errors.shape[0] <= 37_527
         )  # max is 100% of the original dataset rows
-        assert full_run.suspects.size <= 10_000
+        assert full_run.suspects is not None
+        assert full_run.suspects.shape[0] <= 10_000
     else:
         logger.info("Full dataset optimization was not run!")
