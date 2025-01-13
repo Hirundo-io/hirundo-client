@@ -1,7 +1,7 @@
 import typing
 from abc import ABC
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from hirundo.enum import DatasetMetadataType
 
@@ -9,16 +9,18 @@ if typing.TYPE_CHECKING:
     from hirundo._urls import HirundoUrl
 
 
-class Metadata(BaseModel, ABC):
+class Metadata(BaseModel, ABC, frozen=True):
     type: DatasetMetadataType
 
 
-class HirundoCSV(Metadata):
+class HirundoCSV(Metadata, frozen=True):
     """
     A dataset metadata file in the Hirundo CSV format
     """
 
-    type: DatasetMetadataType = DatasetMetadataType.HIRUNDO_CSV
+    type: typing.Literal[DatasetMetadataType.HIRUNDO_CSV] = (
+        DatasetMetadataType.HIRUNDO_CSV
+    )
     csv_url: "HirundoUrl"
     """
     The URL to access the dataset metadata CSV file.
@@ -28,12 +30,12 @@ class HirundoCSV(Metadata):
     """
 
 
-class COCO(Metadata):
+class COCO(Metadata, frozen=True):
     """
     A dataset metadata file in the COCO format
     """
 
-    type: DatasetMetadataType = DatasetMetadataType.COCO
+    type: typing.Literal[DatasetMetadataType.COCO] = DatasetMetadataType.COCO
     json_url: "HirundoUrl"
     """
     The URL to access the dataset metadata JSON file.
@@ -43,8 +45,8 @@ class COCO(Metadata):
     """
 
 
-class YOLO(Metadata):
-    type: DatasetMetadataType = DatasetMetadataType.YOLO
+class YOLO(Metadata, frozen=True):
+    type: typing.Literal[DatasetMetadataType.YOLO] = DatasetMetadataType.YOLO
     data_yaml_url: "typing.Optional[HirundoUrl]" = None
     labels_dir_url: "HirundoUrl"
 
@@ -55,7 +57,7 @@ class KeylabsAuth(BaseModel):
     instance: str
 
 
-class Keylabs(Metadata):
+class Keylabs(Metadata, frozen=True):
     project_id: str
     """
     Keylabs project ID.
@@ -81,20 +83,28 @@ class Keylabs(Metadata):
     """
 
 
-class KeylabsObjDetImages(Keylabs):
-    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjDetImages
+class KeylabsObjDetImages(Keylabs, frozen=True):
+    type: typing.Literal[DatasetMetadataType.KeylabsObjDetImages] = (
+        DatasetMetadataType.KeylabsObjDetImages
+    )
 
 
-class KeylabsObjDetVideo(Keylabs):
-    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjDetVideo
+class KeylabsObjDetVideo(Keylabs, frozen=True):
+    type: typing.Literal[DatasetMetadataType.KeylabsObjDetVideo] = (
+        DatasetMetadataType.KeylabsObjDetVideo
+    )
 
 
-class KeylabsObjSegImages(Keylabs):
-    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjSegImages
+class KeylabsObjSegImages(Keylabs, frozen=True):
+    type: typing.Literal[DatasetMetadataType.KeylabsObjSegImages] = (
+        DatasetMetadataType.KeylabsObjSegImages
+    )
 
 
-class KeylabsObjSegVideo(Keylabs):
-    type: DatasetMetadataType = DatasetMetadataType.KeylabsObjSegVideo
+class KeylabsObjSegVideo(Keylabs, frozen=True):
+    type: typing.Literal[DatasetMetadataType.KeylabsObjSegVideo] = (
+        DatasetMetadataType.KeylabsObjSegVideo
+    )
 
 
 KeylabsInfo = typing.Union[
@@ -107,11 +117,14 @@ The dataset labeling info for Keylabs. The dataset labeling info can be one of t
 - `DatasetMetadataType.KeylabsObjSegImages`: Indicates that the dataset metadata file is in the Keylabs object segmentation image format
 - `DatasetMetadataType.KeylabsObjSegVideo`: Indicates that the dataset metadata file is in the Keylabs object segmentation video format
 """
-LabelingInfo = typing.Union[
-    HirundoCSV,
-    COCO,
-    YOLO,
-    KeylabsInfo,
+LabelingInfo = typing.Annotated[
+    typing.Union[
+        HirundoCSV,
+        COCO,
+        YOLO,
+        KeylabsInfo,
+    ],
+    Field(discriminator="type"),
 ]
 """
 The dataset labeling info. The dataset labeling info can be one of the following:
