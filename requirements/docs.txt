@@ -221,7 +221,7 @@ sphinx==7.4.7
     #   sphinx-basic-ng
     #   sphinx-click
     #   sphinx-multiversion
-sphinx-autobuild==2024.4.16
+sphinx-autobuild==2024.10.3
     # via hirundo (pyproject.toml)
 sphinx-basic-ng==1.0.0b2
     # via furo
