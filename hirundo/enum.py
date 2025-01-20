@@ -28,3 +28,19 @@ class DatasetMetadataType(str, Enum):
     KeylabsObjDetVideo = "KeylabsObjDetVideo"
     KeylabsObjSegImages = "KeylabsObjSegImages"
     KeylabsObjSegVideo = "KeylabsObjSegVideo"
+
+
+class StorageTypes(str, Enum):
+    """
+    Enum for the different types of storage configs.
+    Supported types are:
+    """
+
+    S3 = "S3"
+    GCP = "GCP"
+    # AZURE = "Azure"  TODO: Azure storage config is coming soon
+    GIT = "Git"
+    LOCAL = "Local"
+    """
+    Local storage config is only supported for on-premises installations.
+    """

@@ -1,5 +1,4 @@
 import typing
-from enum import Enum
 from pathlib import Path
 
 import pydantic
@@ -12,6 +11,7 @@ from hirundo._headers import get_auth_headers, json_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo._urls import S3BucketUrl, StorageConfigName
+from hirundo.enum import StorageTypes
 from hirundo.git import GitRepo, GitRepoOut
 from hirundo.logger import get_logger
 
@@ -187,22 +187,6 @@ class StorageGitOut(BaseModel):
         """
         repo_url = self.repo.repository_url
         return get_git_repo_url(repo_url, path)
-
-
-class StorageTypes(str, Enum):
-    """
-    Enum for the different types of storage configs.
-    Supported types are:
-    """
-
-    S3 = "S3"
-    GCP = "GCP"
-    # AZURE = "Azure"  TODO: Azure storage config is coming soon
-    GIT = "Git"
-    LOCAL = "Local"
-    """
-    Local storage config is only supported for on-premises installations.
-    """
 
 
 class StorageConfig(BaseModel):

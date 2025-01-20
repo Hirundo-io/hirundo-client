@@ -8,6 +8,7 @@ from .dataset_optimization_results import DatasetOptimizationResults
 from .enum import (
     DatasetMetadataType,
     LabelingType,
+    StorageTypes,
 )
 from .git import GitRepo
 from .labeling import (
@@ -26,7 +27,6 @@ from .storage import (
     # StorageAzure,  TODO: Azure storage is coming soon
     StorageGit,
     StorageS3,
-    StorageTypes,
 )
 from .unzip import load_df, load_from_zip
 
