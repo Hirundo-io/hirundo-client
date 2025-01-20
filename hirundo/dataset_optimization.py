@@ -547,6 +547,15 @@ class OptimizationDataset(BaseModel):
             OptimizationDataset._check_run_by_id(run_id, retry + 1)
 
     @staticmethod
+    def _handle_failure(iteration: dict):
+        if iteration["result"]:
+            raise HirundoError(
+                f"Optimization run failed with error: {iteration['result']}"
+            )
+        else:
+            raise HirundoError("Optimization run failed with an unknown error")
+
+    @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[True]
@@ -595,9 +604,7 @@ class OptimizationDataset(BaseModel):
                         RunStatus.REJECTED.value,
                         RunStatus.REVOKED.value,
                     ]:
-                        raise HirundoError(
-                            f"Optimization run failed with error: {iteration['result']}"
-                        )
+                        OptimizationDataset._handle_failure(iteration)
                     elif iteration["state"] == RunStatus.SUCCESS.value:
                         t.close()
                         zip_temporary_url = iteration["result"]
