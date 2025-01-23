@@ -17,7 +17,7 @@ from hirundo._dataframe import (
     string,
 )
 from hirundo._env import API_HOST
-from hirundo._headers import get_auth_headers
+from hirundo._headers import _get_auth_headers
 from hirundo._timeouts import DOWNLOAD_READ_TIMEOUT
 from hirundo.dataset_optimization_results import (
     DataFrameType,
@@ -128,7 +128,7 @@ def download_and_extract_zip(
             f"{API_HOST}/dataset-optimization/run/local-download"
             + zip_url.replace("file://", "")
         )
-        headers = get_auth_headers()
+        headers = _get_auth_headers()
     # Stream the zip file download
     with requests.get(
         zip_url,
