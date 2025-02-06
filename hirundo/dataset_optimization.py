@@ -18,8 +18,8 @@ from hirundo._headers import get_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
+from hirundo.dataset_enum import DatasetMetadataType, LabelingType
 from hirundo.dataset_optimization_results import DatasetOptimizationResults
-from hirundo.enum import DatasetMetadataType, LabelingType
 from hirundo.logger import get_logger
 from hirundo.storage import ResponseStorageConfig, StorageConfig
 from hirundo.unzip import download_and_extract_zip

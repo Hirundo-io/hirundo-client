@@ -1,3 +1,7 @@
+from .dataset_enum import (
+    DatasetMetadataType,
+    LabelingType,
+)
 from .dataset_optimization import (
     COCO,
     YOLO,
@@ -8,10 +12,6 @@ from .dataset_optimization import (
     VisionRunArgs,
 )
 from .dataset_optimization_results import DatasetOptimizationResults
-from .enum import (
-    DatasetMetadataType,
-    LabelingType,
-)
 from .git import GitRepo
 from .storage import (
     StorageConfig,
