@@ -163,7 +163,7 @@ select = [
     "B",
     "A",
     "TID",
-    "TCH",
+    "TC",
     "NPY",
 ]
 ignore = []
