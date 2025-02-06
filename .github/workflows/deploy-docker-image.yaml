@@ -6,6 +6,7 @@ on:
       - 'v*'
   pull_request:
     paths:
+      - '.github/workflows/deploy-docker-image.yaml'
       - 'jupyter.Dockerfile'
 
 concurrency:
@@ -19,7 +20,7 @@ permissions:
 
 jobs:
   build-and-push:
-      if: startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '+on-prem')
+      if: (startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '+on-prem')) || github.event_name == 'pull_request'
       runs-on: ubuntu-latest
 
       steps:
