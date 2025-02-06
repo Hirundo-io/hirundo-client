@@ -830,6 +830,7 @@ class DataOptimizationDatasetOut(BaseModel):
 class DataOptimizationRunOut(BaseModel):
     id: int
     name: str
+    dataset_id: int
     run_id: str
     status: RunStatus
     approved: bool
