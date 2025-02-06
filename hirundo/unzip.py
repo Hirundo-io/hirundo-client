@@ -152,9 +152,14 @@ def download_and_extract_zip(
             suspects_df = None
             warnings_and_errors_df = None
             try:
+                filenames = [file.filename for file in z.filelist]
                 mislabel_suspect_filename = "mislabel_suspects.csv"
-                if mislabel_suspect_filename not in z.filelist:
+                if mislabel_suspect_filename not in filenames:
                     mislabel_suspect_filename = "suspects.csv"
+                if mislabel_suspect_filename not in filenames:
+                    raise ValueError(
+                        "Neither mislabel_suspects.csv nor suspects.csv found in the zip file"
+                    )
                 with z.open(mislabel_suspect_filename) as suspects_file:
                     suspects_df = load_df(suspects_file)
                 logger.debug(
