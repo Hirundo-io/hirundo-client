@@ -107,7 +107,8 @@ def download_and_extract_zip(
     """
     Download and extract the zip file from the given URL.
 
-    Note: It will only extract the `mislabel_suspects.csv`
+    Note: It will only extract the `mislabel_suspects.csv` (vision)
+    or `suspects.csv` (STT)
     and `warnings_and_errors.csv` files from the zip file.
 
     Args:
@@ -151,7 +152,10 @@ def download_and_extract_zip(
             suspects_df = None
             warnings_and_errors_df = None
             try:
-                with z.open("mislabel_suspects.csv") as suspects_file:
+                mislabel_suspect_filename = "mislabel_suspects.csv"
+                if mislabel_suspect_filename not in z.filelist:
+                    mislabel_suspect_filename = "suspects.csv"
+                with z.open(mislabel_suspect_filename) as suspects_file:
                     suspects_df = load_df(suspects_file)
                 logger.debug(
                     "Successfully loaded mislabel suspects into DataFrame for run ID %s",
