@@ -65,7 +65,7 @@ jobs:
             name=ghcr.io/hirundo-io/hirundo-client,enable=true
           tags: |
             type=match,pattern=v(.*)+on-prem,group=1,suffix=on-prem,enable=${{ github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/') && endsWith(github.ref, '+on-prem') }}
-            type=ref,event=branch,enable=${{ github.event_name == 'pull_request' }}
+            type=raw,value=${{ github.head_ref }},enable=${{ github.event_name == 'pull_request' }}
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
