@@ -38,22 +38,22 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Cache /home/10001/.cache/rattler/cache
-        id: cache-pixi
+      - name: Cache /home/nonroot/.cache/uv
+        id: cache-uv
         uses: actions/cache@v4
         with:
-          path: opt-client-pixi
-          key: opt-client-pixi-${{ hashFiles('pixi.lock') }}
-      - name: inject pixi cache into docker
+          path: opt-uv
+          key: opt-uv-${{ hashFiles('requirements/*') }}
+      - name: inject uv cache into docker
         # v1 was composed of two actions: "inject" and "extract".
         # v2 is unified to a single action.
         uses: reproducible-containers/buildkit-cache-dance@v3.1.1
         with:
           cache-map: |
             {
-              "opt-client-pixi": "/home/10001/.cache/rattler/cache"
+              "opt-uv": "/home/nonroot/.cache/uv"
             }
-          skip-extraction: ${{ steps.cache-pixi.outputs.cache-hit }}
+          skip-extraction: ${{ steps.cache-uv.outputs.cache-hit }}
         # Credit to: https://docs.docker.com/build/ci/github-actions/cache/#cache-mounts &
         #            https://github.com/reproducible-containers/buildkit-cache-dance
 
