@@ -9,7 +9,7 @@ from pydantic_core import Url
 
 from hirundo._constraints import RepoUrl
 from hirundo._env import API_HOST
-from hirundo._headers import get_auth_headers, json_headers
+from hirundo._headers import get_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo.logger import get_logger
@@ -124,10 +124,7 @@ class GitRepo(BaseModel):
                 **self.model_dump(mode="json"),
                 "replace_if_exists": replace_if_exists,
             },
-            headers={
-                **json_headers,
-                **get_auth_headers(),
-            },
+            headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         raise_for_status_with_reason(git_repo)
@@ -145,7 +142,7 @@ class GitRepo(BaseModel):
         """
         git_repo = requests.get(
             f"{API_HOST}/git-repo/{git_repo_id}",
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(git_repo)
@@ -163,7 +160,7 @@ class GitRepo(BaseModel):
         """
         git_repo = requests.get(
             f"{API_HOST}/git-repo/by-name/{name}",
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(git_repo)
@@ -176,9 +173,7 @@ class GitRepo(BaseModel):
         """
         git_repos = requests.get(
             f"{API_HOST}/git-repo/",
-            headers={
-                **get_auth_headers(),
-            },
+            headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(git_repos)
@@ -200,9 +195,7 @@ class GitRepo(BaseModel):
         """
         git_repo = requests.delete(
             f"{API_HOST}/git-repo/{git_repo_id}",
-            headers={
-                **get_auth_headers(),
-            },
+            headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         raise_for_status_with_reason(git_repo)
