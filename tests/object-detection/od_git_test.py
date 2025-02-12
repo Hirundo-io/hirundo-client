@@ -22,7 +22,7 @@ unique_id = get_unique_id()
 git_storage = StorageGit(
     repo=GitRepo(
         name=f"BDD-100k-validation-dataset{unique_id}",
-        repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
+        repository_url="git@hf.co:datasets/hirundo-io/bdd100k-validation-only",
     ),
     branch="main",
 )
