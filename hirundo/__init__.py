@@ -12,7 +12,7 @@ from .dataset_optimization import (
     VisionRunArgs,
 )
 from .dataset_optimization_results import DatasetOptimizationResults
-from .git import GitRepo
+from .git import GitPlainAuth, GitRepo, GitSSHAuth
 from .storage import (
     StorageConfig,
     StorageGCP,
@@ -33,7 +33,9 @@ __all__ = [
     "VisionRunArgs",
     "LabelingType",
     "DatasetMetadataType",
+    "GitPlainAuth",
     "GitRepo",
+    "GitSSHAuth",
     "StorageTypes",
     "StorageS3",
     "StorageGCP",

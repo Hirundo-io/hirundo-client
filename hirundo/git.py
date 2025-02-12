@@ -17,7 +17,7 @@ from hirundo.logger import get_logger
 logger = get_logger(__name__)
 
 
-class GitPlainAuthBase(BaseModel):
+class GitPlainAuth(BaseModel):
     username: str
     """
     The username for the Git repository
@@ -28,7 +28,7 @@ class GitPlainAuthBase(BaseModel):
     """
 
 
-class GitSSHAuthBase(BaseModel):
+class GitSSHAuth(BaseModel):
     ssh_key: str
     """
     The SSH key for the Git repository
@@ -52,7 +52,7 @@ class GitRepo(BaseModel):
     repository_url: typing.Union[str, RepoUrl]
     """
     The URL of the Git repository, it should start with `ssh://` or `https://` or be in the form `user@host:path`.
-    If it is in the form `user@host:path`, it will be rewritten to `ssh://user@host:path`.
+    If it is in the form `user@host:path`, it will be rewritten to `ssh://user@host/path`.
     """
     organization_id: typing.Optional[int] = None
     """
@@ -60,14 +60,14 @@ class GitRepo(BaseModel):
     If not provided, it will be assigned to your default organization.
     """
 
-    plain_auth: typing.Optional[GitPlainAuthBase] = pydantic.Field(
+    plain_auth: typing.Optional[GitPlainAuth] = pydantic.Field(
         default=None, examples=[None, {"username": "ben", "password": "password"}]
     )
     """
     The plain authentication details for the Git repository.
     Use this if using a special user with a username and password for authentication.
     """
-    ssh_auth: typing.Optional[GitSSHAuthBase] = pydantic.Field(
+    ssh_auth: typing.Optional[GitSSHAuth] = pydantic.Field(
         default=None,
         examples=[
             {

@@ -835,3 +835,4 @@ class DataOptimizationRunOut(BaseModel):
     status: RunStatus
     approved: bool
     created_at: datetime.datetime
+    run_args: typing.Optional[RunArgs]

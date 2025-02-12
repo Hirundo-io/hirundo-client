@@ -7,6 +7,8 @@ from typing import Annotated
 from urllib.parse import urlparse
 
 import typer
+from rich.console import Console
+from rich.table import Table
 
 from hirundo._env import API_HOST, EnvLocation
 
@@ -187,6 +189,56 @@ def setup(
         print(
             "API host and API key saved to .env for future use. Please do not share this file since it contains your secret API key."
         )
+
+
+@app.command("check-run", epilog=hirundo_epilog)
+def check_run(
+    run_id: str,
+):
+    """
+    Check the status of a run.
+    """
+    from hirundo.dataset_optimization import OptimizationDataset
+
+    results = OptimizationDataset.check_run_by_id(run_id)
+    print(f"Run results saved to {results.cached_zip_path}")
+
+
+@app.command("list-runs", epilog=hirundo_epilog)
+def list_runs():
+    """
+    List all runs available.
+    """
+    from hirundo.dataset_optimization import OptimizationDataset
+
+    runs = OptimizationDataset.list_runs()
+
+    console = Console()
+    table = Table(
+        title="Runs:",
+        expand=True,
+    )
+    cols = (
+        "Dataset name",
+        "Run ID",
+        "Status",
+        "Created At",
+        "Run Args",
+    )
+    for col in cols:
+        table.add_column(
+            col,
+            overflow="fold",
+        )
+    for run in runs:
+        table.add_row(
+            str(run.name),
+            str(run.id),
+            str(run.status),
+            run.created_at.isoformat(),
+            run.run_args.model_dump_json() if run.run_args else None,
+        )
+    console.print(table)
 
 
 typer_click_object = typer.main.get_command(app)
