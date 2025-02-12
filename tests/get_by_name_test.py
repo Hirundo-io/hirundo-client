@@ -4,6 +4,7 @@ import typing
 
 import pytest
 from hirundo import (
+    GitPlainAuth,
     GitRepo,
     HirundoCSV,
     LabelingType,
@@ -77,7 +78,11 @@ def test_get_by_name_git():
         git=StorageGit(
             repo=GitRepo(
                 name=git_repository_name,
-                repository_url="git@hf.co:datasets/hirundo-io/bdd100k-validation-only",
+                repository_url="https://huggingface.co/datasets/hirundo-io/bdd100k-validation-only",
+                plain_auth=GitPlainAuth(
+                    username="blewis-hir",
+                    password=os.environ["HUGGINGFACE_ACCESS_TOKEN"],
+                ),
             ),
             branch="main",
         ),

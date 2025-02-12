@@ -98,7 +98,11 @@ from hirundo import (
 git_storage = StorageGit(
     repo=GitRepo(
         name="BDD-100k-validation-dataset",
-        repository_url="git@hf.co:datasets/hirundo-io/bdd100k-validation-only.git",
+        repository_url="https://huggingface.co/datasets/hirundo-io/bdd100k-validation-only.git",
+        plain_auth=GitPlainAuth(
+            username="blewis-hir",
+            password=os.environ["HUGGINGFACE_ACCESS_TOKEN"],
+        ),
     ),
     branch="main",
 )
