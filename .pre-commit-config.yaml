@@ -7,7 +7,7 @@ repos:
       - id: trailing-whitespace
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.6.5
+    rev: v0.9.4
     hooks:
       # Run the linter.
       - id: ruff
@@ -17,42 +17,48 @@ repos:
   - repo: local
     hooks:
     - id: pip-compile
-      name: compile requirements.txt
+      name: compile requirements/requirements.txt
       entry: uv
-      args: ["pip", "compile", "-o", "requirements.txt"]
+      args: ["pip", "compile", "-o", "requirements/requirements.txt"]
       language: python
       always_run: false
       files: pyproject.toml$
       additional_dependencies: [uv]
     - id: pip-compile-dev
-      name: compile dev-requirements.txt
+      name: compile requirements/dev.txt
       entry: uv
-      args: ["pip", "compile", "--extra", "dev", "-o", "dev-requirements.txt", "-c", "requirements.txt"]
+      args: ["pip", "compile", "--extra", "dev", "-o", "requirements/dev.txt", "-c", "requirements/requirements.txt"]
       language: python
       always_run: false
       files: pyproject.toml$
       additional_dependencies: [uv]
-    - id: pip-sync-dev
-      name: sync dev-requirements.txt
+    - id: pip-compile-pandas
+      name: compile requirements/pandas.txt
       entry: uv
-      args: ["pip", "sync", "dev-requirements.txt"]
+      args: ["pip", "compile", "--extra", "pandas", "-o", "requirements/pandas.txt", "-c", "requirements/requirements.txt"]
       language: python
-      always_run: false
-      files: dev-requirements.txt$
+      files: pyproject.toml$
+      additional_dependencies: [uv]
+    - id: pip-compile-polars
+      name: compile requirements/polars.txt
+      entry: uv
+      args: ["pip", "compile", "--extra", "polars", "-o", "requirements/polars.txt", "-c", "requirements/requirements.txt"]
+      language: python
+      files: pyproject.toml$
       additional_dependencies: [uv]
     - id: pip-compile-docs
-      name: compile docs-requirements.txt
+      name: compile requirements/docs.txt
       entry: uv
-      args: ["pip", "compile", "--extra", "docs", "-o", "docs-requirements.txt", "-c", "requirements.txt"]
+      args: ["pip", "compile", "--extra", "docs", "-o", "requirements/docs.txt", "-c", "requirements/requirements.txt"]
       language: python
       always_run: false
       files: pyproject.toml$
       additional_dependencies: [uv]
-    - id: pip-sync-docs
-      name: sync docs-requirements.txt
+    - id: pip-sync
+      name: sync
       entry: uv
-      args: ["pip", "sync", "docs-requirements.txt"]
+      args: ["pip", "sync", "requirements/dev.txt", "requirements/docs.txt", "requirements/pandas.txt", "requirements/polars.txt"]
       language: python
       always_run: false
-      files: docs-requirements.txt$
+      files: requirements.txt$
       additional_dependencies: [uv]

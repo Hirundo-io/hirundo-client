@@ -22,6 +22,8 @@ jobs:
             env: RUN_AWS_OD_OPTIMIZATION
           - test: object-detection/od_git_test.py
             env: RUN_OD_GIT_OPTIMIZATION
+          - test: tests/object-detection/sama_coco_test.py
+            env: RUN_COCO_OD_GCP_SANITY_OPTIMIZATION
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -34,7 +36,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m venv .venv
           source .venv/bin/activate
-          pip install -r dev-requirements.txt
+          pip install -r requirements/dev.txt -r requirements/polars.txt
       - name: Run PyTest
         run: .venv/bin/pytest tests/${{ matrix.optimization-test['test'] }}
         env:
@@ -43,5 +45,6 @@ jobs:
           GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          HUGGINGFACE_ACCESS_TOKEN: ${{ secrets.HUGGINGFACE_ACCESS_TOKEN }}
           UNIQUE_ID: ${{ github.ref }}-${{ github.run_number }}
           ${{ matrix.optimization-test['env'] }}: true

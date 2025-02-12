@@ -7,7 +7,7 @@ packages = ["hirundo"]
 
 [project]
 name = "hirundo"
-version = "0.1.8"
+version = "0.1.9"
 description = "This package is used to interface with Hirundo's platform. It provides a simple API to optimize your ML datasets."
 authors = [{ name = "Hirundo", email = "dev@hirundo.io" }]
 readme = "README.md"
@@ -35,7 +35,6 @@ dependencies = [
     "httpx>=0.27.0",
     "stamina>=24.2.0",
     "httpx-sse>=0.4.0",
-    "pandas>=2.2.2",
     "tqdm>=4.66.5",
 ]
 
@@ -60,10 +59,14 @@ dev = [
     "httpx-sse>=0.4.0",
     "pytest>=8.2.0",
     "pytest-asyncio>=0.23.6",
-    "uv",
+    "uv>=0.5.8",
     "pre-commit>=3.7.1",
-    "ruff==0.6.5",
+    "virtualenv>=20.6.6",
+    #  ⬆️ Needed for `pre-commit` and locking version for `safety-cli`
+    "ruff>=0.9.4",
     "bumpver",
+    "platformdirs>=4.3.6",
+    "safety>=3.2.13",
 ]
 docs = [
     "sphinx>=7.4.7",
@@ -74,6 +77,16 @@ docs = [
     "autodoc_pydantic>=2.2.0",
     "furo",
     "sphinx-multiversion",
+    "esbonio",
+    "starlette>0.40.0",
+    "markupsafe>=3.0.2",
+    #  Force `starlette` and `markupsafe` to versions compatible with `dev` dependencies.
+]
+pandas = [
+    "pandas>=2.2.2",
+]
+polars = [
+    "polars>=1.0.0",
 ]
 
 [tool.bumpver]
@@ -150,7 +163,7 @@ select = [
     "B",
     "A",
     "TID",
-    "TCH",
+    "TC",
     "NPY",
 ]
 ignore = []
@@ -166,3 +179,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 [tool.ruff.lint.per-file-ignores]
 "tests/*.py" = ["S101"]
 "notebooks/**/*.ipynb" = ["S324"]
+
+[tool.pyright]
+typeCheckingMode = "standard"
+autoSearchPaths = true
