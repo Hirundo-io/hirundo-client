@@ -52,7 +52,7 @@ class GitRepo(BaseModel):
     repository_url: typing.Union[str, RepoUrl]
     """
     The URL of the Git repository, it should start with `ssh://` or `https://` or be in the form `user@host:path`.
-    If it is in the form `user@host:path`, it will be rewritten to `ssh://user@host:path`.
+    If it is in the form `user@host:path`, it will be rewritten to `ssh://user@host/path`.
     """
     organization_id: typing.Optional[int] = None
     """
