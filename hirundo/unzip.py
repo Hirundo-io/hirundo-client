@@ -17,7 +17,7 @@ from hirundo._dataframe import (
     string,
 )
 from hirundo._env import API_HOST
-from hirundo._headers import get_auth_headers
+from hirundo._headers import _get_auth_headers
 from hirundo._timeouts import DOWNLOAD_READ_TIMEOUT
 from hirundo.dataset_optimization_results import (
     DataFrameType,
@@ -107,7 +107,8 @@ def download_and_extract_zip(
     """
     Download and extract the zip file from the given URL.
 
-    Note: It will only extract the `mislabel_suspects.csv`
+    Note: It will only extract the `mislabel_suspects.csv` (vision)
+    or `suspects.csv` (STT)
     and `warnings_and_errors.csv` files from the zip file.
 
     Args:
@@ -128,7 +129,7 @@ def download_and_extract_zip(
             f"{API_HOST}/dataset-optimization/run/local-download"
             + zip_url.replace("file://", "")
         )
-        headers = get_auth_headers()
+        headers = _get_auth_headers()
     # Stream the zip file download
     with requests.get(
         zip_url,
@@ -151,7 +152,15 @@ def download_and_extract_zip(
             suspects_df = None
             warnings_and_errors_df = None
             try:
-                with z.open("mislabel_suspects.csv") as suspects_file:
+                filenames = [file.filename for file in z.filelist]
+                mislabel_suspect_filename = "mislabel_suspects.csv"
+                if mislabel_suspect_filename not in filenames:
+                    mislabel_suspect_filename = "suspects.csv"
+                if mislabel_suspect_filename not in filenames:
+                    raise ValueError(
+                        "Neither mislabel_suspects.csv nor suspects.csv found in the zip file"
+                    )
+                with z.open(mislabel_suspect_filename) as suspects_file:
                     suspects_df = load_df(suspects_file)
                 logger.debug(
                     "Successfully loaded mislabel suspects into DataFrame for run ID %s",

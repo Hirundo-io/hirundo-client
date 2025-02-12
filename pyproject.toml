@@ -63,7 +63,7 @@ dev = [
     "pre-commit>=3.7.1",
     "virtualenv>=20.6.6",
     #  ⬆️ Needed for `pre-commit` and locking version for `safety-cli`
-    "ruff>=0.8.2",
+    "ruff>=0.9.4",
     "bumpver",
     "platformdirs>=4.3.6",
     "safety>=3.2.13",
@@ -163,7 +163,7 @@ select = [
     "B",
     "A",
     "TID",
-    "TCH",
+    "TC",
     "NPY",
 ]
 ignore = []
