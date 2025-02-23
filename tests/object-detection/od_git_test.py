@@ -1,9 +1,7 @@
 import logging
-import os
 
 import pytest
 from hirundo import (
-    GitPlainAuth,
     GitRepo,
     HirundoCSV,
     LabelingType,
@@ -25,9 +23,6 @@ git_storage = StorageGit(
     repo=GitRepo(
         name=f"BDD-100k-validation-dataset{unique_id}",
         repository_url="https://huggingface.co/datasets/hirundo-io/bdd100k-validation-only",
-        plain_auth=GitPlainAuth(
-            username="blewis-hir", password=os.environ["HUGGINGFACE_ACCESS_TOKEN"]
-        ),
     ),
     branch="main",
 )
