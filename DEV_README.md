@@ -15,7 +15,7 @@ When opening Pull Requests, note that the repository has GitHub Actions which ru
 ### Install dev dependencies
 
 ```bash
-pip install -r dev-requirements.txt
+pip install -r requirements/dev.txt
 ```
 
 Note: You can install and use `uv` as a faster drop-in replacement for `pip`. We have it as part of our dev dependencies for this reason.
@@ -40,14 +40,16 @@ ruff format
 
 ```bash
 uv pip compile pyproject.toml
-uv pip compile --extra dev -o dev-requirements.txt -c requirements.txt pyproject.toml
-uv pip compile --extra docs -o docs-requirements.txt -c requirements.txt pyproject.toml
+uv pip compile --extra dev -o requirements/dev.txt -c requirements.txt pyproject.toml
+uv pip compile --extra pandas -o requirements/pandas.txt -c requirements.txt pyproject.toml
+uv pip compile --extra polars -o requirements/polars.txt -c requirements.txt pyproject.toml
+uv pip compile --extra docs -o requirements/docs.txt -c requirements.txt pyproject.toml
 ```
 
 #### Sync installed packages
 
 ```bash
-uv pip sync dev-requirements.txt
+uv pip sync requirements/dev.txt requirements/polars.txt
 ```
 
 ### Build process
@@ -57,7 +59,7 @@ To build the package, run:
 
 ### Documentation
 
-We use `sphinx` to generate our documentation. Note: If you want to manually create the HTML files from your documentation, you must install `docs-requirements.txt` instead of/in addition to `dev-requirements.txt`.
+We use `sphinx` to generate our documentation. Note: If you want to manually create the HTML files from your documentation, you must install `requirements/docs.txt` instead of/in addition to `requirements/dev.txt`.
 
 #### Documentation releases
 Documentation releases are published via GitHub Actions on merges to `main`.

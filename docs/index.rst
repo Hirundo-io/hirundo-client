@@ -24,7 +24,7 @@ Currently ``hirundo`` supports the following dataset types:
    - (Multi-class) Classification datasets
    - Object Detection datasets
 
-Support dataset storage integrations include:
+Support dataset storage configs include:
    - Google Cloud (GCP) Storage
    - Amazon Web Services (AWS) S3
    - Git LFS (Large File Storage) repositories (e.g. GitHub or HuggingFace)

@@ -4,14 +4,13 @@ import os
 
 import pytest
 from hirundo import (
-    HirundoCSV,
+    YOLO,
     LabelingType,
     OptimizationDataset,
     StorageConfig,
     StorageGCP,
     StorageTypes,
 )
-from hirundo.dataset_optimization import AugmentationNames
 from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_async_test,
@@ -23,39 +22,29 @@ logger = logging.getLogger(__name__)
 
 unique_id = get_unique_id()
 gcp_bucket = StorageGCP(
-    bucket_name="cifar1bucket",
+    bucket_name="rock-paper-scissors-yolo",
     project="Hirundo-global",
     credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
 )
 test_dataset = OptimizationDataset(
-    name=f"TEST-GCP sanity dataset{unique_id}",
-    labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
+    name=f"TEST-GCP sanity YOLO dataset{unique_id}",
+    labeling_type=LabelingType.OBJECT_DETECTION,
     storage_config=StorageConfig(
-        name=f"cifar1bucket{unique_id}",
+        name=f"rock-paper-scissors-yolo-{unique_id}",
         type=StorageTypes.GCP,
         gcp=gcp_bucket,
     ),
-    labeling_info=HirundoCSV(
-        csv_url=gcp_bucket.get_url(path="/pytorch-cifar/data/cifar1.csv"),
+    labeling_info=YOLO(
+        data_yaml_url=gcp_bucket.get_url(
+            path="/Rock Paper Scissors SXSW.v14i.yolov8.zip/Rock Paper Scissors SXSW.v14i.yolov8/train/images/"
+        ),
+        labels_dir_url=gcp_bucket.get_url(
+            path="/Rock Paper Scissors SXSW.v14i.yolov8.zip/Rock Paper Scissors SXSW.v14i.yolov8/train/labels/"
+        ),
     ),
-    data_root_url=gcp_bucket.get_url(path="/pytorch-cifar/data"),
-    classes=[
-        "airplane",
-        "automobile",
-        "bird",
-        "cat",
-        "deer",
-        "dog",
-        "frog",
-        "horse",
-        "ship",
-        "truck",
-    ],
-    augmentations=[
-        AugmentationNames.RandomHorizontalFlip,
-        AugmentationNames.RandomVerticalFlip,
-        AugmentationNames.ColorJitter,
-    ],
+    data_root_url=gcp_bucket.get_url(
+        path="/Rock Paper Scissors SXSW.v14i.yolov8.zip/Rock Paper Scissors SXSW.v14i.yolov8/data.yaml"
+    ),
 )
 
 
@@ -69,14 +58,14 @@ def cleanup_tests():
 def test_dataset_optimization():
     full_run = dataset_optimization_sync_test(
         test_dataset,
-        sanity=True,
-        alternative_env="RUN_CLASSIFICATION_GCP_SANITY_OPTIMIZATION",
+        alternative_env="RUN_YOLO_OD_GCP_SANITY_OPTIMIZATION",
     )
     if full_run is not None:
         assert full_run.warnings_and_errors is not None
         assert full_run.warnings_and_errors.shape[0] == 0
         assert full_run.suspects is not None
-        assert full_run.suspects.shape[0] >= 5_000
+        assert full_run.suspects.shape[0] >= 30_000
+        # TODO: Add more assertions for results
     else:
         logger.info("Full dataset optimization was not run!")
 
@@ -84,5 +73,5 @@ def test_dataset_optimization():
 @pytest.mark.asyncio
 async def test_async_dataset_optimization():
     await dataset_optimization_async_test(
-        test_dataset, "RUN_CLASSIFICATION_GCP_SANITY_OPTIMIZATION"
+        test_dataset, "RUN_YOLO_OD_GCP_SANITY_OPTIMIZATION"
     )

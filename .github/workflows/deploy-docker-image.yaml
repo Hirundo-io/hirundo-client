@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+  pull_request:
+    paths:
+      - '.github/workflows/deploy-docker-image.yaml'
+      - 'jupyter.Dockerfile'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,7 +20,7 @@ permissions:
 
 jobs:
   build-and-push:
-      if: startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '+on-prem')
+      if: (startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '+on-prem')) || github.event_name == 'pull_request'
       runs-on: ubuntu-latest
 
       steps:
@@ -34,6 +38,25 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Cache /home/nonroot/.cache/uv
+        id: cache-uv
+        uses: actions/cache@v4
+        with:
+          path: opt-uv
+          key: opt-uv-${{ hashFiles('requirements/*') }}
+      - name: inject uv cache into docker
+        # v1 was composed of two actions: "inject" and "extract".
+        # v2 is unified to a single action.
+        uses: reproducible-containers/buildkit-cache-dance@v3.1.1
+        with:
+          cache-map: |
+            {
+              "opt-uv": "/home/nonroot/.cache/uv"
+            }
+          skip-extraction: ${{ steps.cache-uv.outputs.cache-hit }}
+        # Credit to: https://docs.docker.com/build/ci/github-actions/cache/#cache-mounts &
+        #            https://github.com/reproducible-containers/buildkit-cache-dance
+
       - name: Docker meta configuration for `hirundo-client` image
         id: client-meta
         uses: docker/metadata-action@v5
@@ -42,6 +65,7 @@ jobs:
             name=ghcr.io/hirundo-io/hirundo-client,enable=true
           tags: |
             type=match,pattern=v(.*)+on-prem,group=1,suffix=on-prem,enable=${{ github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/') && endsWith(github.ref, '+on-prem') }}
+            type=raw,value=${{ github.head_ref }},enable=${{ github.event_name == 'pull_request' }}
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:

@@ -4,16 +4,16 @@ import os
 
 import pytest
 from hirundo import (
-    HirundoCSV,
+    COCO,
     LabelingType,
     OptimizationDataset,
     StorageConfig,
     StorageGCP,
     StorageTypes,
 )
-from tests.classification.cifar100_classes import cifar100_classes
 from tests.dataset_optimization_shared import (
     cleanup,
+    dataset_optimization_async_test,
     dataset_optimization_sync_test,
     get_unique_id,
 )
@@ -22,23 +22,24 @@ logger = logging.getLogger(__name__)
 
 unique_id = get_unique_id()
 gcp_bucket = StorageGCP(
-    bucket_name="cifar100bucket",
+    bucket_name="sama-coco-bucket",
     project="Hirundo-global",
     credentials_json=json.loads(os.environ["GCP_CREDENTIALS"]),
 )
 test_dataset = OptimizationDataset(
-    name=f"TEST-GCP cifar 100 classification dataset{unique_id}",
-    labeling_type=LabelingType.SINGLE_LABEL_CLASSIFICATION,
+    name=f"TEST-GCP sanity COCO dataset{unique_id}",
+    labeling_type=LabelingType.OBJECT_DETECTION,
     storage_config=StorageConfig(
-        name=f"cifar100bucket{unique_id}",
+        name=f"sama-coco-{unique_id}",
         type=StorageTypes.GCP,
         gcp=gcp_bucket,
     ),
-    data_root_url=gcp_bucket.get_url(path="/pytorch-cifar/data"),
-    labeling_info=HirundoCSV(
-        csv_url=gcp_bucket.get_url(path="/pytorch-cifar/data/cifar100.csv"),
+    labeling_info=COCO(
+        json_url=gcp_bucket.get_url(
+            path="/sama-coco.zip/sama-coco/validation/labels.json"
+        ),
     ),
-    classes=cifar100_classes,
+    data_root_url=gcp_bucket.get_url(path="/sama-coco.zip/sama-coco/validation/data"),
 )
 
 
@@ -51,11 +52,21 @@ def cleanup_tests():
 
 def test_dataset_optimization():
     full_run = dataset_optimization_sync_test(
-        test_dataset, "RUN_CLASSIFICATION_GCP_OPTIMIZATION"
+        test_dataset,
+        alternative_env="RUN_COCO_OD_GCP_SANITY_OPTIMIZATION",
     )
     if full_run is not None:
         assert full_run.warnings_and_errors is not None
         assert full_run.warnings_and_errors.shape[0] == 0
+        assert full_run.suspects is not None
+        assert full_run.suspects.shape[0] >= 30_000
         # TODO: Add more assertions for results
     else:
         logger.info("Full dataset optimization was not run!")
+
+
+@pytest.mark.asyncio
+async def test_async_dataset_optimization():
+    await dataset_optimization_async_test(
+        test_dataset, "RUN_COCO_OD_GCP_SANITY_OPTIMIZATION"
+    )
