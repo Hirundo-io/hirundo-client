@@ -4,40 +4,43 @@ This package exposes access to Hirundo APIs for dataset optimization for Machine
 
 Dataset optimization is currently available for datasets labelled for classification and object detection.
 
-
 Support dataset storage configs include:
-   - Google Cloud (GCP) Storage
-   - Amazon Web Services (AWS) S3
-   - Git LFS (Large File Storage) repositories (e.g. GitHub or HuggingFace)
+
+- Google Cloud (GCP) Storage
+- Amazon Web Services (AWS) S3
+- Git LFS (Large File Storage) repositories (e.g. GitHub or HuggingFace)
 
 Optimizing a classification dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Currently ``hirundo`` requires a CSV file with the following columns (all columns are required):
-   - ``image_path``: The location of the image within the dataset ``root``
-   - ``label``: The label of the image, i.e. which the class that was annotated for this image
+Currently `hirundo` requires a CSV file with the following columns (all columns are required):
+
+- `image_path`: The location of the image within the dataset `root`
+- `label`: The label of the image, i.e. which the class that was annotated for this image
 
 And outputs a CSV with the same columns and:
-   - ``suspect_level``: mislabel suspect level
-   - ``suggested_label``: suggested label
-   - ``suggested_label_conf``: suggested label confidence
+
+- `suspect_level`: mislabel suspect level
+- `suggested_label`: suggested label
+- `suggested_label_conf`: suggested label confidence
 
 Optimizing an object detection (OD) dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Currently ``hirundo`` requires a CSV file with the following columns (all columns are required):
-   - ``image_path``: The location of the image within the dataset ``root``
-   - ``bbox_id``: The index of the bounding box within the dataset. Used to indicate label suspects
-   - ``label``: The label of the image, i.e. which the class that was annotated for this image
-   - ``x1``, ``y1``, ``x2``, ``y2``: The bounding box coordinates of the object within the image
+Currently `hirundo` requires a CSV file with the following columns (all columns are required):
+
+- `image_path`: The location of the image within the dataset `root`
+- `bbox_id`: The index of the bounding box within the dataset. Used to indicate label suspects
+- `label`: The label of the image, i.e. which the class that was annotated for this image
+- `x1`, `y1`, `x2`, `y2`: The bounding box coordinates of the object within the image
 
 And outputs a CSV with the same columns and:
-   - ``suspect_level``: object mislabel suspect level
-   - ``suggested_label``: suggested object label
-   - ``suggested_label_conf``: suggested object label confidence
+
+- `suspect_level`: object mislabel suspect level
+- `suggested_label`: suggested object label
+- `suggested_label_conf`: suggested object label confidence
 
 Note: This Python package must be used alongside a Hirundo server, either the SaaS platform, a custom VPC deployment or an on-premises installation.
-
 
 ## Installation
 
@@ -46,6 +49,7 @@ You can install the codebase with a simple `pip install hirundo` to install the 
 ## Usage
 
 Classification example:
+
 ```python
 from hirundo import (
     HirundoCSV,
@@ -80,7 +84,6 @@ test_dataset.run_optimization()
 results = test_dataset.check_run()
 print(results)
 ```
-
 
 Object detection example:
 
@@ -142,4 +145,4 @@ Note: Currently we only support the main CPython release 3.9, 3.10 and 3.11. PyP
 
 ## Further documentation
 
-To learn more about how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the Google Colab examples.
+To learn more about how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the [Google Colab examples](https://github.com/Hirundo-io/hirundo-client/tree/main/notebooks).
