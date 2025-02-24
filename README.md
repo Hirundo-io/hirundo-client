@@ -98,7 +98,7 @@ from hirundo import (
 git_storage = StorageGit(
     repo=GitRepo(
         name="BDD-100k-validation-dataset",
-        repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only.git",
+        repository_url="https://huggingface.co/datasets/hirundo-io/bdd100k-validation-only",
     ),
     branch="main",
 )
