@@ -25,6 +25,9 @@ from hirundo.dataset_optimization_results import (
 )
 from hirundo.logger import get_logger
 
+if typing.TYPE_CHECKING:
+    from pandas._typing import DtypeArg
+
 ZIP_FILE_CHUNK_SIZE = 50 * 1024 * 1024  # 50 MB
 
 Dtype = typing.Union[type[int32], type[float32], type[string]]
@@ -90,12 +93,10 @@ def load_df(
     if has_polars:
         return pl.read_csv(file, schema_overrides=CUSTOMER_INTERCHANGE_DTYPES)
     elif has_pandas:
-        from pandas._typing import DtypeArg
-
-        dtype = cast(DtypeArg, CUSTOMER_INTERCHANGE_DTYPES)
+        dtype = cast("DtypeArg", CUSTOMER_INTERCHANGE_DTYPES)
         #  ⬆️ Casting since CUSTOMER_INTERCHANGE_DTYPES is a Mapping[str, Dtype] in this case
         df = pd.read_csv(file, dtype=dtype)
-        return cast(DataFrameType, _clean_df_index(df))
+        return cast("DataFrameType", _clean_df_index(df))
         #  ⬆️ Casting since the return type is pd.DataFrame, but this is what DataFrameType is in this case
     else:
         return None
