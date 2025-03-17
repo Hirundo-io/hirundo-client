@@ -166,13 +166,14 @@ class VisionRunArgs(BaseModel):
 RunArgs = typing.Union[VisionRunArgs]
 
 
-class AugmentationNames(str, Enum):
-    RandomHorizontalFlip = "RandomHorizontalFlip"
-    RandomVerticalFlip = "RandomVerticalFlip"
-    RandomRotation = "RandomRotation"
-    ColorJitter = "ColorJitter"
-    RandomAffine = "RandomAffine"
-    RandomPerspective = "RandomPerspective"
+class AugmentationName(str, Enum):
+    RANDOM_HORIZONTAL_FLIP = "RandomHorizontalFlip"
+    RANDOM_VERTICAL_FLIP = "RandomVerticalFlip"
+    RANDOM_ROTATION = "RandomRotation"
+    RANDOM_PERSPECTIVE = "RandomPerspective"
+    GAUSSIAN_NOISE = "GaussianNoise"
+    RANDOM_GRAYSCALE = "RandomGrayscale"
+    GAUSSIAN_BLUR = "GaussianBlur"
 
 
 class Modality(str, Enum):
@@ -229,7 +230,7 @@ class OptimizationDataset(BaseModel):
     """
     labeling_info: LabelingInfo
 
-    augmentations: typing.Optional[list[AugmentationNames]] = None
+    augmentations: typing.Optional[list[AugmentationName]] = None
     """
     Used to define which augmentations are apply to a vision dataset.
     For audio datasets, this field is ignored.
