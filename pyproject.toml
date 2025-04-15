@@ -83,7 +83,7 @@ docs = [
     #  Force `starlette` and `markupsafe` to versions compatible with `dev` dependencies.
 ]
 pandas = [
-    "pandas>=2.2.2",
+    "pandas>=2.2.3",
 ]
 polars = [
     "polars>=1.0.0",
