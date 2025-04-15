@@ -10,37 +10,56 @@ Support dataset storage configs include:
 - Amazon Web Services (AWS) S3
 - Git LFS (Large File Storage) repositories (e.g. GitHub or HuggingFace)
 
+Note: This Python package must be used alongside a Hirundo server, either the SaaS platform, a custom VPC deployment or an on-premises installation.
+
 Optimizing a classification dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Currently `hirundo` requires a CSV file with the following columns (all columns are required):
 
-- `image_path`: The location of the image within the dataset `root`
-- `label`: The label of the image, i.e. which the class that was annotated for this image
+- `image_path`: The location of the image within the dataset `data_root_url`
+- `class_name`: The semantic label, i.e. the class name of the class that the image was annotated as belonging to
 
-And outputs a CSV with the same columns and:
+And outputs two Pandas DataFrames with the dataset columns as well as:
 
-- `suspect_level`: mislabel suspect level
-- `suggested_label`: suggested label
-- `suggested_label_conf`: suggested label confidence
+Suspect DataFrame (filename: `mislabel_suspects.csv`) columns:
+
+- ``suspect_score``: mislabel suspect score
+- ``suspect_level``: mislabel suspect level
+- ``suspect_rank``: mislabel suspect ranking
+- ``suggested_class_name``: suggested semantic label
+- ``suggested_class_conf``: suggested semantic label confidence
+
+Errors and warnings DataFrame (filename: `invalid_data.csv`) columns:
+
+   - ``status``: status message (one of ``NO_LABELS`` / ``MISSING_IMAGE`` / ``INVALID_IMAGE``)
 
 Optimizing an object detection (OD) dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Currently `hirundo` requires a CSV file with the following columns (all columns are required):
+Currently ``hirundo`` requires a CSV file with the following columns (all columns are required):
 
-- `image_path`: The location of the image within the dataset `root`
-- `bbox_id`: The index of the bounding box within the dataset. Used to indicate label suspects
-- `label`: The label of the image, i.e. which the class that was annotated for this image
-- `x1`, `y1`, `x2`, `y2`: The bounding box coordinates of the object within the image
+- ``image_path``: The location of the image within the dataset ``data_root_url``
+- ``object_id``: The ID of the bounding box within the dataset. Used to indicate object suspects
+- ``class_name``: Object semantic label, i.e. the class name of the object that was annotated
+- ``xmin``: leftmost horizontal pixel coordinate of the object's bounding box
+- ``ymin``: uppermost vertical pixel coordinate of the object's bounding box
+- ``xmax``: rightmost horizontal pixel coordinate of the object's bounding box
+- ``ymax``: lowermost vertical pixel coordinate of the object's bounding box
 
-And outputs a CSV with the same columns and:
 
-- `suspect_level`: object mislabel suspect level
-- `suggested_label`: suggested object label
-- `suggested_label_conf`: suggested object label confidence
+And outputs two Pandas DataFrames with the dataset columns as well as:
 
-Note: This Python package must be used alongside a Hirundo server, either the SaaS platform, a custom VPC deployment or an on-premises installation.
+Suspect DataFrame (filename: `mislabel_suspects.csv`) columns:
+
+- ``suspect_score``: object mislabel suspect score
+- ``suspect_level``: object mislabel suspect level
+- ``suspect_rank``: object mislabel suspect ranking
+- ``suggested_class_name``: suggested object semantic label
+- ``suggested_label_conf``: suggested object semantic label confidence
+
+Errors and warnings DataFrame (filename: `invalid_data.csv`) columns:
+   - ``status``: status message (one of ``NO_LABELS`` / ``MISSING_IMAGE`` / ``INVALID_IMAGE`` / ``INVALID_BBOX`` / ``INVALID_BBOX_SIZE``)
 
 ## Installation
 
@@ -119,21 +138,6 @@ test_dataset = OptimizationDataset(
             path="/BDD100K Val from Hirundo.zip/bdd100k/bdd100k.csv"
         ),
     ),
-    classes=[
-        "traffic light",
-        "traffic sign",
-        "car",
-        "pedestrian",
-        "bus",
-        "truck",
-        "rider",
-        "bicycle",
-        "motorcycle",
-        "train",
-        "other vehicle",
-        "other person",
-        "trailer",
-    ],
 )
 
 test_dataset.run_optimization()
