@@ -23,7 +23,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m venv .venv
           source .venv/bin/activate
-          pip install -r requirements/dev.txt -r requirements/pandas.txt -r requirements/polars.txt
+          if [[ ${{ matrix.python-version}} = "pypy3.9" || ${{ matrix.python-version}} = "pypy3.10" ]]; then
+            pip install -r requirements/dev.txt
+          else
+            pip install -r requirements/dev.txt -r requirements/pandas.txt -r requirements/polars.txt
+          fi
       - run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
       - uses: astral-sh/ruff-action@v3
       - run: ruff check
@@ -44,7 +48,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m venv .venv
           source .venv/bin/activate
-          pip install -r requirements/dev.txt -r requirements/pandas.txt -r requirements/polars.txt
+          if [[ ${{ matrix.python-version}} = "pypy3.9" || ${{ matrix.python-version}} = "pypy3.10" ]]; then
+            pip install -r requirements/dev.txt
+          else
+            pip install -r requirements/dev.txt -r requirements/pandas.txt -r requirements/polars.txt
+          fi
       - run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
       - uses: jakebailey/pyright-action@v2
         with:
