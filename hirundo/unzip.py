@@ -90,15 +90,29 @@ def load_df(
     if has_polars:
         return pl.read_csv(file, schema_overrides=CUSTOMER_INTERCHANGE_DTYPES)
     elif has_pandas:
-        from pandas._typing import DtypeArg
+        if typing.TYPE_CHECKING:
+            from pandas._typing import DtypeArg
 
-        dtype = cast(DtypeArg, CUSTOMER_INTERCHANGE_DTYPES)
+        dtype = cast("DtypeArg", CUSTOMER_INTERCHANGE_DTYPES)
         #  ⬆️ Casting since CUSTOMER_INTERCHANGE_DTYPES is a Mapping[str, Dtype] in this case
         df = pd.read_csv(file, dtype=dtype)
-        return cast(DataFrameType, _clean_df_index(df))
+        return cast("DataFrameType", _clean_df_index(df))
         #  ⬆️ Casting since the return type is pd.DataFrame, but this is what DataFrameType is in this case
     else:
         return None
+
+
+def get_mislabel_suspect_filename(filenames: list[str]):
+    mislabel_suspect_filename = "mislabel_suspects.csv"
+    if mislabel_suspect_filename not in filenames:
+        mislabel_suspect_filename = "image_mislabel_suspects.csv"
+    if mislabel_suspect_filename not in filenames:
+        mislabel_suspect_filename = "suspects.csv"
+    if mislabel_suspect_filename not in filenames:
+        raise ValueError(
+            "None of mislabel_suspects.csv, image_mislabel_suspects.csv or suspects.csv were found in the zip file"
+        )
+    return mislabel_suspect_filename
 
 
 def download_and_extract_zip(
@@ -107,7 +121,8 @@ def download_and_extract_zip(
     """
     Download and extract the zip file from the given URL.
 
-    Note: It will only extract the `mislabel_suspects.csv` (vision)
+    Note: It will only extract the `mislabel_suspects.csv` (vision - classification)
+    or `image_mislabel_suspects.csv` & `object_mislabel_suspects.csv` (vision - OD)
     or `suspects.csv` (STT)
     and `warnings_and_errors.csv` files from the zip file.
 
@@ -150,16 +165,17 @@ def download_and_extract_zip(
         with zipfile.ZipFile(zip_file_path, "r") as z:
             # Extract suspects file
             suspects_df = None
+            object_suspects_df = None
             warnings_and_errors_df = None
+
+            filenames = []
             try:
                 filenames = [file.filename for file in z.filelist]
-                mislabel_suspect_filename = "mislabel_suspects.csv"
-                if mislabel_suspect_filename not in filenames:
-                    mislabel_suspect_filename = "suspects.csv"
-                if mislabel_suspect_filename not in filenames:
-                    raise ValueError(
-                        "Neither mislabel_suspects.csv nor suspects.csv found in the zip file"
-                    )
+            except Exception as e:
+                logger.error("Failed to get filenames from ZIP", exc_info=e)
+
+            try:
+                mislabel_suspect_filename = get_mislabel_suspect_filename(filenames)
                 with z.open(mislabel_suspect_filename) as suspects_file:
                     suspects_df = load_df(suspects_file)
                 logger.debug(
@@ -170,6 +186,23 @@ def download_and_extract_zip(
                 logger.error(
                     "Failed to load mislabel suspects into DataFrame", exc_info=e
                 )
+
+            object_mislabel_suspects_filename = "object_mislabel_suspects.csv"
+            if object_mislabel_suspects_filename in filenames:
+                try:
+                    with z.open(
+                        object_mislabel_suspects_filename
+                    ) as object_suspects_file:
+                        object_suspects_df = load_df(object_suspects_file)
+                    logger.debug(
+                        "Successfully loaded object mislabel suspects into DataFrame for run ID %s",
+                        run_id,
+                    )
+                except Exception as e:
+                    logger.error(
+                        "Failed to load object mislabel suspects into DataFrame",
+                        exc_info=e,
+                    )
 
             try:
                 # Extract warnings_and_errors file
@@ -187,6 +220,7 @@ def download_and_extract_zip(
             return DatasetOptimizationResults[DataFrameType](
                 cached_zip_path=zip_file_path,
                 suspects=suspects_df,
+                object_suspects=object_suspects_df,
                 warnings_and_errors=warnings_and_errors_df,
             )
 
