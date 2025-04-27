@@ -7,7 +7,7 @@ packages = ["hirundo"]
 
 [project]
 name = "hirundo"
-version = "0.1.9"
+version = "0.1.16"
 description = "This package is used to interface with Hirundo's platform. It provides a simple API to optimize your ML datasets."
 authors = [{ name = "Hirundo", email = "dev@hirundo.io" }]
 readme = "README.md"
@@ -63,7 +63,7 @@ dev = [
     "pre-commit>=3.7.1",
     "virtualenv>=20.6.6",
     #  ⬆️ Needed for `pre-commit` and locking version for `safety-cli`
-    "ruff>=0.9.4",
+    "ruff>=0.11.6",
     "bumpver",
     "platformdirs>=4.3.6",
     "safety>=3.2.13",
@@ -163,7 +163,7 @@ select = [
     "B",
     "A",
     "TID",
-    "TC",
+    "TCH",
     "NPY",
 ]
 ignore = []
