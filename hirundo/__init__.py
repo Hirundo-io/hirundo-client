@@ -47,4 +47,4 @@ __all__ = [
     "load_from_zip",
 ]
 
-__version__ = "0.1.9"
+__version__ = "0.1.16"
