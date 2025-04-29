@@ -7,7 +7,7 @@ packages = ["hirundo"]
 
 [project]
 name = "hirundo"
-version = "0.1.9"
+version = "0.1.16"
 description = "This package is used to interface with Hirundo's platform. It provides a simple API to optimize your ML datasets."
 authors = [{ name = "Hirundo", email = "dev@hirundo.io" }]
 readme = "README.md"
@@ -17,12 +17,7 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
-keywords = [
-    "dataset",
-    "machine learning",
-    "data science",
-    "data engineering",
-]
+keywords = ["dataset", "machine learning", "data science", "data engineering"]
 requires-python = ">= 3.9"
 dependencies = [
     "pyyaml>=6.0.1",
@@ -63,7 +58,7 @@ dev = [
     "pre-commit>=3.7.1",
     "virtualenv>=20.6.6",
     #  ⬆️ Needed for `pre-commit` and locking version for `safety-cli`
-    "ruff>=0.11.0",
+    "ruff>=0.11.6",
     "bumpver",
     "platformdirs>=4.3.6",
     "safety>=3.2.13",
@@ -82,32 +77,29 @@ docs = [
     "markupsafe>=3.0.2",
     #  Force `starlette` and `markupsafe` to versions compatible with `dev` dependencies.
 ]
-pandas = [
-    "pandas>=2.2.3",
-]
-polars = [
-    "polars>=1.0.0",
-]
+pandas = ["pandas>=2.2.3"]
+polars = ["polars>=1.0.0"]
 
 [tool.bumpver]
 current_version = "0.1.3b1"
 version_pattern = "MAJOR.MINOR.PATCH[PYTAGNUM]"
 
 [tool.bumpver.file_patterns]
-"pyproject.toml" = [
-    '^version = "{version}"$',
-]
-"hirundo/__init__.py" = [
-    '^__version__ = "{version}"$',
-]
+"pyproject.toml" = ['^version = "{version}"$']
+"hirundo/__init__.py" = ['^__version__ = "{version}"$']
 "docs/_templates/github-pages-redirect.html" = [
     """<meta http-equiv="refresh" content="0; url=./v{version}/index.html" />""",
-    """<link rel="canonical" href="https://hirundo-io.github.io/hirundo/v{version}/index.html" />$"""
+    """<link rel="canonical" href="https://hirundo-io.github.io/hirundo/v{version}/index.html" />$""",
 ]
 
 [tool.ruff]
 src = ["hirundo"]
-include = ["pyproject.toml", "hirundo/**/*.py", "tests/**/*.py", "notebooks/**/*.ipynb"]
+include = [
+    "pyproject.toml",
+    "hirundo/**/*.py",
+    "tests/**/*.py",
+    "notebooks/**/*.ipynb",
+]
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -137,7 +129,7 @@ exclude = [
     "dist",
     "node_modules",
     "site-packages",
-    ".venv",               # This is the default
+    ".venv",              # This is the default
     ".micromamba",
 ]
 
@@ -163,7 +155,7 @@ select = [
     "B",
     "A",
     "TID",
-    "TC",
+    "TCH",
     "NPY",
 ]
 ignore = []
