@@ -1,11 +1,9 @@
 from .dataset_enum import (
     DatasetMetadataType,
     LabelingType,
+    StorageTypes,
 )
 from .dataset_optimization import (
-    COCO,
-    YOLO,
-    HirundoCSV,
     HirundoError,
     OptimizationDataset,
     RunArgs,
@@ -13,26 +11,40 @@ from .dataset_optimization import (
 )
 from .dataset_optimization_results import DatasetOptimizationResults
 from .git import GitPlainAuth, GitRepo, GitSSHAuth
+from .labeling import (
+    COCO,
+    YOLO,
+    HirundoCSV,
+    KeylabsAuth,
+    KeylabsObjDetImages,
+    KeylabsObjDetVideo,
+    KeylabsObjSegImages,
+    KeylabsObjSegVideo,
+)
 from .storage import (
     StorageConfig,
     StorageGCP,
     # StorageAzure,  TODO: Azure storage is coming soon
     StorageGit,
     StorageS3,
-    StorageTypes,
 )
 from .unzip import load_df, load_from_zip
 
 __all__ = [
     "COCO",
     "YOLO",
-    "HirundoCSV",
     "HirundoError",
+    "HirundoCSV",
+    "KeylabsAuth",
+    "KeylabsObjDetImages",
+    "KeylabsObjDetVideo",
+    "KeylabsObjSegImages",
+    "KeylabsObjSegVideo",
     "OptimizationDataset",
     "RunArgs",
     "VisionRunArgs",
-    "LabelingType",
     "DatasetMetadataType",
+    "LabelingType",
     "GitPlainAuth",
     "GitRepo",
     "GitSSHAuth",

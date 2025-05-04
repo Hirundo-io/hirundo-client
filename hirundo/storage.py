@@ -1,5 +1,4 @@
 import typing
-from enum import Enum
 from pathlib import Path
 
 import pydantic
@@ -7,11 +6,12 @@ import requests
 from pydantic import BaseModel, model_validator
 from pydantic_core import Url
 
-from hirundo._constraints import S3BucketUrl, StorageConfigName
 from hirundo._env import API_HOST
 from hirundo._headers import get_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
+from hirundo._urls import S3BucketUrl, StorageConfigName
+from hirundo.dataset_enum import StorageTypes
 from hirundo.git import GitRepo, GitRepoOut
 from hirundo.logger import get_logger
 
@@ -34,11 +34,11 @@ class StorageS3Base(BaseModel):
         Chains the bucket URL with the path, ensuring that the path is formatted correctly
 
         Args:
-            path: The path to the file in the S3 bucket, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+            path: The path to the file in the S3 bucket, e.g. :file:`my-file.txt` or :file:`/my-folder/my-file.txt`
 
         Returns:
-            The full URL to the file in the S3 bucket, e.g. `s3://my-bucket/my-file.txt` or `s3://my-bucket/my-folder/my-file.txt`,
-            where `s3://my-bucket` is the bucket URL provided in the S3 storage config
+            The full URL to the file in the S3 bucket, e.g. :file:`s3://my-bucket/my-file.txt` or :file:`s3://my-bucket/my-folder/my-file.txt`,
+            where :file:`s3://my-bucket` is the bucket URL provided in the S3 storage config
         """
         return Url(
             f"{S3_PREFIX}{self.bucket_url.removeprefix(S3_PREFIX).removesuffix('/')}/{str(path).removeprefix('/')}"
@@ -64,11 +64,11 @@ class StorageGCPBase(BaseModel):
         Chains the bucket URL with the path, ensuring that the path is formatted correctly
 
         Args:
-            path: The path to the file in the GCP bucket, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+            path: The path to the file in the GCP bucket, e.g. :file:`my-file.txt` or :file:`/my-folder/my-file.txt`
 
         Returns:
-            The full URL to the file in the GCP bucket, e.g. `gs://my-bucket/my-file.txt` or `gs://my-bucket/my-folder/my-file.txt`,
-            where `my-bucket` is the bucket name provided in the GCP storage config
+            The full URL to the file in the GCP bucket, e.g. :file:`gs://my-bucket/my-file.txt` or :file:`gs://my-bucket/my-folder/my-file.txt`,
+            where :file:`my-bucket` is the bucket name provided in the GCP storage config
         """
         return Url(f"gs://{self.bucket_name}/{str(path).removeprefix('/')}")
 
@@ -94,7 +94,7 @@ class StorageGCPOut(StorageGCPBase):
 #         Chains the container URL with the path, ensuring that the path is formatted correctly
 
 #         Args:
-#             path: The path to the file in the Azure container, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+#             path: The path to the file in the Azure container, e.g. :file:`my-file.txt` or :file:`/my-folder/my-file.txt`
 
 #         Returns:
 #             The full URL to the file in the Azure container
@@ -114,11 +114,11 @@ def get_git_repo_url(
     Chains the repository URL with the path, ensuring that the path is formatted correctly
 
     Args:
-        repo_url: The URL of the git repository, e.g. `https://my-git-repository.com`
-        path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+        repo_url: The URL of the git repository, e.g. :file:`https://my-git-repository.com`
+        path: The path to the file in the git repository, e.g. :file:`my-file.txt` or :file:`/my-folder/my-file.txt`
 
     Returns:
-        The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`
+        The full URL to the file in the git repository, e.g. :file:`https://my-git-repository.com/my-file.txt` or :file:`https://my-git-repository.com/my-folder/my-file.txt`
     """
     if not isinstance(repo_url, Url):
         repo_url = Url(repo_url)
@@ -131,12 +131,12 @@ class StorageGit(BaseModel):
     repo_id: typing.Optional[int] = None
     """
     The ID of the Git repository in the Hirundo system.
-    Either `repo_id` or `repo` must be provided.
+    Either :code:`repo_id` or :code:`repo` must be provided.
     """
     repo: typing.Optional[GitRepo] = None
     """
     The Git repository to link to.
-    Either `repo_id` or `repo` must be provided.
+    Either :code:`repo_id` or :code:`repo` must be provided.
     """
     branch: str
     """
@@ -156,11 +156,11 @@ class StorageGit(BaseModel):
         Chains the repository URL with the path, ensuring that the path is formatted correctly
 
         Args:
-            path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+            path: The path to the file in the git repository, e.g. :file:`my-file.txt` or :file:`/my-folder/my-file.txt`
 
         Returns:
-            The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`,
-            where `https://my-git-repository.com` is the repository URL provided in the git storage config's git repo
+            The full URL to the file in the git repository, e.g. :file:`https://my-git-repository.com/my-file.txt` or :file:`https://my-git-repository.com/my-folder/my-file.txt`,
+            where :file:`https://my-git-repository.com` is the repository URL provided in the git storage config's git repo
         """
         if not self.repo:
             raise ValueError("Repo must be provided to use `get_url`")
@@ -179,47 +179,31 @@ class StorageGitOut(BaseModel):
         Chains the repository URL with the path, ensuring that the path is formatted correctly
 
         Args:
-            path: The path to the file in the git repository, e.g. `my-file.txt` or `/my-folder/my-file.txt`
+            path: The path to the file in the git repository, e.g. :file:`my-file.txt` or :file:`/my-folder/my-file.txt`
 
         Returns:
-            The full URL to the file in the git repository, e.g. `https://my-git-repository.com/my-file.txt` or `https://my-git-repository.com/my-folder/my-file.txt`,
-            where `https://my-git-repository.com` is the repository URL provided in the git storage config's git repo
+            The full URL to the file in the git repository, e.g. :file:`https://my-git-repository.com/my-file.txt` or :file:`https://my-git-repository.com/my-folder/my-file.txt`,
+            where :file:`https://my-git-repository.com` is the repository URL provided in the git storage config's git repo
         """
         repo_url = self.repo.repository_url
         return get_git_repo_url(repo_url, path)
 
 
-class StorageTypes(str, Enum):
-    """
-    Enum for the different types of storage configs.
-    Supported types are:
-    """
-
-    S3 = "S3"
-    GCP = "GCP"
-    # AZURE = "Azure"  TODO: Azure storage config is coming soon
-    GIT = "Git"
-    LOCAL = "Local"
-    """
-    Local storage config is only supported for on-premises installations.
-    """
-
-
 class StorageConfig(BaseModel):
     id: typing.Optional[int] = None
     """
-    The ID of the `StorageConfig` in the Hirundo system.
+    The ID of the :code:`StorageConfig` in the Hirundo system.
     """
 
     organization_id: typing.Optional[int] = None
     """
-    The ID of the organization that the `StorageConfig` belongs to.
+    The ID of the organization that the :code:`StorageConfig` belongs to.
     If not provided, it will be assigned to your default organization.
     """
 
     name: StorageConfigName
     """
-    A name to identify the `StorageConfig` in the Hirundo system.
+    A name to identify the :code:`StorageConfig` in the Hirundo system.
     """
     type: typing.Optional[StorageTypes] = pydantic.Field(
         examples=[
@@ -230,12 +214,12 @@ class StorageConfig(BaseModel):
         ]
     )
     """
-    The type of the `StorageConfig`.
+    The type of the :code:`StorageConfig`.
     Supported types are:
-    - `S3`
-    - `GCP`
-    - `Azure` (coming soon)
-    - `Git`
+    - :code:`S3`
+    - :code:`GCP`
+    - :code:`Azure` (coming soon)
+    - :code:`Git`
     """
     s3: typing.Optional[StorageS3] = pydantic.Field(
         default=None,
@@ -323,10 +307,10 @@ class StorageConfig(BaseModel):
     @staticmethod
     def get_by_id(storage_config_id: int) -> "ResponseStorageConfig":
         """
-        Retrieves a `StorageConfig` instance from the server by its ID
+        Retrieves a :code:`StorageConfig` instance from the server by its ID
 
         Args:
-            storage_config_id: The ID of the `StorageConfig` to retrieve
+            storage_config_id: The ID of the :code:`StorageConfig` to retrieve
         """
         storage_config = requests.get(
             f"{API_HOST}/storage-config/{storage_config_id}",
@@ -339,11 +323,11 @@ class StorageConfig(BaseModel):
     @staticmethod
     def get_by_name(name: str, storage_type: StorageTypes) -> "ResponseStorageConfig":
         """
-        Retrieves a `StorageConfig` instance from the server by its name
+        Retrieves a :code:`StorageConfig` instance from the server by its name
 
         Args:
-            name: The name of the `StorageConfig` to retrieve
-            storage_type: The type of the `StorageConfig` to retrieve
+            name: The name of the :code:`StorageConfig` to retrieve
+            storage_type: The type of the :code:`StorageConfig` to retrieve
 
             Note: The type is required because the name is not unique across different storage types
         """
@@ -360,12 +344,12 @@ class StorageConfig(BaseModel):
         organization_id: typing.Optional[int] = None,
     ) -> list["ResponseStorageConfig"]:
         """
-        Lists all the `StorageConfig`'s created by user's default organization
-        Note: The return type is `list[dict]` and not `list[StorageConfig]`
+        Lists all the :code:`StorageConfig`'s created by user's default organization
+        Note: The return type is :code:`list[dict]` and not :code:`list[StorageConfig]`
 
         Args:
-            organization_id: The ID of the organization to list `StorageConfig`'s for.
-            If not provided, it will list `StorageConfig`'s for the default organization.
+            organization_id: The ID of the organization to list :code:`StorageConfig`'s for.
+            If not provided, it will list :code:`StorageConfig`'s for the default organization.
         """
         storage_configs = requests.get(
             f"{API_HOST}/storage-config/",
@@ -379,10 +363,10 @@ class StorageConfig(BaseModel):
     @staticmethod
     def delete_by_id(storage_config_id) -> None:
         """
-        Deletes a `StorageConfig` instance from the server by its ID
+        Deletes a :code:`StorageConfig` instance from the server by its ID
 
         Args:
-            storage_config_id: The ID of the `StorageConfig` to delete
+            storage_config_id: The ID of the :code:`StorageConfig` to delete
         """
         storage_config = requests.delete(
             f"{API_HOST}/storage-config/{storage_config_id}",
@@ -394,7 +378,7 @@ class StorageConfig(BaseModel):
 
     def delete(self) -> None:
         """
-        Deletes the `StorageConfig` instance from the server
+        Deletes the :code:`StorageConfig` instance from the server
         """
         if not self.id:
             raise ValueError("No StorageConfig has been created")
@@ -402,10 +386,10 @@ class StorageConfig(BaseModel):
 
     def create(self, replace_if_exists: bool = False) -> int:
         """
-        Create a `StorageConfig` instance on the server
+        Create a :code:`StorageConfig` instance on the server
 
         Args:
-            replace_if_exists: If a `StorageConfig` with the same name and type already exists, replace it.
+            replace_if_exists: If a :code:`StorageConfig` with the same name and type already exists, replace it.
         """
         if self.git and self.git.repo:
             self.git.repo_id = self.git.repo.create(replace_if_exists=replace_if_exists)
