@@ -43,6 +43,9 @@ LABELING_TYPES_TO_DATASET_METADATA_TYPES = {
     LabelingType.PANOPTIC_SEGMENTATION: [
         DatasetMetadataType.HIRUNDO_CSV,
     ],
+    LabelingType.SPEECH_TO_TEXT: [
+        DatasetMetadataType.HIRUNDO_CSV,
+    ],
 }
 
 
