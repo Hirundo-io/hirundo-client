@@ -67,7 +67,7 @@ Suspect DataFrame (filename: `mislabel_suspects.csv`) columns:
    - ``suspect_level``: object mislabel suspect level
    - ``suspect_rank``: object mislabel suspect ranking
    - ``suggested_class_name``: suggested object semantic label
-   - ``suggested_label_conf``: suggested object semantic label confidence
+   - ``suggested_class_conf``: suggested object semantic label confidence
 
 Errors and warnings DataFrame (filename: `invalid_data.csv`) columns:
    - ``status``: status message (one of ``NO_LABELS`` / ``MISSING_IMAGE`` / ``INVALID_IMAGE`` / ``INVALID_BBOX`` / ``INVALID_BBOX_SIZE``)
