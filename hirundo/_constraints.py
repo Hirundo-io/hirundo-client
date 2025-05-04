@@ -47,9 +47,8 @@ def validate_url(
     is_gcp = storage_config.gcp is not None
     matches = None
 
-    if (
-        is_s3
-        and len(str(url)) < LENGTH_CONSTRAINTS[StorageTypes.S3]["min_length"]
+    if is_s3 and (
+        len(str(url)) < LENGTH_CONSTRAINTS[StorageTypes.S3]["min_length"]
         or len(str(url)) > LENGTH_CONSTRAINTS[StorageTypes.S3]["max_length"]
     ):
         raise ValueError("S3 URL must be between 8 and 1023 characters")
@@ -60,9 +59,8 @@ def validate_url(
     ):
         #  New `storage_config.s3` check because `is_s3` is not enough for Pylance
         raise ValueError(f"S3 URL must start with {storage_config.s3.bucket_url}/")
-    elif (
-        is_gcp
-        and len(str(url)) < LENGTH_CONSTRAINTS[StorageTypes.GCP]["min_length"]
+    elif is_gcp and (
+        len(str(url)) < LENGTH_CONSTRAINTS[StorageTypes.GCP]["min_length"]
         or len(str(url)) > LENGTH_CONSTRAINTS[StorageTypes.GCP]["max_length"]
     ):
         raise ValueError("GCP URL must be between 8 and 1023 characters")
