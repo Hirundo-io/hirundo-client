@@ -3,7 +3,7 @@ from typing import Annotated
 from pydantic import StringConstraints, UrlConstraints
 from pydantic_core import Url
 
-from hirundo.enum import StorageTypes
+from hirundo.dataset_enum import StorageTypes
 
 S3BucketUrl = Annotated[
     str,

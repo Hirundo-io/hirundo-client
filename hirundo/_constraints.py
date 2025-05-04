@@ -6,7 +6,7 @@ from hirundo._urls import (
     LENGTH_CONSTRAINTS,
     STORAGE_PATTERNS,
 )
-from hirundo.enum import DatasetMetadataType, LabelingType, StorageTypes
+from hirundo.dataset_enum import DatasetMetadataType, LabelingType, StorageTypes
 from hirundo.labeling import COCO, YOLO, HirundoCSV, Keylabs
 
 if TYPE_CHECKING:

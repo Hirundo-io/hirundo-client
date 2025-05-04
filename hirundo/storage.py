@@ -11,7 +11,7 @@ from hirundo._headers import get_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo._urls import S3BucketUrl, StorageConfigName
-from hirundo.enum import StorageTypes
+from hirundo.dataset_enum import StorageTypes
 from hirundo.git import GitRepo, GitRepoOut
 from hirundo.logger import get_logger
 

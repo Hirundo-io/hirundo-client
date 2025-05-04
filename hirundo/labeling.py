@@ -3,7 +3,7 @@ from abc import ABC
 
 from pydantic import BaseModel, Field
 
-from hirundo.enum import DatasetMetadataType
+from hirundo.dataset_enum import DatasetMetadataType
 
 if typing.TYPE_CHECKING:
     from hirundo._urls import HirundoUrl
