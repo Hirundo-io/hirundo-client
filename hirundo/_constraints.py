@@ -12,7 +12,14 @@ from hirundo.labeling import COCO, YOLO, HirundoCSV, Keylabs
 if TYPE_CHECKING:
     from hirundo._urls import HirundoUrl
     from hirundo.dataset_optimization import LabelingInfo
-    from hirundo.storage import ResponseStorageConfig, StorageConfig
+    from hirundo.storage import (
+        ResponseStorageConfig,
+        StorageConfig,
+        StorageGCP,
+        StorageGCPOut,
+        StorageS3,
+        StorageS3Out,
+    )
 
 LABELING_TYPES_TO_DATASET_METADATA_TYPES = {
     LabelingType.SINGLE_LABEL_CLASSIFICATION: [
@@ -39,56 +46,67 @@ LABELING_TYPES_TO_DATASET_METADATA_TYPES = {
 }
 
 
+def validate_s3_url(str_url: str, s3_config: "StorageS3 | StorageS3Out"):
+    if (
+        len(str_url) < LENGTH_CONSTRAINTS[StorageTypes.S3]["min_length"]
+        or len(str_url) > LENGTH_CONSTRAINTS[StorageTypes.S3]["max_length"]
+    ):
+        raise ValueError("S3 URL must be between 8 and 1023 characters")
+    elif not re.match(STORAGE_PATTERNS[StorageTypes.S3], str_url):
+        raise ValueError(
+            f"Invalid S3 URL. Pattern must match: {STORAGE_PATTERNS[StorageTypes.S3]}"
+        )
+    elif not str_url.startswith(f"{s3_config.bucket_url}/"):
+        raise ValueError(f"S3 URL must start with {s3_config.bucket_url}/")
+
+
+def validate_gcp_url(str_url: str, gcp_config: "StorageGCP | StorageGCPOut"):
+    matches = re.match(STORAGE_PATTERNS[StorageTypes.GCP], str_url)
+    if (
+        len(str_url) < LENGTH_CONSTRAINTS[StorageTypes.GCP]["min_length"]
+        or len(str_url) > LENGTH_CONSTRAINTS[StorageTypes.GCP]["max_length"]
+    ):
+        raise ValueError(
+            f"GCP URL must be between {LENGTH_CONSTRAINTS[StorageTypes.GCP]['min_length']}"
+            + f" and {LENGTH_CONSTRAINTS[StorageTypes.GCP]['max_length']} characters"
+        )
+    elif not matches:
+        raise ValueError(
+            f"Invalid GCP URL. Pattern must match: {STORAGE_PATTERNS[StorageTypes.GCP]}"
+        )
+    elif (
+        matches
+        and len(matches.group(1))
+        > LENGTH_CONSTRAINTS[StorageTypes.GCP]["bucket_max_length"]
+    ):
+        raise ValueError(
+            f"GCP bucket name must be between {LENGTH_CONSTRAINTS[StorageTypes.GCP]['bucket_min_length']} "
+            + f"and {LENGTH_CONSTRAINTS[StorageTypes.GCP]['bucket_max_length']} characters"
+        )
+    elif not str_url.startswith(f"gs://{gcp_config.bucket_name}/"):
+        raise ValueError(f"GCP URL must start with gs://{gcp_config.bucket_name}")
+
+
 def validate_url(
     url: "HirundoUrl",
     storage_config: "StorageConfig | ResponseStorageConfig",
 ) -> "HirundoUrl":
-    is_s3 = storage_config.s3 is not None
-    is_gcp = storage_config.gcp is not None
-    matches = None
+    s3_config = storage_config.s3
+    gcp_config = storage_config.gcp
+    git_config = storage_config.git
+    str_url = str(url)
 
-    if is_s3 and (
-        len(str(url)) < LENGTH_CONSTRAINTS[StorageTypes.S3]["min_length"]
-        or len(str(url)) > LENGTH_CONSTRAINTS[StorageTypes.S3]["max_length"]
-    ):
-        raise ValueError("S3 URL must be between 8 and 1023 characters")
-    elif is_s3 and not re.match(STORAGE_PATTERNS[StorageTypes.S3], str(url)):
-        raise ValueError("Invalid S3 URL")
-    elif storage_config.s3 is not None and not str(url).startswith(
-        f"{storage_config.s3.bucket_url}/"
-    ):
-        #  New `storage_config.s3` check because `is_s3` is not enough for Pylance
-        raise ValueError(f"S3 URL must start with {storage_config.s3.bucket_url}/")
-    elif is_gcp and (
-        len(str(url)) < LENGTH_CONSTRAINTS[StorageTypes.GCP]["min_length"]
-        or len(str(url)) > LENGTH_CONSTRAINTS[StorageTypes.GCP]["max_length"]
-    ):
-        raise ValueError("GCP URL must be between 8 and 1023 characters")
-    elif is_gcp and not (
-        matches := re.match(STORAGE_PATTERNS[StorageTypes.GCP], str(url))
-    ):
-        raise ValueError("Invalid GCP URL")
+    if s3_config is not None:
+        validate_s3_url(str_url, s3_config)
+    elif gcp_config is not None:
+        validate_gcp_url(str_url, gcp_config)
     elif (
-        is_gcp
-        and matches
-        and len(matches.group(1))
-        > LENGTH_CONSTRAINTS[StorageTypes.GCP]["bucket_max_length"]
-    ):
-        raise ValueError("GCP bucket name must be between 3 and 222 characters")
-    elif storage_config.gcp is not None and not str(url).startswith(
-        f"gs://{storage_config.gcp.bucket_name}/"
-    ):
-        #  New `storage_config.gcp` check because `is_gcp` is not enough for Pylance
-        raise ValueError(
-            f"GCP URL must start with gs://{storage_config.gcp.bucket_name}"
-        )
-    elif (
-        storage_config.git is not None
-        and not str(url).startswith("https://")
-        and not str(url).startswith("ssh://")
+        git_config is not None
+        and not str_url.startswith("https://")
+        and not str_url.startswith("ssh://")
     ):
         raise ValueError("Git URL must start with https:// or ssh://")
-    elif storage_config.type == StorageTypes.LOCAL and not str(url).startswith(
+    elif storage_config.type == StorageTypes.LOCAL and not str_url.startswith(
         "file:///datasets/"
     ):
         raise ValueError("Local URL must start with file:///datasets/")
