@@ -13,13 +13,13 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 
 from hirundo._constraints import validate_labeling_info, validate_url
 from hirundo._env import API_HOST
-from hirundo._headers import get_auth_headers, json_headers
+from hirundo._headers import get_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo._urls import HirundoUrl
+from hirundo.dataset_enum import DatasetMetadataType, LabelingType
 from hirundo.dataset_optimization_results import DatasetOptimizationResults
-from hirundo.enum import DatasetMetadataType, LabelingType
 from hirundo.labeling import YOLO, LabelingInfo
 from hirundo.logger import get_logger
 from hirundo.storage import ResponseStorageConfig, StorageConfig
@@ -101,13 +101,14 @@ class VisionRunArgs(BaseModel):
 RunArgs = typing.Union[VisionRunArgs]
 
 
-class AugmentationNames(str, Enum):
-    RandomHorizontalFlip = "RandomHorizontalFlip"
-    RandomVerticalFlip = "RandomVerticalFlip"
-    RandomRotation = "RandomRotation"
-    ColorJitter = "ColorJitter"
-    RandomAffine = "RandomAffine"
-    RandomPerspective = "RandomPerspective"
+class AugmentationName(str, Enum):
+    RANDOM_HORIZONTAL_FLIP = "RandomHorizontalFlip"
+    RANDOM_VERTICAL_FLIP = "RandomVerticalFlip"
+    RANDOM_ROTATION = "RandomRotation"
+    RANDOM_PERSPECTIVE = "RandomPerspective"
+    GAUSSIAN_NOISE = "GaussianNoise"
+    RANDOM_GRAYSCALE = "RandomGrayscale"
+    GAUSSIAN_BLUR = "GaussianBlur"
 
 
 class Modality(str, Enum):
@@ -164,7 +165,7 @@ class OptimizationDataset(BaseModel):
     """
     labeling_info: typing.Union[LabelingInfo, list[LabelingInfo]]
 
-    augmentations: typing.Optional[list[AugmentationNames]] = None
+    augmentations: typing.Optional[list[AugmentationName]] = None
     """
     Used to define which augmentations are apply to a vision dataset.
     For audio datasets, this field is ignored.
@@ -237,7 +238,7 @@ class OptimizationDataset(BaseModel):
         """
         response = requests.get(
             f"{API_HOST}/dataset-optimization/dataset/{dataset_id}",
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(response)
@@ -254,7 +255,7 @@ class OptimizationDataset(BaseModel):
         """
         response = requests.get(
             f"{API_HOST}/dataset-optimization/dataset/by-name/{name}",
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(response)
@@ -275,7 +276,7 @@ class OptimizationDataset(BaseModel):
         response = requests.get(
             f"{API_HOST}/dataset-optimization/dataset/",
             params={"dataset_organization_id": organization_id},
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(response)
@@ -302,7 +303,7 @@ class OptimizationDataset(BaseModel):
         response = requests.get(
             f"{API_HOST}/dataset-optimization/run/list",
             params={"dataset_organization_id": organization_id},
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(response)
@@ -324,7 +325,7 @@ class OptimizationDataset(BaseModel):
         """
         response = requests.delete(
             f"{API_HOST}/dataset-optimization/dataset/{dataset_id}",
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         raise_for_status_with_reason(response)
@@ -396,10 +397,7 @@ class OptimizationDataset(BaseModel):
                 "organization_id": organization_id,
                 "replace_if_exists": replace_if_exists,
             },
-            headers={
-                **json_headers,
-                **get_auth_headers(),
-            },
+            headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         raise_for_status_with_reason(dataset_response)
@@ -433,7 +431,7 @@ class OptimizationDataset(BaseModel):
         run_response = requests.post(
             f"{API_HOST}/dataset-optimization/run/{dataset_id}",
             json=run_info if len(run_info) > 0 else None,
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         raise_for_status_with_reason(run_response)
@@ -519,7 +517,7 @@ class OptimizationDataset(BaseModel):
                 client,
                 "GET",
                 f"{API_HOST}/dataset-optimization/run/{run_id}",
-                headers=get_auth_headers(),
+                headers=get_headers(),
             ):
                 if sse.event == "ping":
                     continue
@@ -704,7 +702,7 @@ class OptimizationDataset(BaseModel):
                 client,
                 "GET",
                 f"{API_HOST}/dataset-optimization/run/{run_id}",
-                headers=get_auth_headers(),
+                headers=get_headers(),
             )
             async for sse in async_iterator:
                 if sse.event == "ping":
@@ -753,7 +751,7 @@ class OptimizationDataset(BaseModel):
         logger.info("Cancelling run with ID: %s", run_id)
         response = requests.delete(
             f"{API_HOST}/dataset-optimization/run/{run_id}",
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         raise_for_status_with_reason(response)
@@ -789,7 +787,9 @@ class DataOptimizationDatasetOut(BaseModel):
 class DataOptimizationRunOut(BaseModel):
     id: int
     name: str
+    dataset_id: int
     run_id: str
     status: RunStatus
     approved: bool
     created_at: datetime.datetime
+    run_args: typing.Optional[RunArgs]

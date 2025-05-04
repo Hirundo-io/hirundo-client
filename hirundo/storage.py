@@ -7,7 +7,7 @@ from pydantic import BaseModel, model_validator
 from pydantic_core import Url
 
 from hirundo._env import API_HOST
-from hirundo._headers import get_auth_headers, json_headers
+from hirundo._headers import get_headers
 from hirundo._http import raise_for_status_with_reason
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo._urls import S3BucketUrl, StorageConfigName
@@ -314,7 +314,7 @@ class StorageConfig(BaseModel):
         """
         storage_config = requests.get(
             f"{API_HOST}/storage-config/{storage_config_id}",
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(storage_config)
@@ -333,7 +333,7 @@ class StorageConfig(BaseModel):
         """
         storage_config = requests.get(
             f"{API_HOST}/storage-config/by-name/{name}?storage_type={storage_type.value}",
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(storage_config)
@@ -354,7 +354,7 @@ class StorageConfig(BaseModel):
         storage_configs = requests.get(
             f"{API_HOST}/storage-config/",
             params={"storage_config_organization_id": organization_id},
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
         raise_for_status_with_reason(storage_configs)
@@ -370,7 +370,7 @@ class StorageConfig(BaseModel):
         """
         storage_config = requests.delete(
             f"{API_HOST}/storage-config/{storage_config_id}",
-            headers=get_auth_headers(),
+            headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         raise_for_status_with_reason(storage_config)
@@ -399,10 +399,7 @@ class StorageConfig(BaseModel):
                 **self.model_dump(mode="json"),
                 "replace_if_exists": replace_if_exists,
             },
-            headers={
-                **json_headers,
-                **get_auth_headers(),
-            },
+            headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )
         raise_for_status_with_reason(storage_config)

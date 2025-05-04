@@ -1,3 +1,8 @@
+from .dataset_enum import (
+    DatasetMetadataType,
+    LabelingType,
+    StorageTypes,
+)
 from .dataset_optimization import (
     HirundoError,
     OptimizationDataset,
@@ -5,12 +10,7 @@ from .dataset_optimization import (
     VisionRunArgs,
 )
 from .dataset_optimization_results import DatasetOptimizationResults
-from .enum import (
-    DatasetMetadataType,
-    LabelingType,
-    StorageTypes,
-)
-from .git import GitRepo
+from .git import GitPlainAuth, GitRepo, GitSSHAuth
 from .labeling import (
     COCO,
     YOLO,
@@ -45,7 +45,9 @@ __all__ = [
     "VisionRunArgs",
     "DatasetMetadataType",
     "LabelingType",
+    "GitPlainAuth",
     "GitRepo",
+    "GitSSHAuth",
     "StorageTypes",
     "StorageS3",
     "StorageGCP",
@@ -57,4 +59,4 @@ __all__ = [
     "load_from_zip",
 ]
 
-__version__ = "0.1.9"
+__version__ = "0.1.16"

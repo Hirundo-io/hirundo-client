@@ -77,7 +77,7 @@ def test_get_by_name_git():
         git=StorageGit(
             repo=GitRepo(
                 name=git_repository_name,
-                repository_url="https://git@hf.co/datasets/hirundo-io/bdd100k-validation-only",
+                repository_url="https://huggingface.co/datasets/hirundo-io/bdd100k-validation-only",
             ),
             branch="main",
         ),

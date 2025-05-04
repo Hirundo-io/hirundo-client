@@ -3,6 +3,7 @@ import os
 
 import pytest
 from hirundo import (
+    GitPlainAuth,
     GitRepo,
     HirundoCSV,
     LabelingType,
@@ -11,7 +12,6 @@ from hirundo import (
     StorageGit,
     StorageTypes,
 )
-from hirundo.git import GitPlainAuthBase
 from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_sync_test,
@@ -25,7 +25,7 @@ test_storage_git = StorageGit(
     repo=GitRepo(
         name=f"STT-MASC-dataset{unique_id}",
         repository_url="https://huggingface.co/datasets/hirundo-io/MASC",
-        plain_auth=GitPlainAuthBase(
+        plain_auth=GitPlainAuth(
             username="blewis-hir",
             password=os.environ["HUGGINGFACE_ACCESS_TOKEN"],
         ),

@@ -6,7 +6,7 @@ This repo contains the source code for the Hirundo client library.
 
 To learn about how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the Google Colab examples.
 
-Note: Currently we only support the main CPython release 3.9, 3.10 and 3.11. PyPy support may be introduced in the future.
+Note: Currently we only support the main CPython release 3.9, 3.10, 3.11, 3.12 & 3.13. PyPy support may be introduced in the future.
 
 ## Development
 

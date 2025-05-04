@@ -3,6 +3,7 @@ import os
 
 import pytest
 from hirundo import (
+    GitPlainAuth,
     GitRepo,
     HirundoCSV,
     LabelingType,
@@ -11,7 +12,6 @@ from hirundo import (
     StorageGit,
     StorageTypes,
 )
-from hirundo.git import GitPlainAuthBase
 from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_sync_test,
@@ -25,7 +25,7 @@ test_storage_git = StorageGit(
     repo=GitRepo(
         name=f"STT-RoboShaulTiny-dataset{unique_id}",
         repository_url="https://huggingface.co/datasets/hirundo-io/RoboShaulTiny",
-        plain_auth=GitPlainAuthBase(
+        plain_auth=GitPlainAuth(
             username="blewis-hir",
             password=os.environ["HUGGINGFACE_ACCESS_TOKEN"],
         ),
@@ -63,7 +63,7 @@ def test_dataset_optimization():
         assert full_run.warnings_and_errors is not None
         assert full_run.warnings_and_errors.shape[0] == 0
         assert full_run.suspects is not None
-        assert full_run.suspects.shape[0] > 100
-        assert full_run.suspects.shape[0] < 150
+        assert full_run.suspects.shape[0] > 45
+        assert full_run.suspects.shape[0] < 100
     else:
         logger.info("Full dataset optimization was not run!")

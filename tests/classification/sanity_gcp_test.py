@@ -11,7 +11,7 @@ from hirundo import (
     StorageGCP,
     StorageTypes,
 )
-from hirundo.dataset_optimization import AugmentationNames
+from hirundo.dataset_optimization import AugmentationName
 from tests.dataset_optimization_shared import (
     cleanup,
     dataset_optimization_async_test,
@@ -52,9 +52,9 @@ test_dataset = OptimizationDataset(
         "truck",
     ],
     augmentations=[
-        AugmentationNames.RandomHorizontalFlip,
-        AugmentationNames.RandomVerticalFlip,
-        AugmentationNames.ColorJitter,
+        AugmentationName.RANDOM_HORIZONTAL_FLIP,
+        AugmentationName.RANDOM_VERTICAL_FLIP,
+        AugmentationName.GAUSSIAN_NOISE,
     ],
 )
 
