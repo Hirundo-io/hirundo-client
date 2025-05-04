@@ -96,7 +96,7 @@ nh3==0.2.18
     #   readme-renderer
 numpy==2.0.1
     # via pandas
-pandas==2.2.2
+pandas==2.2.3
     # via hirundo (pyproject.toml)
 pkginfo==1.10.0
     # via

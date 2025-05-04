@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "pypy3.9", "pypy3.10"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
@@ -23,11 +23,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m venv .venv
           source .venv/bin/activate
-          if [[ ${{ matrix.python-version}} = "pypy3.9" || ${{ matrix.python-version}} = "pypy3.10" ]]; then
-            pip install -r requirements/dev.txt
-          else
-            pip install -r requirements/dev.txt -r requirements/pandas.txt -r requirements/polars.txt
-          fi
+          pip install -r requirements/dev.txt -r requirements/pandas.txt -r requirements/polars.txt
       - run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
       - uses: astral-sh/ruff-action@v3
       - run: ruff check
@@ -37,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
