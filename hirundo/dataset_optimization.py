@@ -764,6 +764,32 @@ class OptimizationDataset(BaseModel):
             raise ValueError("No run has been started")
         self.cancel_by_id(self.run_id)
 
+    @staticmethod
+    def archive_run_by_id(run_id: str) -> None:
+        """
+        Archive the dataset optimization run for the given `run_id`.
+
+        Args:
+            run_id: The ID of the run to archive
+        """
+        if not run_id:
+            raise ValueError("No run has been started")
+        logger.info("Archiving run with ID: %s", run_id)
+        response = requests.patch(
+            f"{API_HOST}/dataset-optimization/run/archive/{run_id}",
+            headers=get_headers(),
+            timeout=MODIFY_TIMEOUT,
+        )
+        raise_for_status_with_reason(response)
+
+    def archive(self) -> None:
+        """
+        Archive the current active instance's run.
+        """
+        if not self.run_id:
+            raise ValueError("No run has been started")
+        self.archive_run_by_id(self.run_id)
+
 
 class DataOptimizationDatasetOut(BaseModel):
     id: int
