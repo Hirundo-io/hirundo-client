@@ -130,12 +130,10 @@ def cleanup(test_dataset: OptimizationDataset):
                     e,
                 )
         if dataset.storage_config is not None:
-            storage_config = test_dataset.storage_config
-            if storage_config is None or storage_config.id is None:
-                raise ValueError(
-                    "Storage config ID is not None, this should not happen"
-                )
-            storage_config_id = storage_config.id
+            storage_config = dataset.storage_config
+            storage_config_id = dataset.storage_config_id
+            if storage_config_id is None:
+                raise ValueError("Storage config ID is None, this should not happen")
             logger.debug(
                 "Found storage config with ID %s, deleting it", storage_config_id
             )
