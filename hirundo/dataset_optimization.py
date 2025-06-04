@@ -551,7 +551,9 @@ class OptimizationDataset(BaseModel):
                 f"Optimization run failed with error: {iteration['result']}"
             )
         else:
-            raise HirundoError("Optimization run failed with an unknown error")
+            raise HirundoError(
+                "Optimization run failed with an unknown error in _handle_failure"
+            )
 
     @staticmethod
     @overload
@@ -602,6 +604,9 @@ class OptimizationDataset(BaseModel):
                         RunStatus.REJECTED.value,
                         RunStatus.REVOKED.value,
                     ]:
+                        logger.error(
+                            "State is failure, rejected, or revoked", iteration["state"]
+                        )
                         OptimizationDataset._handle_failure(iteration)
                     elif iteration["state"] == RunStatus.SUCCESS.value:
                         t.close()
@@ -646,7 +651,9 @@ class OptimizationDataset(BaseModel):
                         t.n = current_progress_percentage
                         logger.debug("Setting progress to %s", t.n)
                         t.refresh()
-        raise HirundoError("Optimization run failed with an unknown error")
+        raise HirundoError(
+            "Optimization run failed with an unknown error in check_run_by_id"
+        )
 
     @overload
     def check_run(
