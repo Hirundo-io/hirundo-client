@@ -104,9 +104,7 @@ def cleanup(test_dataset: OptimizationDataset):
         runs_by_dataset = {
             run.dataset_id: [run.run_id]
             for run in runs
-            if run.dataset_id is not None
-            and run.run_id is not None
-            and run.status == RunStatus.STARTED
+            if run.dataset_id is not None and run.run_id is not None
         }
         if dataset.id is not None:
             logger.debug(
