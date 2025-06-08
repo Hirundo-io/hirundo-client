@@ -605,7 +605,8 @@ class OptimizationDataset(BaseModel):
                         RunStatus.REVOKED.value,
                     ]:
                         logger.error(
-                            "State is failure, rejected, or revoked", iteration["state"]
+                            "State is failure, rejected, or revoked: %s",
+                            iteration["state"],
                         )
                         OptimizationDataset._handle_failure(iteration)
                     elif iteration["state"] == RunStatus.SUCCESS.value:
