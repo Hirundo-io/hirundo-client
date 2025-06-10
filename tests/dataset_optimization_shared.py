@@ -93,6 +93,17 @@ def _handle_not_found_error(dataset: OptimizationDataset):
             raise e
 
 
+def _get_runs_by_dataset():
+    runs = OptimizationDataset.list_runs()
+    runs_by_dataset = {}
+    for run in runs:
+        if run.dataset_id is not None and run.run_id is not None:
+            if run.dataset_id not in runs_by_dataset:
+                runs_by_dataset[run.dataset_id] = []
+            runs_by_dataset[run.dataset_id].append(run.run_id)
+    return runs_by_dataset
+
+
 def cleanup(test_dataset: OptimizationDataset):
     logger.info("Started cleanup")
     with _handle_not_found_error(test_dataset):
@@ -100,12 +111,7 @@ def cleanup(test_dataset: OptimizationDataset):
         storage_config_id = (
             dataset.storage_config.id if dataset.storage_config is not None else None
         )
-        runs = OptimizationDataset.list_runs()
-        runs_by_dataset = {
-            run.dataset_id: [run.run_id]
-            for run in runs
-            if run.dataset_id is not None and run.run_id is not None
-        }
+        runs_by_dataset = _get_runs_by_dataset()
         if dataset.id is not None:
             logger.debug(
                 "Found optimization dataset with the same name, deleting it",
