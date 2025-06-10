@@ -1,12 +1,13 @@
 import os
 import typing
+from contextlib import contextmanager
 
+import requests
 from hirundo import (
     GitRepo,
     OptimizationDataset,
     RunArgs,
     StorageConfig,
-    StorageTypes,
 )
 from hirundo.dataset_optimization import RunStatus
 from hirundo.logger import get_logger
@@ -20,35 +21,43 @@ def get_unique_id():
     )
 
 
-def log_cleanup(storage_config_ids: list[int], git_repo_ids: list[int]):
-    if len(storage_config_ids) > 0:
-        logger.debug("Found %s storage configs, deleting them", len(storage_config_ids))
-        logger.debug("Note: If I am not the owner, I will not be able to delete them")
-    if len(git_repo_ids) > 0:
-        logger.debug("Found %s git repos, deleting them", len(git_repo_ids))
-        logger.debug("Note: If I am not the owner, I will not be able to delete them")
-
-
 def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
     if not unique_id:
         return
+    conflicting_runs = OptimizationDataset.list_runs()
+    conflicting_run_ids = [
+        run.run_id for run in conflicting_runs if unique_id in run.name
+    ]
+    conflicting_datasets = OptimizationDataset.list_datasets()
+    conflicting_dataset_ids = [
+        dataset.id for dataset in conflicting_datasets if unique_id in dataset.name
+    ]
     conflicting_git_repo_ids = [
         git_repo.id for git_repo in GitRepo.list() if unique_id in git_repo.name
     ]
-    for conflicting_git_repo_id in conflicting_git_repo_ids:
-        try:
-            GitRepo.delete_by_id(conflicting_git_repo_id)
-        except Exception as e:
-            logger.warning(
-                "Failed to delete git repo with ID %s and exception %s",
-                conflicting_git_repo_id,
-                e,
-            )
     conflicting_storage_config_ids = [
         storage_config.id
         for storage_config in StorageConfig.list()
         if unique_id in storage_config.name and storage_config.id is not None
     ]
+    for conflicting_run_id in conflicting_run_ids:
+        try:
+            OptimizationDataset.archive_run_by_id(conflicting_run_id)
+        except Exception as e:
+            logger.warning(
+                "Failed to archive run with ID %s and exception %s",
+                conflicting_run_id,
+                e,
+            )
+    for conflicting_dataset_id in conflicting_dataset_ids:
+        try:
+            OptimizationDataset.delete_by_id(conflicting_dataset_id)
+        except Exception as e:
+            logger.warning(
+                "Failed to delete dataset with ID %s and exception %s",
+                conflicting_dataset_id,
+                e,
+            )
     for conflicting_storage_config_id in conflicting_storage_config_ids:
         try:
             StorageConfig.delete_by_id(conflicting_storage_config_id)
@@ -58,91 +67,110 @@ def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
                 conflicting_storage_config_id,
                 e,
             )
+    for conflicting_git_repo_id in conflicting_git_repo_ids:
+        try:
+            GitRepo.delete_by_id(conflicting_git_repo_id)
+        except Exception as e:
+            logger.warning(
+                "Failed to delete git repo with ID %s and exception %s",
+                conflicting_git_repo_id,
+                e,
+            )
+
+
+@contextmanager
+def _handle_not_found_error(dataset: OptimizationDataset):
+    try:
+        yield
+    except requests.HTTPError as e:
+        if e.response.status_code == 404:
+            logger.info(
+                "Optimization dataset with name %s not found, skipping cleanup",
+                dataset.name,
+            )
+            return
+        else:
+            raise e
+
+
+def _get_runs_by_dataset():
+    runs = OptimizationDataset.list_runs()
+    runs_by_dataset = {}
+    for run in runs:
+        if run.dataset_id is not None and run.run_id is not None:
+            if run.dataset_id not in runs_by_dataset:
+                runs_by_dataset[run.dataset_id] = []
+            runs_by_dataset[run.dataset_id].append(run.run_id)
+    return runs_by_dataset
 
 
 def cleanup(test_dataset: OptimizationDataset):
     logger.info("Started cleanup")
-    datasets = OptimizationDataset.list_datasets()
-    dataset_ids = [
-        dataset.id
-        for dataset in datasets
-        if dataset.name == test_dataset.name and dataset.id
-    ]
-    storage_config_ids = [
-        dataset.storage_config.id
-        for dataset in datasets
-        if dataset.name == test_dataset.name and dataset.storage_config.id is not None
-    ]
-    runs = OptimizationDataset.list_runs()
-    running_datasets = {
-        run.id: run.run_id
-        for run in runs
-        if (
-            run.name == test_dataset.name
-            and run.run_id is not None
-            and run.status == RunStatus.STARTED
+    with _handle_not_found_error(test_dataset):
+        dataset = OptimizationDataset.get_by_name(test_dataset.name)
+        storage_config_id = (
+            dataset.storage_config.id if dataset.storage_config is not None else None
         )
-    }
-    if len(dataset_ids) > 0:
-        logger.debug(
-            "Found %s optimization datasets with the same name, deleting them",
-            len(dataset_ids),
-        )
-        logger.debug("Note: If I am not the owner, I will not be able to delete them")
-    for dataset_id in dataset_ids:
-        try:
-            if dataset_id in running_datasets:
-                run_id = running_datasets[dataset_id]
-                logger.debug("Cancelling optimization dataset with run ID %s", run_id)
-                OptimizationDataset.cancel_by_id(run_id)
-            OptimizationDataset.delete_by_id(dataset_id)
-        except Exception as e:
-            logger.warning(
-                "Unable to delete optimization dataset with ID %s and exception %s",
-                dataset_id,
-                e,
+        runs_by_dataset = _get_runs_by_dataset()
+        if dataset.id is not None:
+            logger.debug(
+                "Found optimization dataset with the same name, deleting it",
             )
-    storage_configs = StorageConfig.list()
-    storage_config_ids = (
-        [
-            storage_config.id
-            for storage_config in storage_configs
-            if storage_config.name == test_dataset.storage_config.name
-        ]
-        if (test_dataset.storage_config is not None)
-        else storage_config_ids
-    )  # ⬆️ If given a StorageConfig object, use it's name to find the matching IDs
-    git_repo_ids = [
-        storage_config.git.repo.id
-        for storage_config in storage_configs
-        if storage_config.type == StorageTypes.GIT
-        and storage_config.git is not None
-        and storage_config.id in storage_config_ids
-    ]
-    log_cleanup(storage_config_ids, git_repo_ids)
-    for storage_config_id in storage_config_ids:
-        try:
-            StorageConfig.delete_by_id(storage_config_id)
-        except Exception as e:
-            logger.warning(
-                "Unable to delete storage config with ID %s and exception %s",
-                storage_config_id,
-                e,
+            logger.debug(
+                "Note: If I am not the owner, I will not be able to delete them"
             )
-    for git_repo_id in git_repo_ids:
-        try:
-            GitRepo.delete_by_id(git_repo_id)
-        except Exception as e:
-            logger.warning(
-                "Unable to delete git repo with ID %s and exception %s",
-                git_repo_id,
-                e,
+            try:
+                if dataset.id in runs_by_dataset:
+                    for run_id in runs_by_dataset[dataset.id]:
+                        logger.debug(
+                            "Archiving optimization dataset with run ID %s", run_id
+                        )
+                        OptimizationDataset.archive_run_by_id(run_id)
+                OptimizationDataset.delete_by_id(dataset.id)
+            except Exception as e:
+                logger.warning(
+                    "Unable to delete optimization dataset with ID %s and exception %s",
+                    dataset.id,
+                    e,
+                )
+        if dataset.storage_config is not None and dataset.storage_config_id is not None:
+            storage_config = dataset.storage_config
+            storage_config_id = dataset.storage_config_id
+            logger.debug(
+                "Found storage config with ID %s, deleting it", storage_config_id
             )
-    # ⬆️ Delete all datasets and storage configs from the server for the given user's default organization
-    test_dataset.clean_ids()
-    # ⬆️ Reset `dataset_id`, `storage_config_id`, and `run_id` values on `test_dataset` to default value of `None`
-    # This prevents errors due to ID links to deleted datasets, storage configs and runs
-    logger.info("Finished cleanup")
+            logger.debug("Note: If I am not the owner, I will not be able to delete it")
+            try:
+                StorageConfig.delete_by_id(storage_config_id)
+            except Exception as e:
+                logger.warning(
+                    "Unable to delete storage config with ID %s and exception %s",
+                    storage_config_id,
+                    e,
+                )
+            if (
+                storage_config.git is not None
+                and storage_config.git.repo is not None
+                and storage_config.git.repo.id is not None
+            ):
+                git_repo_id = storage_config.git.repo.id
+                logger.debug("Found git repo with ID %s, deleting it", git_repo_id)
+                logger.debug(
+                    "Note: If I am not the owner, I will not be able to delete it"
+                )
+                try:
+                    GitRepo.delete_by_id(git_repo_id)
+                except Exception as e:
+                    logger.warning(
+                        "Unable to delete git repo with ID %s and exception %s",
+                        git_repo_id,
+                        e,
+                    )
+        # ⬆️ Delete all datasets and storage configs from the server for the given user's default organization
+        test_dataset.clean_ids()
+        # ⬆️ Reset `dataset_id`, `storage_config_id`, and `run_id` values on `test_dataset` to default value of `None`
+        # This prevents errors due to ID links to deleted datasets, storage configs and runs
+        logger.info("Finished cleanup")
 
 
 def dataset_optimization_sync_test(

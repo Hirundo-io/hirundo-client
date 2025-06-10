@@ -551,7 +551,9 @@ class OptimizationDataset(BaseModel):
                 f"Optimization run failed with error: {iteration['result']}"
             )
         else:
-            raise HirundoError("Optimization run failed with an unknown error")
+            raise HirundoError(
+                "Optimization run failed with an unknown error in _handle_failure"
+            )
 
     @staticmethod
     @overload
@@ -602,6 +604,10 @@ class OptimizationDataset(BaseModel):
                         RunStatus.REJECTED.value,
                         RunStatus.REVOKED.value,
                     ]:
+                        logger.error(
+                            "State is failure, rejected, or revoked: %s",
+                            iteration["state"],
+                        )
                         OptimizationDataset._handle_failure(iteration)
                     elif iteration["state"] == RunStatus.SUCCESS.value:
                         t.close()
@@ -646,7 +652,9 @@ class OptimizationDataset(BaseModel):
                         t.n = current_progress_percentage
                         logger.debug("Setting progress to %s", t.n)
                         t.refresh()
-        raise HirundoError("Optimization run failed with an unknown error")
+        raise HirundoError(
+            "Optimization run failed with an unknown error in check_run_by_id"
+        )
 
     @overload
     def check_run(
@@ -763,6 +771,32 @@ class OptimizationDataset(BaseModel):
         if not self.run_id:
             raise ValueError("No run has been started")
         self.cancel_by_id(self.run_id)
+
+    @staticmethod
+    def archive_run_by_id(run_id: str) -> None:
+        """
+        Archive the dataset optimization run for the given `run_id`.
+
+        Args:
+            run_id: The ID of the run to archive
+        """
+        if not run_id:
+            raise ValueError("No run has been started")
+        logger.info("Archiving run with ID: %s", run_id)
+        response = requests.patch(
+            f"{API_HOST}/dataset-optimization/run/archive/{run_id}",
+            headers=get_headers(),
+            timeout=MODIFY_TIMEOUT,
+        )
+        raise_for_status_with_reason(response)
+
+    def archive(self) -> None:
+        """
+        Archive the current active instance's run.
+        """
+        if not self.run_id:
+            raise ValueError("No run has been started")
+        self.archive_run_by_id(self.run_id)
 
 
 class DataOptimizationDatasetOut(BaseModel):
