@@ -1,4 +1,6 @@
-# Hirundo
+# [hirundo](https://hirundo-io.github.io/hirundo/) · [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Hirundo-io/hirundo-client/blob/main/LICENSE) [![pypi version](https://img.shields.io/pypi/v/hirundo)](https://pypi.org/project/hirundo/)
+
+[![Deploy docs](https://github.com/Hirundo-io/hirundo-client/actions/workflows/update-docs.yaml/badge.svg)](https://github.com/Hirundo-io/hirundo-client/actions/workflows/update-docs.yaml) [![pyright](https://github.com/Hirundo-io/hirundo-client/actions/workflows/lint.yaml/badge.svg)](https://github.com/Hirundo-io/hirundo-client/actions/workflows/lint.yaml) [![ruff](https://github.com/Hirundo-io/hirundo-client/actions/workflows/lint.yaml/badge.svg)](https://github.com/Hirundo-io/hirundo-client/actions/workflows/lint.yaml) [![Unit tests](https://github.com/Hirundo-io/hirundo-client/actions/workflows/pytest-full.yaml/badge.svg)](https://github.com/Hirundo-io/hirundo-client/actions/workflows/pytest-full.yaml) [![Vulnerability scan](https://github.com/Hirundo-io/hirundo-client/actions/workflows/safety-scan.yml/badge.svg)](https://github.com/Hirundo-io/hirundo-client/actions/workflows/safety-scan.yml)
 
 This package exposes access to Hirundo APIs for dataset optimization for Machine Learning.
 
