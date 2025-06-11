@@ -41,11 +41,15 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install -r requirements/docs.txt
-          # Extract version from hirundo/__init__.py
-          export VERSION=$(python -c "import re; content=open('hirundo/__init__.py').read(); match=re.search(r'__version__ = [\"\'](.*?)[\"\']', content); print(match.group(1) if match else 'unknown')")
+          # Extract version from hirundo/__init__.py with error handling
+          if [ -f "hirundo/__init__.py" ]; then
+            export VERSION=$(python -c "import re; content=open('hirundo/__init__.py').read(); match=re.search(r'__version__ = [\"\'](.*?)[\"\']', content); print(match.group(1) if match else 'unknown')" 2>/dev/null || echo 'unknown')
+          else
+            export VERSION='unknown'
+          fi
           echo "Using version: $VERSION"
-          if [ "$VERSION" = "unknown" ]; then
-            echo "Error: Could not extract version from hirundo/__init__.py"
+          if [ "$VERSION" = "unknown" ] || [ -z "$VERSION" ]; then
+            echo "Error: Could not extract version from hirundo/__init__.py (file may be missing, unreadable, or version format is invalid)"
             exit 1
           fi
           pip install "hirundo==${VERSION}"
