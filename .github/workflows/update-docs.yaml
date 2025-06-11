@@ -41,8 +41,9 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install -r requirements/docs.txt
-          export VERSION_TAG=${{ (github.event_name == 'pull_request' && github.event.pull_request.title) || (github.event_name == 'push' && '0.1.16') }}
-          export VERSION=$(sed -e 's/^v//' <<< $VERSION_TAG)
+          # Extract version from hirundo/__init__.py
+          export VERSION=$(python -c "import re; content=open('hirundo/__init__.py').read(); print(re.search(r'__version__ = [\"\'](.*?)[\"\']', content).group(1))")
+          echo "Using version: $VERSION"
           pip install "hirundo==${VERSION}"
       - name: Sphinx multi-version build
         run: |
