@@ -42,8 +42,12 @@ jobs:
           source .venv/bin/activate
           pip install -r requirements/docs.txt
           # Extract version from hirundo/__init__.py
-          export VERSION=$(python -c "import re; content=open('hirundo/__init__.py').read(); print(re.search(r'__version__ = [\"\'](.*?)[\"\']', content).group(1))")
+          export VERSION=$(python -c "import re; content=open('hirundo/__init__.py').read(); match=re.search(r'__version__ = [\"\'](.*?)[\"\']', content); print(match.group(1) if match else 'unknown')")
           echo "Using version: $VERSION"
+          if [ "$VERSION" = "unknown" ]; then
+            echo "Error: Could not extract version from hirundo/__init__.py"
+            exit 1
+          fi
           pip install "hirundo==${VERSION}"
       - name: Sphinx multi-version build
         run: |
