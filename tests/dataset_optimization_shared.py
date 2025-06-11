@@ -1,5 +1,6 @@
 import os
 import typing
+from collections import defaultdict
 from contextlib import contextmanager
 
 import requests
@@ -24,13 +25,11 @@ def get_unique_id():
 def cleanup_conflict_by_unique_id(unique_id: typing.Optional[str]):
     if not unique_id:
         return
-    conflicting_runs = OptimizationDataset.list_runs()
-    conflicting_run_ids = [
-        run.run_id for run in conflicting_runs if unique_id in run.name
-    ]
-    conflicting_datasets = OptimizationDataset.list_datasets()
+    runs = OptimizationDataset.list_runs()
+    conflicting_run_ids = [run.run_id for run in runs if unique_id in run.name]
+    datasets = OptimizationDataset.list_datasets()
     conflicting_dataset_ids = [
-        dataset.id for dataset in conflicting_datasets if unique_id in dataset.name
+        dataset.id for dataset in datasets if unique_id in dataset.name
     ]
     conflicting_git_repo_ids = [
         git_repo.id for git_repo in GitRepo.list() if unique_id in git_repo.name
@@ -95,11 +94,9 @@ def _handle_not_found_error(dataset: OptimizationDataset):
 
 def _get_runs_by_dataset():
     runs = OptimizationDataset.list_runs()
-    runs_by_dataset = {}
+    runs_by_dataset = defaultdict(list)
     for run in runs:
         if run.dataset_id is not None and run.run_id is not None:
-            if run.dataset_id not in runs_by_dataset:
-                runs_by_dataset[run.dataset_id] = []
             runs_by_dataset[run.dataset_id].append(run.run_id)
     return runs_by_dataset
 

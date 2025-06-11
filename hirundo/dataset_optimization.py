@@ -754,8 +754,6 @@ class OptimizationDataset(BaseModel):
         Args:
             run_id: The ID of the run to cancel
         """
-        if not run_id:
-            raise ValueError("No run has been started")
         logger.info("Cancelling run with ID: %s", run_id)
         response = requests.delete(
             f"{API_HOST}/dataset-optimization/run/{run_id}",
@@ -780,8 +778,6 @@ class OptimizationDataset(BaseModel):
         Args:
             run_id: The ID of the run to archive
         """
-        if not run_id:
-            raise ValueError("No run has been started")
         logger.info("Archiving run with ID: %s", run_id)
         response = requests.patch(
             f"{API_HOST}/dataset-optimization/run/archive/{run_id}",
