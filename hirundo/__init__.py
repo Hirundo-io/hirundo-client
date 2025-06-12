@@ -28,6 +28,8 @@ from .storage import (
     StorageGit,
     StorageS3,
 )
+from .unlearning import MLModel, UnlearningCvModelRun
+from .unlearning_llm_behavior import LlmModel, LlmUnlearningRun
 from .unzip import load_df, load_from_zip
 
 __all__ = [
@@ -54,9 +56,13 @@ __all__ = [
     # "StorageAzure",  TODO: Azure storage is coming soon
     "StorageGit",
     "StorageConfig",
+    "MLModel",
+    "UnlearningCvModelRun",
+    "LlmModel",
+    "LlmUnlearningRun",
     "DatasetOptimizationResults",
     "load_df",
     "load_from_zip",
 ]
 
-__version__ = "0.1.16"
+__version__ = "0.1.17"
