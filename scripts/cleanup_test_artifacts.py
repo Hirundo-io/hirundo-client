@@ -37,7 +37,9 @@ def _delete_dataset(
             try:
                 GitRepo.delete_by_id(git_repo_id)
             except (HirundoError, requests.HTTPError) as exc:
-                logger.warning("Failed to delete git repo with ID %s: %s", git_repo_id, exc)
+                logger.warning(
+                    "Failed to delete git repo with ID %s: %s", git_repo_id, exc
+                )
 
 
 def _should_delete_dataset(dataset_runs: list, expiry_date: datetime.datetime) -> bool:
@@ -50,13 +52,17 @@ def _should_delete_dataset(dataset_runs: list, expiry_date: datetime.datetime) -
 
 
 def main() -> None:
-    runs = OptimizationDataset.list_runs()
-    datasets = {ds.id: ds for ds in OptimizationDataset.list_datasets() if ds.id is not None}
+    all_runs = OptimizationDataset.list_runs()
+    datasets = {
+        dataset_entry.id: dataset_entry
+        for dataset_entry in OptimizationDataset.list_datasets()
+        if dataset_entry.id is not None
+    }
     now = datetime.datetime.now(timezone.utc)
     one_week_ago = now - timedelta(days=7)
 
     runs_by_dataset: defaultdict[int, list] = defaultdict(list)
-    for run in runs:
+    for run in all_runs:
         if run.dataset_id is None or run.run_id is None:
             continue
         runs_by_dataset[run.dataset_id].append(run)
@@ -71,7 +77,9 @@ def main() -> None:
                 try:
                     OptimizationDataset.archive_run_by_id(run.run_id)
                 except (HirundoError, requests.HTTPError) as exc:
-                    logger.warning("Failed to archive run with ID %s: %s", run.run_id, exc)
+                    logger.warning(
+                        "Failed to archive run with ID %s: %s", run.run_id, exc
+                    )
 
             _delete_dataset(dataset_id, dataset.storage_config)
 
