@@ -45,12 +45,14 @@ def _delete_dataset(
 def _should_delete_dataset(dataset_runs: list, expiry_date: datetime.datetime) -> bool:
     """Return ``True`` if the dataset should be deleted."""
 
-    for run in dataset_runs:
-        if run.status == RunStatus.SUCCESS:
-            return True
-
     if not dataset_runs:
         return False
+
+    all_runs_successful = all(
+        run.status == RunStatus.SUCCESS for run in dataset_runs
+    )
+    if all_runs_successful:
+        return True
 
     most_recent_run_time = max(run.created_at for run in dataset_runs)
     return most_recent_run_time <= expiry_date
@@ -74,7 +76,7 @@ def main() -> None:
 
     for dataset_id, dataset_runs in runs_by_dataset.items():
         dataset = datasets.get(dataset_id)
-        if dataset is None or not dataset.name.startswith("TEST"):
+        if dataset is None or not dataset.name.startswith("TEST-"):
             continue
 
         if _should_delete_dataset(dataset_runs, one_week_ago):
