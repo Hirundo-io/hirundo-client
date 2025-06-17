@@ -1,6 +1,7 @@
 import datetime
 from collections import defaultdict
 from datetime import timedelta, timezone
+from typing import Union
 
 import requests
 from hirundo import GitRepo, OptimizationDataset, StorageConfig
@@ -13,7 +14,7 @@ logger = get_logger(__name__)
 
 def _delete_dataset(
     dataset_id: int,
-    storage_config: StorageConfig | ResponseStorageConfig | None,
+    storage_config: Union[StorageConfig, ResponseStorageConfig, None],
 ) -> None:
     try:
         OptimizationDataset.delete_by_id(dataset_id)
@@ -48,9 +49,7 @@ def _should_delete_dataset(dataset_runs: list, expiry_date: datetime.datetime) -
     if not dataset_runs:
         return False
 
-    all_runs_successful = all(
-        run.status == RunStatus.SUCCESS for run in dataset_runs
-    )
+    all_runs_successful = all(run.status == RunStatus.SUCCESS for run in dataset_runs)
     if all_runs_successful:
         return True
 
