@@ -36,6 +36,9 @@ jobs:
         with:
           python-version: "3.9"
       - name: Install dependencies
+        timeout-minutes: 5
+        env:
+          SLEEP: 15
         run: |
           python -m pip install --upgrade pip
           python -m venv .venv
@@ -52,7 +55,12 @@ jobs:
             echo "Error: Could not extract version from hirundo/__init__.py (file may be missing, unreadable, or version format is invalid)"
             exit 1
           fi
-          pip install "hirundo==${VERSION}"
+
+          until pip install --no-cache-dir "hirundo==${VERSION}"; do
+            echo "waiting $SLEEP s"
+            sleep $SLEEP
+          done
+          
       - name: Sphinx multi-version build
         run: |
           source .venv/bin/activate
