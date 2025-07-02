@@ -37,7 +37,12 @@ click==8.1.7
     #   safety
     #   typer
 colorama==0.4.6
-    # via bumpver
+    # via
+    #   -c requirements/requirements.txt
+    #   bumpver
+    #   click
+    #   pytest
+    #   tqdm
 cryptography==44.0.0
     # via authlib
 distlib==0.3.8
@@ -183,6 +188,10 @@ python-dotenv==1.0.1
     # via
     #   -c requirements/requirements.txt
     #   hirundo (pyproject.toml)
+pywin32-ctypes==0.2.3
+    # via
+    #   -c requirements/requirements.txt
+    #   keyring
 pyyaml==6.0.1
     # via
     #   -c requirements/requirements.txt
