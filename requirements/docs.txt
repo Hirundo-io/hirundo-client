@@ -47,7 +47,12 @@ click==8.1.7
     #   typer
     #   uvicorn
 colorama==0.4.6
-    # via sphinx-autobuild
+    # via
+    #   -c requirements/requirements.txt
+    #   click
+    #   sphinx
+    #   sphinx-autobuild
+    #   tqdm
 docutils==0.21.2
     # via
     #   -c requirements/requirements.txt
@@ -171,6 +176,10 @@ python-dotenv==1.0.1
     #   -c requirements/requirements.txt
     #   hirundo (pyproject.toml)
     #   pydantic-settings
+pywin32-ctypes==0.2.3
+    # via
+    #   -c requirements/requirements.txt
+    #   keyring
 pyyaml==6.0.1
     # via
     #   -c requirements/requirements.txt

@@ -57,10 +57,11 @@ jobs:
           fi
 
           until pip install --no-cache-dir "hirundo==${VERSION}"; do
-            echo "waiting $SLEEP s"
+            echo "Can't find the version you mentioned, waiting $SLEEP seconds and retrying"
             sleep $SLEEP
+            echo "finish waiting. retrying..."
           done
-          
+
       - name: Sphinx multi-version build
         run: |
           source .venv/bin/activate

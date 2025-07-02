@@ -44,7 +44,13 @@ jobs:
           pip install -r requirements/dev.txt
           pip install build twine
           python -m build
-      - name: Publish package distributions to TestPyPI
+      - name: Publish package distributions to TestPyPI (with act)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: ${{ vars.ACT == 'true' }}
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          password: ${{ secrets.TESTPYPI_APIKEY }}
+      - name: Publish package distributions to TestPyPI (GitHub Actions)
         uses: pypa/gh-action-pypi-publish@release/v1
         if: ${{ contains(github.event.pull_request.labels.*.name, 'test') }}
         with:
