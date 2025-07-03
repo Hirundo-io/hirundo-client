@@ -1,7 +1,7 @@
 {
     "pull_request": {
-        "head": { "ref": "fix-docs-deployment-after-release-pypi-package" },
-        "base": { "ref": "act-simulate-package-being-upload-testpypi" },
+        "head": { "ref": "release-v0.1.18" },
+        "base": { "ref": "main" },
         "title": "v0.1.18",
         "body": "This is a test PR that is created by act",
         "changed_files": [
