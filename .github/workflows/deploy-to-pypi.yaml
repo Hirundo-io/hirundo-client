@@ -45,6 +45,8 @@ jobs:
           pip install build twine
           python -m build
       - name: Publish package distributions to TestPyPI (with act)
+        env:
+          GITHUB_WORKFLOW_REF: .github/workflows/deploy-to-pypi.yaml
         uses: pypa/gh-action-pypi-publish@release/v1
         if: ${{ vars.ACT == 'true' }}
         with:
