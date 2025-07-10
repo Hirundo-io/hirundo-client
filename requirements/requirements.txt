@@ -15,6 +15,10 @@ charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via typer
+colorama==0.4.6
+    # via
+    #   click
+    #   tqdm
 docutils==0.21.2
     # via readme-renderer
 exceptiongroup==1.2.2
@@ -66,6 +70,8 @@ pygments==2.18.0
     #   rich
 python-dotenv==1.0.1
     # via hirundo (pyproject.toml)
+pywin32-ctypes==0.2.3
+    # via keyring
 pyyaml==6.0.1
     # via hirundo (pyproject.toml)
 readme-renderer==44.0
