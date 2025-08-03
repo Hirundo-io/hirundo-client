@@ -26,11 +26,6 @@ click==8.1.7
     # via
     #   -c requirements/requirements.txt
     #   typer
-colorama==0.4.6
-    # via
-    #   -c requirements/requirements.txt
-    #   click
-    #   tqdm
 docutils==0.21.2
     # via
     #   -c requirements/requirements.txt
@@ -128,10 +123,6 @@ python-dotenv==1.0.1
     #   hirundo (pyproject.toml)
 pytz==2024.1
     # via pandas
-pywin32-ctypes==0.2.3
-    # via
-    #   -c requirements/requirements.txt
-    #   keyring
 pyyaml==6.0.1
     # via
     #   -c requirements/requirements.txt
