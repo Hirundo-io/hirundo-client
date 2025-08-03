@@ -39,7 +39,7 @@ exceptiongroup==1.2.2
     # via
     #   -c requirements/requirements.txt
     #   anyio
-h11==0.14.0
+h11==0.16.0
     # via
     #   -c requirements/requirements.txt
     #   httpcore
@@ -140,7 +140,7 @@ readme-renderer==44.0
     # via
     #   -c requirements/requirements.txt
     #   twine
-requests==2.32.3
+requests==2.32.4
     # via
     #   -c requirements/requirements.txt
     #   requests-toolbelt
@@ -207,7 +207,7 @@ typing-extensions==4.12.2
     #   typer
 tzdata==2024.1
     # via pandas
-urllib3==2.2.2
+urllib3==2.5.0
     # via
     #   -c requirements/requirements.txt
     #   requests
