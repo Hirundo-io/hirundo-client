@@ -129,10 +129,11 @@ class AugmentationName(str, Enum):
     GAUSSIAN_BLUR = "GaussianBlur"
 
 
-class Modality(str, Enum):
-    IMAGE = "Image"
-    RADAR = "Radar"
-    EKG = "EKG"
+class Domain(str, Enum):
+    RADAR = "RADAR"
+    VISION = "VISION"
+    SPEECH = "SPEECH"
+    TABULAR = "TABULAR"
 
 
 class QADataset(BaseModel):
@@ -189,9 +190,9 @@ class QADataset(BaseModel):
     For audio datasets, this field is ignored.
     If no value is provided, all augmentations are applied to vision datasets.
     """
-    modality: Modality = Modality.IMAGE
+    domain: Domain = Domain.IMAGE
     """
-    Used to define the modality of the dataset.
+    Used to define the domain of the dataset.
     Defaults to Image.
     """
 

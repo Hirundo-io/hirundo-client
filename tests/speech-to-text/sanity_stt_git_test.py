@@ -3,6 +3,7 @@ import os
 
 import pytest
 from hirundo import (
+    Domain,
     GitPlainAuth,
     GitRepo,
     HirundoCSV,
@@ -34,6 +35,7 @@ test_storage_git = StorageGit(
 )
 test_dataset = QADataset(
     name=f"TEST-STT-RoboShaulTiny-dataset{unique_id}",
+    domain=Domain.SPEECH,
     labeling_type=LabelingType.SPEECH_TO_TEXT,
     language="he",
     storage_config=StorageConfig(
