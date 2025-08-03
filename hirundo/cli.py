@@ -198,9 +198,9 @@ def check_run(
     """
     Check the status of a run.
     """
-    from hirundo.dataset_optimization import OptimizationDataset
+    from hirundo.dataset_qa import QADataset
 
-    results = OptimizationDataset.check_run_by_id(run_id)
+    results = QADataset.check_run_by_id(run_id)
     print(f"Run results saved to {results.cached_zip_path}")
 
 
@@ -209,9 +209,9 @@ def list_runs():
     """
     List all runs available.
     """
-    from hirundo.dataset_optimization import OptimizationDataset
+    from hirundo.dataset_qa import QADataset
 
-    runs = OptimizationDataset.list_runs()
+    runs = QADataset.list_runs()
 
     console = Console()
     table = Table(

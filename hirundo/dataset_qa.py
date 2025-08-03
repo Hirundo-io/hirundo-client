@@ -19,7 +19,7 @@ from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo._urls import HirundoUrl
 from hirundo.dataset_enum import DatasetMetadataType, LabelingType
-from hirundo.dataset_optimization_results import DatasetOptimizationResults
+from hirundo.dataset_qa_results import DatasetQAResults
 from hirundo.labeling import YOLO, LabelingInfo
 from hirundo.logger import get_logger
 from hirundo.storage import ResponseStorageConfig, StorageConfig
@@ -30,7 +30,7 @@ logger = get_logger(__name__)
 
 class HirundoError(Exception):
     """
-    Custom exception used to indicate errors in `hirundo` dataset optimization runs
+    Custom exception used to indicate errors in `hirundo` dataset QA runs
     """
 
     pass
@@ -51,14 +51,14 @@ class RunStatus(Enum):
 
 
 STATUS_TO_TEXT_MAP = {
-    RunStatus.STARTED.value: "Optimization run in progress. Downloading dataset",
-    RunStatus.PENDING.value: "Optimization run queued and not yet started",
-    RunStatus.SUCCESS.value: "Optimization run completed successfully",
-    RunStatus.FAILURE.value: "Optimization run failed",
+    RunStatus.STARTED.value: "Dataset QA run in progress. Downloading dataset",
+    RunStatus.PENDING.value: "Dataset QA run queued and not yet started",
+    RunStatus.SUCCESS.value: "Dataset QA run completed successfully",
+    RunStatus.FAILURE.value: "Dataset QA run failed",
     RunStatus.AWAITING_MANUAL_APPROVAL.value: "Awaiting manual approval",
-    RunStatus.RETRY.value: "Optimization run failed. Retrying",
-    RunStatus.REVOKED.value: "Optimization run was cancelled",
-    RunStatus.REJECTED.value: "Optimization run was rejected",
+    RunStatus.RETRY.value: "Dataset QA run failed. Retrying",
+    RunStatus.REVOKED.value: "Dataset QA run was cancelled",
+    RunStatus.REJECTED.value: "Dataset QA run was rejected",
 }
 STATUS_TO_PROGRESS_MAP = {
     RunStatus.STARTED.value: 0.0,
@@ -135,7 +135,7 @@ class Modality(str, Enum):
     EKG = "EKG"
 
 
-class OptimizationDataset(BaseModel):
+class QADataset(BaseModel):
     id: typing.Optional[int] = Field(default=None)
     """
     The ID of the dataset created on the server.
@@ -197,7 +197,7 @@ class OptimizationDataset(BaseModel):
 
     run_id: typing.Optional[str] = Field(default=None, init=False)
     """
-    The ID of the Dataset Optimization run created on the server.
+    The ID of the Dataset QA run created on the server.
     """
 
     status: typing.Optional[RunStatus] = None
@@ -247,12 +247,12 @@ class OptimizationDataset(BaseModel):
         return self
 
     @staticmethod
-    def get_by_id(dataset_id: int) -> "OptimizationDataset":
+    def get_by_id(dataset_id: int) -> "QADataset":
         """
-        Get a `OptimizationDataset` instance from the server by its ID
+        Get a `QADataset` instance from the server by its ID
 
         Args:
-            dataset_id: The ID of the `OptimizationDataset` instance to get
+            dataset_id: The ID of the `QADataset` instance to get
         """
         response = requests.get(
             f"{API_HOST}/dataset-qa/dataset/{dataset_id}",
@@ -261,15 +261,15 @@ class OptimizationDataset(BaseModel):
         )
         raise_for_status_with_reason(response)
         dataset = response.json()
-        return OptimizationDataset(**dataset)
+        return QADataset(**dataset)
 
     @staticmethod
-    def get_by_name(name: str) -> "OptimizationDataset":
+    def get_by_name(name: str) -> "QADataset":
         """
-        Get a `OptimizationDataset` instance from the server by its name
+        Get a `QADataset` instance from the server by its name
 
         Args:
-            name: The name of the `OptimizationDataset` instance to get
+            name: The name of the `QADataset` instance to get
         """
         response = requests.get(
             f"{API_HOST}/dataset-qa/dataset/by-name/{name}",
@@ -278,14 +278,14 @@ class OptimizationDataset(BaseModel):
         )
         raise_for_status_with_reason(response)
         dataset = response.json()
-        return OptimizationDataset(**dataset)
+        return QADataset(**dataset)
 
     @staticmethod
     def list_datasets(
         organization_id: typing.Optional[int] = None,
-    ) -> list["DataOptimizationDatasetOut"]:
+    ) -> list["QADatasetOut"]:
         """
-        Lists all the optimization datasets created by user's default organization
+        Lists all the datasets created by user's default organization
         or the `organization_id` passed
 
         Args:
@@ -300,7 +300,7 @@ class OptimizationDataset(BaseModel):
         raise_for_status_with_reason(response)
         datasets = response.json()
         return [
-            DataOptimizationDatasetOut(
+            QADatasetOut(
                 **ds,
             )
             for ds in datasets
@@ -309,11 +309,11 @@ class OptimizationDataset(BaseModel):
     @staticmethod
     def list_runs(
         organization_id: typing.Optional[int] = None,
-    ) -> list["DataOptimizationRunOut"]:
+    ) -> list["DataQARunOut"]:
         """
-        Lists all the `OptimizationDataset` instances created by user's default organization
+        Lists all the `QADataset` instances created by user's default organization
         or the `organization_id` passed
-        Note: The return type is `list[dict]` and not `list[OptimizationDataset]`
+        Note: The return type is `list[dict]` and not `list[QADataset]`
 
         Args:
             organization_id: The ID of the organization to list the datasets for.
@@ -327,7 +327,7 @@ class OptimizationDataset(BaseModel):
         raise_for_status_with_reason(response)
         runs = response.json()
         return [
-            DataOptimizationRunOut(
+            DataQARunOut(
                 **run,
             )
             for run in runs
@@ -336,10 +336,10 @@ class OptimizationDataset(BaseModel):
     @staticmethod
     def delete_by_id(dataset_id: int) -> None:
         """
-        Deletes a `OptimizationDataset` instance from the server by its ID
+        Deletes a `QADataset` instance from the server by its ID
 
         Args:
-            dataset_id: The ID of the `OptimizationDataset` instance to delete
+            dataset_id: The ID of the `QADataset` instance to delete
         """
         response = requests.delete(
             f"{API_HOST}/dataset-qa/dataset/{dataset_id}",
@@ -351,14 +351,14 @@ class OptimizationDataset(BaseModel):
 
     def delete(self, storage_config=True) -> None:
         """
-        Deletes the active `OptimizationDataset` instance from the server.
-        It can only be used on a `OptimizationDataset` instance that has been created.
+        Deletes the active `QADataset` instance from the server.
+        It can only be used on a `QADataset` instance that has been created.
 
         Args:
-            storage_config: If True, the `OptimizationDataset`'s `StorageConfig` will also be deleted
+            storage_config: If True, the `QADataset`'s `StorageConfig` will also be deleted
 
         Note: If `storage_config` is not set to `False` then the `storage_config_id` must be set
-        This can either be set manually or by creating the `StorageConfig` instance via the `OptimizationDataset`'s
+        This can either be set manually or by creating the `StorageConfig` instance via the `QADataset`'s
         `create` method
         """
         if storage_config:
@@ -375,7 +375,7 @@ class OptimizationDataset(BaseModel):
         replace_if_exists: bool = False,
     ) -> int:
         """
-        Create a `OptimizationDataset` instance on the server.
+        Create a `QADataset` instance on the server.
         If the `storage_config_id` field is not set, the storage config will also be created and the field will be set.
 
         Args:
@@ -384,7 +384,7 @@ class OptimizationDataset(BaseModel):
                 (this is determined by a dataset of the same name in the same organization).
 
         Returns:
-            The ID of the created `OptimizationDataset` instance
+            The ID of the created `QADataset` instance
         """
         if self.storage_config is None and self.storage_config_id is None:
             raise ValueError("No dataset storage has been provided")
@@ -426,17 +426,17 @@ class OptimizationDataset(BaseModel):
         return self.id
 
     @staticmethod
-    def launch_optimization_run(
+    def launch_qa_run(
         dataset_id: int,
         organization_id: typing.Optional[int] = None,
         run_args: typing.Optional[RunArgs] = None,
     ) -> str:
         """
-        Run the dataset optimization process on the server using the dataset with the given ID
+        Run the dataset QA process on the server using the dataset with the given ID
         i.e. `dataset_id`.
 
         Args:
-            dataset_id: The ID of the dataset to run optimization on.
+            dataset_id: The ID of the dataset to run QA on.
 
         Returns:
             ID of the run (`run_id`).
@@ -458,12 +458,16 @@ class OptimizationDataset(BaseModel):
     def _validate_run_args(self, run_args: RunArgs) -> None:
         if self.labeling_type == LabelingType.SPEECH_TO_TEXT:
             raise Exception("Speech to text cannot have `run_args` set")
-        if self.labeling_type != LabelingType.OBJECT_DETECTION and any(
-            (
-                run_args.min_abs_bbox_size != 0,
-                run_args.min_abs_bbox_area != 0,
-                run_args.min_rel_bbox_size != 0,
-                run_args.min_rel_bbox_area != 0,
+        if (
+            self.labeling_type != LabelingType.OBJECT_DETECTION
+            and isinstance(run_args, ObjectDetectionRunArgs)
+            and any(
+                (
+                    run_args.min_abs_bbox_size != 0,
+                    run_args.min_abs_bbox_area != 0,
+                    run_args.min_rel_bbox_size != 0,
+                    run_args.min_rel_bbox_area != 0,
+                )
             )
         ):
             raise Exception(
@@ -472,7 +476,7 @@ class OptimizationDataset(BaseModel):
                 + f"labeling type {self.labeling_type}"
             )
 
-    def run_optimization(
+    def run_qa(
         self,
         organization_id: typing.Optional[int] = None,
         replace_dataset_if_exists: bool = False,
@@ -480,13 +484,13 @@ class OptimizationDataset(BaseModel):
     ) -> str:
         """
         If the dataset was not created on the server yet, it is created.
-        Run the dataset optimization process on the server using the active `OptimizationDataset` instance
+        Run the dataset QA process on the server using the active `QADataset` instance
 
         Args:
-            organization_id: The ID of the organization to run the optimization for.
+            organization_id: The ID of the organization to run the QA for.
             replace_dataset_if_exists: If True, the dataset will be replaced if it already exists
                 (this is determined by a dataset of the same name in the same organization).
-            run_args: The run arguments to use for the optimization run
+            run_args: The run arguments to use for the QA run
 
         Returns:
             An ID of the run (`run_id`) and stores that `run_id` on the instance
@@ -496,7 +500,7 @@ class OptimizationDataset(BaseModel):
                 self.id = self.create(replace_if_exists=replace_dataset_if_exists)
             if run_args is not None:
                 self._validate_run_args(run_args)
-            run_id = self.launch_optimization_run(self.id, organization_id, run_args)
+            run_id = self.launch_qa_run(self.id, organization_id, run_args)
             self.run_id = run_id
             logger.info("Started the run with ID: %s", run_id)
             return run_id
@@ -560,50 +564,46 @@ class OptimizationDataset(BaseModel):
                         raise HirundoError("Unknown error")
                 yield data
         if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:
-            OptimizationDataset._check_run_by_id(run_id, retry + 1)
+            QADataset._check_run_by_id(run_id, retry + 1)
 
     @staticmethod
     def _handle_failure(iteration: dict):
         if iteration["result"]:
-            raise HirundoError(
-                f"Optimization run failed with error: {iteration['result']}"
-            )
+            raise HirundoError(f"QA run failed with error: {iteration['result']}")
         else:
-            raise HirundoError(
-                "Optimization run failed with an unknown error in _handle_failure"
-            )
+            raise HirundoError("QA run failed with an unknown error in _handle_failure")
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Optional[DatasetOptimizationResults]: ...
+    ) -> typing.Optional[DatasetQAResults]: ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> DatasetOptimizationResults: ...
+    ) -> DatasetQAResults: ...
 
     @staticmethod
     @overload
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool
-    ) -> typing.Optional[DatasetOptimizationResults]: ...
+    ) -> typing.Optional[DatasetQAResults]: ...
 
     @staticmethod
     def check_run_by_id(
         run_id: str, stop_on_manual_approval: bool = False
-    ) -> typing.Optional[DatasetOptimizationResults]:
+    ) -> typing.Optional[DatasetQAResults]:
         """
         Check the status of a run given its ID
 
         Args:
-            run_id: The `run_id` produced by a `run_optimization` call
+            run_id: The `run_id` produced by a `run_qa` call
             stop_on_manual_approval: If True, the function will return `None` if the run is awaiting manual approval
 
         Returns:
-            A DatasetOptimizationResults object with the results of the optimization run
+            A DatasetQAResults object with the results of the QA run
 
         Raises:
             HirundoError: If the maximum number of retries is reached or if the run fails
@@ -611,7 +611,7 @@ class OptimizationDataset(BaseModel):
         logger.debug("Checking run with ID: %s", run_id)
         with logging_redirect_tqdm():
             t = tqdm(total=100.0)
-            for iteration in OptimizationDataset._check_run_by_id(run_id):
+            for iteration in QADataset._check_run_by_id(run_id):
                 if iteration["state"] in STATUS_TO_PROGRESS_MAP:
                     t.set_description(STATUS_TO_TEXT_MAP[iteration["state"]])
                     t.n = STATUS_TO_PROGRESS_MAP[iteration["state"]]
@@ -626,11 +626,11 @@ class OptimizationDataset(BaseModel):
                             "State is failure, rejected, or revoked: %s",
                             iteration["state"],
                         )
-                        OptimizationDataset._handle_failure(iteration)
+                        QADataset._handle_failure(iteration)
                     elif iteration["state"] == RunStatus.SUCCESS.value:
                         t.close()
                         zip_temporary_url = iteration["result"]
-                        logger.debug("Optimization run completed. Downloading results")
+                        logger.debug("QA run completed. Downloading results")
 
                         return download_and_extract_zip(
                             run_id,
@@ -662,7 +662,7 @@ class OptimizationDataset(BaseModel):
                             stage = "Unknown progress state"
                             current_progress_percentage = t.n  # Keep the same progress
                         desc = (
-                            "Optimization run completed. Uploading results"
+                            "QA run completed. Uploading results"
                             if current_progress_percentage == 100.0
                             else stage
                         )
@@ -670,28 +670,26 @@ class OptimizationDataset(BaseModel):
                         t.n = current_progress_percentage
                         logger.debug("Setting progress to %s", t.n)
                         t.refresh()
-        raise HirundoError(
-            "Optimization run failed with an unknown error in check_run_by_id"
-        )
+        raise HirundoError("QA run failed with an unknown error in check_run_by_id")
 
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[True]
-    ) -> typing.Optional[DatasetOptimizationResults]: ...
+    ) -> typing.Optional[DatasetQAResults]: ...
 
     @overload
     def check_run(
         self, stop_on_manual_approval: typing.Literal[False] = False
-    ) -> DatasetOptimizationResults: ...
+    ) -> DatasetQAResults: ...
 
     def check_run(
         self, stop_on_manual_approval: bool = False
-    ) -> typing.Optional[DatasetOptimizationResults]:
+    ) -> typing.Optional[DatasetQAResults]:
         """
         Check the status of the current active instance's run.
 
         Returns:
-            A pandas DataFrame with the results of the optimization run
+            A pandas DataFrame with the results of the QA run
 
         """
         if not self.run_id:
@@ -708,7 +706,7 @@ class OptimizationDataset(BaseModel):
         This generator will produce values to show progress of the run.
 
         Args:
-            run_id: The `run_id` produced by a `run_optimization` call
+            run_id: The `run_id` produced by a `run_qa` call
             retry: A number used to track the number of retries to limit re-checks. *Do not* provide this value manually.
 
         Yields:
@@ -743,7 +741,7 @@ class OptimizationDataset(BaseModel):
                 last_event = json.loads(sse.data)
                 yield last_event["data"]
         if not last_event or last_event["data"]["state"] == RunStatus.PENDING.value:
-            OptimizationDataset.acheck_run_by_id(run_id, retry + 1)
+            QADataset.acheck_run_by_id(run_id, retry + 1)
 
     async def acheck_run(self) -> AsyncGenerator[dict, None]:
         """
@@ -767,7 +765,7 @@ class OptimizationDataset(BaseModel):
     @staticmethod
     def cancel_by_id(run_id: str) -> None:
         """
-        Cancel the dataset optimization run for the given `run_id`.
+        Cancel the dataset QA run for the given `run_id`.
 
         Args:
             run_id: The ID of the run to cancel
@@ -791,7 +789,7 @@ class OptimizationDataset(BaseModel):
     @staticmethod
     def archive_run_by_id(run_id: str) -> None:
         """
-        Archive the dataset optimization run for the given `run_id`.
+        Archive the dataset QA run for the given `run_id`.
 
         Args:
             run_id: The ID of the run to archive
@@ -813,7 +811,7 @@ class OptimizationDataset(BaseModel):
         self.archive_run_by_id(self.run_id)
 
 
-class DataOptimizationDatasetOut(BaseModel):
+class QADatasetOut(BaseModel):
     id: int
 
     name: str
@@ -832,7 +830,7 @@ class DataOptimizationDatasetOut(BaseModel):
     updated_at: datetime.datetime
 
 
-class DataOptimizationRunOut(BaseModel):
+class DataQARunOut(BaseModel):
     id: int
     name: str
     dataset_id: int

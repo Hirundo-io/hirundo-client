@@ -7,14 +7,14 @@ from hirundo import (
     GitRepo,
     HirundoCSV,
     LabelingType,
-    OptimizationDataset,
+    QADataset,
     StorageConfig,
     StorageGit,
     StorageTypes,
 )
-from tests.dataset_optimization_shared import (
+from tests.dataset_qa_shared import (
     cleanup,
-    dataset_optimization_sync_test,
+    dataset_qa_sync_test,
     get_unique_id,
 )
 
@@ -32,7 +32,7 @@ test_storage_git = StorageGit(
     ),
     branch="main",
 )
-test_dataset = OptimizationDataset(
+test_dataset = QADataset(
     name=f"TEST-STT-MASC-dataset{unique_id}",
     labeling_type=LabelingType.SPEECH_TO_TEXT,
     language="ar",
@@ -55,8 +55,8 @@ def cleanup_tests():
     cleanup(test_dataset)
 
 
-def test_dataset_optimization():
-    full_run = dataset_optimization_sync_test(test_dataset, "RUN_STT_GIT_OPTIMIZATION")
+def test_dataset_qa():
+    full_run = dataset_qa_sync_test(test_dataset, "RUN_STT_GIT_DATA_QA")
     if full_run is not None:
         assert full_run.warnings_and_errors is not None
         assert (
@@ -65,4 +65,4 @@ def test_dataset_optimization():
         assert full_run.suspects is not None
         assert full_run.suspects.shape[0] <= 10_000
     else:
-        logger.info("Full dataset optimization was not run!")
+        logger.info("Full dataset QA was not run!")
