@@ -8,6 +8,8 @@ on:
 jobs:
   pytest_full:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       max-parallel: 2
       matrix:
