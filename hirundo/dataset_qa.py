@@ -190,7 +190,7 @@ class QADataset(BaseModel):
     For audio datasets, this field is ignored.
     If no value is provided, all augmentations are applied to vision datasets.
     """
-    domain: Domain = Domain.IMAGE
+    domain: Domain = Domain.VISION
     """
     Used to define the domain of the dataset.
     Defaults to Image.
