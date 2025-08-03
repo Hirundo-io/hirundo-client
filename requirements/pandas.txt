@@ -26,11 +26,6 @@ click==8.1.7
     # via
     #   -c requirements/requirements.txt
     #   typer
-colorama==0.4.6
-    # via
-    #   -c requirements/requirements.txt
-    #   click
-    #   tqdm
 docutils==0.21.2
     # via
     #   -c requirements/requirements.txt
@@ -39,11 +34,12 @@ exceptiongroup==1.2.2
     # via
     #   -c requirements/requirements.txt
     #   anyio
-h11==0.14.0
+h11==0.16.0
     # via
     #   -c requirements/requirements.txt
+    #   hirundo (pyproject.toml)
     #   httpcore
-httpcore==1.0.5
+httpcore==1.0.9
     # via
     #   -c requirements/requirements.txt
     #   httpx
@@ -128,10 +124,6 @@ python-dotenv==1.0.1
     #   hirundo (pyproject.toml)
 pytz==2024.1
     # via pandas
-pywin32-ctypes==0.2.3
-    # via
-    #   -c requirements/requirements.txt
-    #   keyring
 pyyaml==6.0.1
     # via
     #   -c requirements/requirements.txt
@@ -140,9 +132,10 @@ readme-renderer==44.0
     # via
     #   -c requirements/requirements.txt
     #   twine
-requests==2.32.3
+requests==2.32.4
     # via
     #   -c requirements/requirements.txt
+    #   hirundo (pyproject.toml)
     #   requests-toolbelt
     #   twine
 requests-toolbelt==1.0.0
@@ -207,9 +200,10 @@ typing-extensions==4.12.2
     #   typer
 tzdata==2024.1
     # via pandas
-urllib3==2.2.2
+urllib3==2.5.0
     # via
     #   -c requirements/requirements.txt
+    #   hirundo (pyproject.toml)
     #   requests
     #   twine
     #   types-requests
