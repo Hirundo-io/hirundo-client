@@ -237,7 +237,7 @@ class OptimizationDataset(BaseModel):
             dataset_id: The ID of the `OptimizationDataset` instance to get
         """
         response = requests.get(
-            f"{API_HOST}/dataset-optimization/dataset/{dataset_id}",
+            f"{API_HOST}/dataset-qa/dataset/{dataset_id}",
             headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
@@ -254,7 +254,7 @@ class OptimizationDataset(BaseModel):
             name: The name of the `OptimizationDataset` instance to get
         """
         response = requests.get(
-            f"{API_HOST}/dataset-optimization/dataset/by-name/{name}",
+            f"{API_HOST}/dataset-qa/dataset/by-name/{name}",
             headers=get_headers(),
             timeout=READ_TIMEOUT,
         )
@@ -274,7 +274,7 @@ class OptimizationDataset(BaseModel):
             organization_id: The ID of the organization to list the datasets for.
         """
         response = requests.get(
-            f"{API_HOST}/dataset-optimization/dataset/",
+            f"{API_HOST}/dataset-qa/dataset/",
             params={"dataset_organization_id": organization_id},
             headers=get_headers(),
             timeout=READ_TIMEOUT,
@@ -301,7 +301,7 @@ class OptimizationDataset(BaseModel):
             organization_id: The ID of the organization to list the datasets for.
         """
         response = requests.get(
-            f"{API_HOST}/dataset-optimization/run/list",
+            f"{API_HOST}/dataset-qa/run/list",
             params={"dataset_organization_id": organization_id},
             headers=get_headers(),
             timeout=READ_TIMEOUT,
@@ -324,7 +324,7 @@ class OptimizationDataset(BaseModel):
             dataset_id: The ID of the `OptimizationDataset` instance to delete
         """
         response = requests.delete(
-            f"{API_HOST}/dataset-optimization/dataset/{dataset_id}",
+            f"{API_HOST}/dataset-qa/dataset/{dataset_id}",
             headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )
@@ -391,7 +391,7 @@ class OptimizationDataset(BaseModel):
         model_dict = self.model_dump(mode="json")
         # ⬆️ Get dict of model fields from Pydantic model instance
         dataset_response = requests.post(
-            f"{API_HOST}/dataset-optimization/dataset/",
+            f"{API_HOST}/dataset-qa/dataset/",
             json={
                 **{k: model_dict[k] for k in model_dict.keys() - {"storage_config"}},
                 "organization_id": organization_id,
@@ -429,7 +429,7 @@ class OptimizationDataset(BaseModel):
         if run_args:
             run_info["run_args"] = run_args.model_dump(mode="json")
         run_response = requests.post(
-            f"{API_HOST}/dataset-optimization/run/{dataset_id}",
+            f"{API_HOST}/dataset-qa/run/{dataset_id}",
             json=run_info if len(run_info) > 0 else None,
             headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
@@ -516,7 +516,7 @@ class OptimizationDataset(BaseModel):
             for sse in iter_sse_retrying(
                 client,
                 "GET",
-                f"{API_HOST}/dataset-optimization/run/{run_id}",
+                f"{API_HOST}/dataset-qa/run/{run_id}",
                 headers=get_headers(),
             ):
                 if sse.event == "ping":
@@ -709,7 +709,7 @@ class OptimizationDataset(BaseModel):
             async_iterator = await aiter_sse_retrying(
                 client,
                 "GET",
-                f"{API_HOST}/dataset-optimization/run/{run_id}",
+                f"{API_HOST}/dataset-qa/run/{run_id}",
                 headers=get_headers(),
             )
             async for sse in async_iterator:
@@ -756,7 +756,7 @@ class OptimizationDataset(BaseModel):
         """
         logger.info("Cancelling run with ID: %s", run_id)
         response = requests.delete(
-            f"{API_HOST}/dataset-optimization/run/{run_id}",
+            f"{API_HOST}/dataset-qa/run/{run_id}",
             headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )
@@ -780,7 +780,7 @@ class OptimizationDataset(BaseModel):
         """
         logger.info("Archiving run with ID: %s", run_id)
         response = requests.patch(
-            f"{API_HOST}/dataset-optimization/run/archive/{run_id}",
+            f"{API_HOST}/dataset-qa/run/archive/{run_id}",
             headers=get_headers(),
             timeout=MODIFY_TIMEOUT,
         )

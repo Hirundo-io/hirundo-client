@@ -140,9 +140,8 @@ def download_and_extract_zip(
 
     headers = None
     if Url(zip_url).scheme == "file":
-        zip_url = (
-            f"{API_HOST}/dataset-optimization/run/local-download"
-            + zip_url.replace("file://", "")
+        zip_url = f"{API_HOST}/dataset-qa/run/local-download" + zip_url.replace(
+            "file://", ""
         )
         headers = _get_auth_headers()
     # Stream the zip file download
