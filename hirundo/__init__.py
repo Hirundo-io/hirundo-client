@@ -4,10 +4,11 @@ from .dataset_enum import (
     StorageTypes,
 )
 from .dataset_optimization import (
+    ClassificationRunArgs,
     HirundoError,
+    ObjectDetectionRunArgs,
     OptimizationDataset,
     RunArgs,
-    VisionRunArgs,
 )
 from .dataset_optimization_results import DatasetOptimizationResults
 from .git import GitPlainAuth, GitRepo, GitSSHAuth
@@ -42,7 +43,8 @@ __all__ = [
     "KeylabsObjSegVideo",
     "OptimizationDataset",
     "RunArgs",
-    "VisionRunArgs",
+    "ClassificationRunArgs",
+    "ObjectDetectionRunArgs",
     "DatasetMetadataType",
     "LabelingType",
     "GitPlainAuth",

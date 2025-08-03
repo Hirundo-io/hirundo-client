@@ -72,33 +72,51 @@ STATUS_TO_PROGRESS_MAP = {
 }
 
 
-class VisionRunArgs(BaseModel):
-    upsample: bool = False
+class ClassificationRunArgs(BaseModel):
+    image_size: typing.Optional[tuple[int, int]] = (224, 224)
+    """
+    Size (width, height) to which to resize classification images.
+    It is recommended to keep this value at (224, 224) unless your classes are differentiated by very small differences.
+    """
+    upsample: typing.Optional[bool] = False
     """
     Whether to upsample the dataset to attempt to balance the classes.
     """
-    min_abs_bbox_size: int = 0
+
+
+class ObjectDetectionRunArgs(ClassificationRunArgs):
+    min_abs_bbox_size: typing.Optional[int] = None
     """
-    Minimum valid size (in pixels) of a bounding box to keep it in the dataset for optimization.
+    Minimum valid size (in pixels) of a bounding box to keep it in the dataset for QA.
     """
-    min_abs_bbox_area: int = 0
+    min_abs_bbox_area: typing.Optional[int] = None
     """
-    Minimum valid absolute area (in pixels²) of a bounding box to keep it in the dataset for optimization.
+    Minimum valid absolute area (in pixels²) of a bounding box to keep it in the dataset for QA.
     """
-    min_rel_bbox_size: float = 0.0
+    min_rel_bbox_size: typing.Optional[float] = None
     """
     Minimum valid size (as a fraction of both image height and width) for a bounding box
-    to keep it in the dataset for optimization, relative to the corresponding dimension size,
+    to keep it in the dataset for QA, relative to the corresponding dimension size,
     i.e. if the bounding box is 10% of the image width and 5% of the image height, it will be kept if this value is 0.05, but not if the
     value is 0.06 (since both width and height are checked).
     """
-    min_rel_bbox_area: float = 0.0
+    min_rel_bbox_area: typing.Optional[float] = None
     """
-    Minimum valid relative area (as a fraction of the image area) of a bounding box to keep it in the dataset for optimization.
+    Minimum valid relative area (as a fraction of the image area) of a bounding box to keep it in the dataset for QA.
+    """
+    crop_ratio: typing.Optional[float] = None
+    """
+    Ratio of the bounding box to crop.
+    Change this value at your own risk. It is recommended to keep it at 1.0 unless you know what you are doing.
+    """
+    add_mask_channel: typing.Optional[bool] = None
+    """
+    Whether to add a mask channel to the image.
+    Change at your own risk. It is recommended to keep it at False unless you know what you are doing.
     """
 
 
-RunArgs = typing.Union[VisionRunArgs]
+RunArgs = typing.Union[ClassificationRunArgs, ObjectDetectionRunArgs]
 
 
 class AugmentationName(str, Enum):

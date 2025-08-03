@@ -5,11 +5,11 @@ import pytest
 from hirundo import (
     HirundoCSV,
     LabelingType,
+    ObjectDetectionRunArgs,
     OptimizationDataset,
     StorageConfig,
     StorageS3,
     StorageTypes,
-    VisionRunArgs,
 )
 from tests.dataset_optimization_shared import (
     cleanup,
@@ -71,7 +71,7 @@ def test_dataset_optimization():
         test_dataset,
         sanity=True,
         alternative_env="RUN_OD_AWS_SANITY_OPTIMIZATION",
-        run_args=VisionRunArgs(
+        run_args=ObjectDetectionRunArgs(
             upsample=True,
             min_abs_bbox_size=11,
             min_abs_bbox_area=121,
