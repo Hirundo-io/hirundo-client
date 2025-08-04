@@ -1,6 +1,5 @@
 [build-system]
-requires = ["setuptools>=78.1.1", "wheel"]
-#  ⬆️ Required to fix vulnerability GHSA-5rjg-fvgr-3xxf
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -38,6 +37,8 @@ dependencies = [
     #  ⬆️ Required to fix vulnerability GHSA-9hjg-9r4m-mvj7
     "urllib3>=2.5.0",
     #  ⬆️ Required to fix vulnerabilities GHSA-pq67-6m6q-mj2v and GHSA-48p4-8xcf-vxj5
+    "setuptools>=78.1.1",
+    #  ⬆️ Required to fix vulnerability GHSA-5rjg-fvgr-3xxf
 ]
 
 [project.scripts]
