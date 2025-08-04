@@ -4,8 +4,8 @@ from datetime import timedelta, timezone
 from typing import Union
 
 import requests
-from hirundo import GitRepo, OptimizationDataset, StorageConfig
-from hirundo.dataset_optimization import HirundoError, RunStatus
+from hirundo import GitRepo, QADataset, StorageConfig
+from hirundo.dataset_qa import HirundoError, RunStatus
 from hirundo.logger import get_logger
 from hirundo.storage import ResponseStorageConfig
 
@@ -17,7 +17,7 @@ def _delete_dataset(
     storage_config: Union[StorageConfig, ResponseStorageConfig, None],
 ) -> None:
     try:
-        OptimizationDataset.delete_by_id(dataset_id)
+        QADataset.delete_by_id(dataset_id)
     except (HirundoError, requests.HTTPError) as exc:
         logger.warning("Failed to delete dataset with ID %s: %s", dataset_id, exc)
 
@@ -58,10 +58,10 @@ def _should_delete_dataset(dataset_runs: list, expiry_date: datetime.datetime) -
 
 
 def main() -> None:
-    all_runs = OptimizationDataset.list_runs()
+    all_runs = QADataset.list_runs()
     datasets = {
         dataset_entry.id: dataset_entry
-        for dataset_entry in OptimizationDataset.list_datasets()
+        for dataset_entry in QADataset.list_datasets()
         if dataset_entry.id is not None
     }
     now = datetime.datetime.now(timezone.utc)
@@ -81,7 +81,7 @@ def main() -> None:
         if _should_delete_dataset(dataset_runs, one_week_ago):
             for run in dataset_runs:
                 try:
-                    OptimizationDataset.archive_run_by_id(run.run_id)
+                    QADataset.archive_run_by_id(run.run_id)
                 except (HirundoError, requests.HTTPError) as exc:
                     logger.warning(
                         "Failed to archive run with ID %s: %s", run.run_id, exc
