@@ -14,6 +14,8 @@ concurrency:
 jobs:
   pytest_sanity:
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       max-parallel: 4
       matrix:

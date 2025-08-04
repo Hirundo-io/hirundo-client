@@ -3,13 +3,15 @@ from .dataset_enum import (
     LabelingType,
     StorageTypes,
 )
-from .dataset_optimization import (
+from .dataset_qa import (
+    ClassificationRunArgs,
+    Domain,
     HirundoError,
-    OptimizationDataset,
+    ObjectDetectionRunArgs,
+    QADataset,
     RunArgs,
-    VisionRunArgs,
 )
-from .dataset_optimization_results import DatasetOptimizationResults
+from .dataset_qa_results import DatasetQAResults
 from .git import GitPlainAuth, GitRepo, GitSSHAuth
 from .labeling import (
     COCO,
@@ -40,9 +42,11 @@ __all__ = [
     "KeylabsObjDetVideo",
     "KeylabsObjSegImages",
     "KeylabsObjSegVideo",
-    "OptimizationDataset",
+    "QADataset",
+    "Domain",
     "RunArgs",
-    "VisionRunArgs",
+    "ClassificationRunArgs",
+    "ObjectDetectionRunArgs",
     "DatasetMetadataType",
     "LabelingType",
     "GitPlainAuth",
@@ -54,7 +58,7 @@ __all__ = [
     # "StorageAzure",  TODO: Azure storage is coming soon
     "StorageGit",
     "StorageConfig",
-    "DatasetOptimizationResults",
+    "DatasetQAResults",
     "load_df",
     "load_from_zip",
 ]
