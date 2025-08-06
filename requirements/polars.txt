@@ -145,6 +145,10 @@ rich==13.7.1
     #   -c requirements/requirements.txt
     #   twine
     #   typer
+setuptools==80.9.0
+    # via
+    #   -c requirements/requirements.txt
+    #   hirundo (pyproject.toml)
 shellingham==1.5.4
     # via
     #   -c requirements/requirements.txt

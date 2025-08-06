@@ -230,8 +230,11 @@ safety==3.2.13
     # via hirundo (pyproject.toml)
 safety-schemas==0.0.10
     # via safety
-setuptools==75.6.0
-    # via safety
+setuptools==80.9.0
+    # via
+    #   -c requirements/requirements.txt
+    #   hirundo (pyproject.toml)
+    #   safety
 shellingham==1.5.4
     # via
     #   -c requirements/requirements.txt
@@ -298,7 +301,7 @@ urllib3==2.5.0
     #   types-requests
 uv==0.5.8
     # via hirundo (pyproject.toml)
-virtualenv==20.26.3
+virtualenv==20.26.6
     # via
     #   hirundo (pyproject.toml)
     #   pre-commit
