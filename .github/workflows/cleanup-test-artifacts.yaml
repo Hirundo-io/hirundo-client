@@ -23,7 +23,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install uv
           uv venv
-          uv pip install -r requirements/requirements.txt
+          uv sync --extra polars
       - name: Run cleanup script
         run: .venv/bin/python scripts/cleanup_test_artifacts.py
         env:
