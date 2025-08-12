@@ -1,5 +1,5 @@
 * @mishana @benglewis @shmuelyo @tomerr-hirundo
-.github/workflows @mishana @benglewis @ddishi @eayar123
+.github/workflows/ @mishana @benglewis @ddishi @eayar123
 #  ⬆️ Allow Eayar and Tamir Dishi to approve PRs with changes just to GitHub Actions workflows
 pyproject.toml
 hirundo/__init__.py

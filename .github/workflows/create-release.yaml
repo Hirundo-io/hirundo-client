@@ -46,4 +46,4 @@ jobs:
           bumpver update --set-version ${{ github.event.inputs.version }} --commit --push
           git push -u origin release-${{ github.event.inputs.version }}
           gh pr create -a ${{ github.event.sender.login || github.actor }} --title "v${{ github.event.inputs.version }}" \
-            --label "${{ github.event.inputs.test == 'true' && 'test' || 'release' }}"
+            --body "" --label "${{ github.event.inputs.test == 'true' && 'test' || 'release' }}"
