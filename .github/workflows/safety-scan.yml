@@ -18,8 +18,7 @@ jobs:
       permissions:
         contents: read
       steps:
-        - name: Checkout hirundo-client
-          uses: actions/checkout@v4
+        - uses: actions/checkout@v4
 
         - uses: pyupio/safety-action@v1
           with:
