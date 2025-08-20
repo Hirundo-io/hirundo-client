@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - "main"
-  pull_request:
-    types: [opened, synchronize, reopened, assigned]
+  merge_group:
+    types: [checks_requested]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -46,8 +46,8 @@ jobs:
         if: runner.os != 'Windows'
         run: .venv/bin/pytest
         env:
-          API_HOST: ${{ contains(github.event.pull_request.labels.*.name, 'test2') && secrets.API_HOST2 || secrets.API_HOST }}
-          API_KEY: ${{ contains(github.event.pull_request.labels.*.name, 'test2') && secrets.API_KEY2 || secrets.API_KEY }}
+          API_HOST: ${{ secrets.API_HOST }}
+          API_KEY: ${{ secrets.API_KEY }}
           GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -58,8 +58,8 @@ jobs:
         if: runner.os == 'Windows'
         run: .venv/Scripts/pytest
         env:
-          API_HOST: ${{ contains(github.event.pull_request.labels.*.name, 'test2') && secrets.API_HOST2 || secrets.API_HOST }}
-          API_KEY: ${{ contains(github.event.pull_request.labels.*.name, 'test2') && secrets.API_KEY2 || secrets.API_KEY }}
+          API_HOST: ${{ secrets.API_HOST }}
+          API_KEY: ${{ secrets.API_KEY }}
           GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
