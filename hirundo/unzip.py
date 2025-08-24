@@ -4,7 +4,6 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import IO, cast
 
-import requests
 from pydantic_core import Url
 
 from hirundo._dataframe import (
@@ -18,6 +17,7 @@ from hirundo._dataframe import (
 )
 from hirundo._env import API_HOST
 from hirundo._headers import _get_auth_headers
+from hirundo._http import requests
 from hirundo._timeouts import DOWNLOAD_READ_TIMEOUT
 from hirundo.dataset_qa_results import (
     DataFrameType,

@@ -6,7 +6,6 @@ from enum import Enum
 from typing import overload
 
 import httpx
-import requests
 from pydantic import BaseModel, Field, model_validator
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
@@ -14,7 +13,7 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 from hirundo._constraints import validate_labeling_info, validate_url
 from hirundo._env import API_HOST
 from hirundo._headers import get_headers
-from hirundo._http import raise_for_status_with_reason
+from hirundo._http import raise_for_status_with_reason, requests
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo._urls import HirundoUrl
@@ -136,6 +135,23 @@ class Domain(str, Enum):
     TABULAR = "TABULAR"
 
 
+DOMAIN_TO_SUPPORTED_LABELING_TYPES = {
+    Domain.RADAR: [
+        LabelingType.SINGLE_LABEL_CLASSIFICATION,
+        LabelingType.OBJECT_DETECTION,
+    ],
+    Domain.VISION: [
+        LabelingType.SINGLE_LABEL_CLASSIFICATION,
+        LabelingType.OBJECT_DETECTION,
+        LabelingType.OBJECT_SEGMENTATION,
+        LabelingType.SEMANTIC_SEGMENTATION,
+        LabelingType.PANOPTIC_SEGMENTATION,
+    ],
+    Domain.SPEECH: [LabelingType.SPEECH_TO_TEXT],
+    Domain.TABULAR: [LabelingType.SINGLE_LABEL_CLASSIFICATION],
+}
+
+
 class QADataset(BaseModel):
     id: typing.Optional[int] = Field(default=None)
     """
@@ -205,6 +221,14 @@ class QADataset(BaseModel):
 
     @model_validator(mode="after")
     def validate_dataset(self):
+        if self.domain not in DOMAIN_TO_SUPPORTED_LABELING_TYPES:
+            raise ValueError(
+                f"Domain {self.domain} is not supported. Supported domains are: {list(DOMAIN_TO_SUPPORTED_LABELING_TYPES.keys())}"
+            )
+        if self.labeling_type not in DOMAIN_TO_SUPPORTED_LABELING_TYPES[self.domain]:
+            raise ValueError(
+                f"Labeling type {self.labeling_type} is not supported for domain {self.domain}. Supported labeling types are: {DOMAIN_TO_SUPPORTED_LABELING_TYPES[self.domain]}"
+            )
         if self.storage_config is None and self.storage_config_id is None:
             raise ValueError(
                 "No dataset storage has been provided. Provide one via `storage_config` or `storage_config_id`"
