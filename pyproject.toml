@@ -45,7 +45,7 @@ dependencies = [
 hirundo = "hirundo.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/Hirundo-io/hirundo-client"
+Homepage = "https://github.com/Hirundo-io/hirundo-python-sdk"
 
 [project.optional-dependencies]
 dev = [
