@@ -6,7 +6,6 @@ from enum import Enum
 from typing import overload
 
 import httpx
-import requests
 from pydantic import BaseModel, Field, model_validator
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
@@ -14,7 +13,7 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 from hirundo._constraints import validate_labeling_info, validate_url
 from hirundo._env import API_HOST
 from hirundo._headers import get_headers
-from hirundo._http import raise_for_status_with_reason
+from hirundo._http import raise_for_status_with_reason, requests
 from hirundo._iter_sse_retrying import aiter_sse_retrying, iter_sse_retrying
 from hirundo._timeouts import MODIFY_TIMEOUT, READ_TIMEOUT
 from hirundo._urls import HirundoUrl
