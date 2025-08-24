@@ -149,4 +149,4 @@ Note: Currently we only support the main CPython release 3.9, 3.10, 3.11, 3.12 &
 
 ## Further documentation
 
-To learn more about how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the [Google Colab examples](https://github.com/Hirundo-io/hirundo-client/tree/main/notebooks).
+To learn more about how to use this library, please visit the [http://docs.hirundo.io/](documentation) or see the [Google Colab examples](https://github.com/Hirundo-io/hirundo-python-sdk/tree/main/notebooks).
