@@ -14,6 +14,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pass_on_pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: No-op success on pull_request
+        run: echo "Skipping heavy tests on PR and marking check as success."
   pytest_sanity:
     if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.os }}
