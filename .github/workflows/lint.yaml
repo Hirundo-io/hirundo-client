@@ -2,6 +2,8 @@ name: "Lint: Ruff and Pyright"
 on:
   pull_request:
     types: [opened, synchronize, reopened, assigned]
+  merge_group:
+    types: [checks_requested]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
