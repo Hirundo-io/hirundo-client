@@ -45,7 +45,7 @@ jobs:
             echo "non_workflow=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Set up Python
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.changes.outputs.non_workflow == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
