@@ -1,6 +1,8 @@
 name: Run sanity tests with PyTest
 
 on:
+  pull_request:
+    types: [opened, synchronize]
   push:
     branches:
       - "main"
@@ -13,7 +15,7 @@ concurrency:
 
 jobs:
   pytest_sanity:
-
+    if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
