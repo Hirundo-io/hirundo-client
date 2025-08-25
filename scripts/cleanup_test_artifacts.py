@@ -5,7 +5,7 @@ from typing import Union
 
 import requests
 from hirundo import GitRepo, QADataset, StorageConfig
-from hirundo.dataset_qa import HirundoError, RunStatus
+from hirundo.dataset_qa import HirundoError, QADatasetOut, RunStatus
 from hirundo.logger import get_logger
 from hirundo.storage import ResponseStorageConfig
 
@@ -43,10 +43,31 @@ def _delete_dataset(
                 )
 
 
-def _should_delete_dataset(dataset_runs: list, expiry_date: datetime.datetime) -> bool:
-    """Return ``True`` if the dataset should be deleted."""
+def _should_delete_dataset(
+    dataset: QADatasetOut,
+    dataset_runs: list,
+    fresh_date: datetime.datetime,
+    expiry_date: datetime.datetime,
+) -> bool:
+    """
+    Return ``True`` if the dataset should be deleted.
 
-    if not dataset_runs:
+    Args:
+        dataset: The dataset to check.
+        dataset_runs: List of dataset runs.
+        fresh_date: The date to check if the dataset should be deleted.
+        expiry_date: The date to check if the dataset should be deleted.
+
+    Returns:
+        True if the dataset should be deleted, False otherwise.
+    """
+
+    if (
+        not dataset_runs
+        and dataset.created_at is not None
+        and dataset.created_at > fresh_date
+    ):
+        # Don't delete fresh datasets
         return False
 
     all_runs_successful = all(run.status == RunStatus.SUCCESS for run in dataset_runs)
@@ -66,6 +87,7 @@ def main() -> None:
     }
     now = datetime.datetime.now(timezone.utc)
     one_week_ago = now - timedelta(days=7)
+    one_day_ago = now - timedelta(days=1)
 
     runs_by_dataset: defaultdict[int, list] = defaultdict(list)
     for run in all_runs:
@@ -75,10 +97,12 @@ def main() -> None:
 
     for dataset_id, dataset_runs in runs_by_dataset.items():
         dataset = datasets.get(dataset_id)
-        if dataset is None or not dataset.name.startswith("TEST-"):
+        if dataset is None or not (
+            dataset.name.startswith("TEST-") or dataset.name.startswith("T-")
+        ):
             continue
 
-        if _should_delete_dataset(dataset_runs, one_week_ago):
+        if _should_delete_dataset(dataset, dataset_runs, one_day_ago, one_week_ago):
             for run in dataset_runs:
                 try:
                     QADataset.archive_run_by_id(run.run_id)
